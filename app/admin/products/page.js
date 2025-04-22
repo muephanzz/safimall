@@ -293,7 +293,7 @@ const ManageProducts = () => {
           value={selectedSubcategory}
           className="border p-2 w-full rounded"
         >
-          <option value="">Select Subcategory</option>
+          <option value="">Select Sub-category</option>
           {subcategories.map((sub) => (
             <option key={sub.id} value={sub.id}>
               {sub.name}
