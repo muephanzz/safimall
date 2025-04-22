@@ -36,14 +36,7 @@ export default function DesktopMenu() {
   }, []);
 
   return (
-    <nav className="absolute top-24 z-50 bg-white shadow-xl rounded-md hidden md:flex w-full px-6 py-3 text-[17px] font-medium justify-center space-x-6 border-b border-gray-200">
-      <Link
-        href="/"
-        className="text-gray-700 hover:text-blue-600 transition duration-300"
-      >
-        Home
-      </Link>
-
+    <nav className="absolute top-20 bg-white shadow-xl hidden md:flex w-full px-6 py-3 text-[17px] font-medium justify-center space-x-6 border-b border-gray-200">
       {categories?.map((category) => {
         const isActive = categoryId === category.id.toString();
         const hasSubcategories = subcategories[category.id]?.length > 0;

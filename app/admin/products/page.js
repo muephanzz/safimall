@@ -18,7 +18,6 @@ const ManageProducts = () => {
     name: "",
     phone: "",
     state: "",
-    brand: "",
     description: "",
     specification: "",
     stock: "",
@@ -127,9 +126,9 @@ const ManageProducts = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { name, brand, state, stock, price, category_id } = newProduct;
+    const { name, state, stock, price, category_id } = newProduct;
 
-    if (!name || !brand || !state || !stock || !price || !category_id) {
+    if (!name || !state || !stock || !price || !category_id) {
       toast.error("Please fill in all fields!");
       return;
     }
@@ -230,7 +229,6 @@ const ManageProducts = () => {
   const resetForm = () => {
     setNewProduct({
       name: "",
-      brand: "",
       state: "",
       phone: "",
       description: "",
@@ -252,54 +250,48 @@ const ManageProducts = () => {
       <h1 className="text-3xl font-bold mb-6">Manage Products</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="name"
-          placeholder="Product Name"
-          value={newProduct.name}
-          onChange={handleChange}
-          required
-          className="border p-2 w-full rounded"
-        />
-
-        <input
-          type="text"
-          name="brand"
-          placeholder="Product Brand"
-          value={newProduct.brand}
-          onChange={handleChange}
-          required
-          className="border p-2 w-full rounded"
-        />
-
-        <select
-          name="category_id"
-          onChange={handleChange}
-          value={newProduct.category_id}
-          required
-          className="border p-2 w-full rounded"
-        >
-          <option value="">Select Category</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.category}
-            </option>
-          ))}
-        </select>
-
-        <select
-          name="subcategory_id"
-          onChange={(e) => setSelectedSubcategory(e.target.value)}
-          value={selectedSubcategory}
-          className="border p-2 w-full rounded"
-        >
-          <option value="">Select Sub-category</option>
-          {subcategories.map((sub) => (
-            <option key={sub.id} value={sub.id}>
-              {sub.name}
-            </option>
-          ))}
-        </select>
+        <div className="space-y-2">
+          <label className="block font-medium">Product Details</label>
+          <div className="flex gap-2 items-center">
+            <label className="w-1/3">Product Name</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Product Name"
+              value={newProduct.name}
+              onChange={handleChange}
+              required
+              className="border p-2 flex-1 rounded"
+            />
+            <label className="w-1/3">Product Category</label>
+            <select
+              name="category_id"
+              onChange={handleChange}
+              value={newProduct.category_id}
+              required
+              className="border p-2 flex-1 rounded"
+            >
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.category}
+              </option>
+            ))}
+          </select>
+          <label className="w-1/3">Product SubCategory</label>
+          <select
+            name="subcategory_id"
+            onChange={(e) => setSelectedSubcategory(e.target.value)}
+            value={selectedSubcategory}
+            className="border p-2 flex-1 rounded"
+          >
+            {subcategories.map((sub) => (
+              <option key={sub.id} value={sub.id}>
+                {sub.name}
+              </option>
+            ))}
+          </select>
+          </div>
+        </div>
 
         <div className="space-y-2">
           <label className="block font-medium">Product Attributes</label>
