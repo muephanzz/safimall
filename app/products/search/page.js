@@ -44,12 +44,12 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 mt-28 mb-12">
+    <div className="mx-auto mt-20 sm:mt-24 mb-12">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="bg-gradient-to-r from-orange-100 to-yellow-50 shadow-xl rounded-xl p-4 mb-6"
+        className="bg-gradient-to-r from-orange-100 to-yellow-50 w-full shadow-xl p-2 mb-6"
       >
         <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center">
           Search Results for <span className="text-orange-500">“{query}”</span>
@@ -67,10 +67,10 @@ export default function SearchPage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="flex flex-col justify-center items-center min-h-[40vh] text-gray-500 text-center"
+          className="flex flex-col px-4 md:px-6 lg:px-8 justify-center items-center min-h-[40vh] text-gray-500 text-center"
         >
           <img
-            src="/empty-box.svg"
+            src="/empty-box.png"
             alt="No products"
             className="w-32 h-32 mb-4 opacity-70"
           />
@@ -81,7 +81,7 @@ export default function SearchPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+            className="grid grid-cols-2 px-4 md:px-6 lg:px-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
           >
             {products.map((product) => (
               <motion.div

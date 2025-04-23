@@ -36,7 +36,7 @@ export default function DesktopMenu() {
   }, []);
 
   return (
-    <nav className="absolute top-20 bg-white shadow-xl hidden md:flex w-full px-6 py-3 text-[17px] font-medium justify-center space-x-6 border-b border-gray-200">
+    <nav className="absolute mt-24 bg-white shadow-xl hidden md:flex w-full px-6 py-2 text-[17px] font-medium justify-center space-x-6 border-b border-gray-200">
       {categories?.map((category) => {
         const isActive = categoryId === category.id.toString();
         const hasSubcategories = subcategories[category.id]?.length > 0;
@@ -63,10 +63,10 @@ export default function DesktopMenu() {
                   {subcategories[category.id].map((sub) => (
                     <li key={sub.id}>
                       <Link
-                        href={`/products/subcategory?subcategory_id=${sub.id}`}
+                        href={`/products/category?subcategory_id=${sub.id}`}
                         className="block px-4 py-2 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition duration-200"
                       >
-                        {sub.subcategory}
+                        {sub.name}
                       </Link>
                     </li>
                   ))}

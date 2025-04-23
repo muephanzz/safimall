@@ -17,7 +17,6 @@ const ManageProducts = () => {
   const [newProduct, setNewProduct] = useState({
     name: "",
     phone: "",
-    state: "",
     description: "",
     specification: "",
     stock: "",
@@ -128,7 +127,7 @@ const ManageProducts = () => {
 
     const { name, state, stock, price, category_id } = newProduct;
 
-    if (!name || !state || !stock || !price || !category_id) {
+    if (!name || !stock || !price || !category_id) {
       toast.error("Please fill in all fields!");
       return;
     }
@@ -229,14 +228,13 @@ const ManageProducts = () => {
   const resetForm = () => {
     setNewProduct({
       name: "",
-      state: "",
       phone: "",
       description: "",
       specification: "",
       stock: "",
       price: "",
       image_urls: [],
-      category_id: "",
+      category_id: "", 
     });
     setFiles([]);
     setPreviews([]);
@@ -251,19 +249,20 @@ const ManageProducts = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <label className="block font-medium">Product Details</label>
-          <div className="flex gap-2 items-center">
-            <label className="w-1/3">Product Name</label>
-            <input
+          <label className="block font-bold">Product Details</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 space-y-2 lg:space-y-1 gap-x-2 items-center">
+            <label className="hidden sm:block flex-1 ml-1">Name</label>            
+            <label className="hidden sm:block flex-1 ml-1">Category</label>            
+            <label className="hidden sm:block flex-1 ml-1">SubCat</label>
+              <input
               type="text"
               name="name"
               placeholder="Product Name"
               value={newProduct.name}
               onChange={handleChange}
               required
-              className="border p-2 flex-1 rounded"
+              className="border p-2 rounded"
             />
-            <label className="w-1/3">Product Category</label>
             <select
               name="category_id"
               onChange={handleChange}
@@ -277,10 +276,9 @@ const ManageProducts = () => {
               </option>
             ))}
           </select>
-          <label className="w-1/3">Product SubCategory</label>
           <select
             name="subcategory_id"
-            onChange={(e) => setSelectedSubcategory(e.target.value)}
+            onChange={handleChange}
             value={selectedSubcategory}
             className="border p-2 flex-1 rounded"
           >
@@ -290,70 +288,10 @@ const ManageProducts = () => {
               </option>
             ))}
           </select>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="block font-medium">Product Attributes</label>
-          {attributes.map((attr) => (
-            <div key={attr.id} className="flex gap-2 items-center">
-              <label className="w-1/3">{attr.name}</label>
-              <input
-                type="text"
-                placeholder={`Enter ${attr.name}`}
-                className="border p-2 flex-1 rounded"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setProductAttributes((prev) => {
-                    const existing = prev.find((a) => a.attribute_id === attr.id);
-                    if (existing) {
-                      return prev.map((a) =>
-                        a.attribute_id === attr.id ? { ...a, value } : a
-                      );
-                    } else {
-                      return [...prev, { attribute_id: attr.id, value }];
-                    }
-                  });
-                }}
-                value={
-                  productAttributes.find((a) => a.attribute_id === attr.id)?.value || ""
-                }
-              />
-            </div>
-          ))}
-        </div>
-
-        <select
-          name="state"
-          onChange={handleChange}
-          value={newProduct.state}
-          required
-          className="border p-2 w-full rounded"
-        >
-          <option value="">Select State</option>
-          <option value="Brand New">Brand New</option>
-          <option value="Refurbished">Refurbished</option>
-        </select>
-
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={newProduct.description}
-          onChange={handleChange}
-          required
-          className="border p-2 w-full rounded"
-        />
-
-        <textarea
-          name="specification"
-          placeholder="Specification"
-          value={newProduct.specification}
-          onChange={handleChange}
-          required
-          className="border p-2 w-full rounded"
-        />
-
-        <input
+          <label className="hidden sm:block flex-1 ml-1 mt-2">Price</label>            
+          <label className="hidden sm:block flex-1 ml-1 mt-2">Phone</label>            
+          <label className="hidden sm:block flex-1 ml-1 mt-2">Price</label>
+          <input
           type="number"
           name="stock"
           min={1}
@@ -381,6 +319,58 @@ const ManageProducts = () => {
           min={1}
           placeholder="Price"
           value={newProduct.price}
+          onChange={handleChange}
+          required
+          className="border p-2 w-full rounded"
+        />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block font-bold">Product Attributes</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-2">
+            {attributes.map((attr) => (
+              <div key={attr.id} className="items-center">
+                <label className="flex-1 ml-1">{attr.name}</label>
+                <input
+                  type="text"
+                  placeholder={`Enter ${attr.name}`}
+                  className="border w-full p-2 rounded"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setProductAttributes((prev) => {
+                      const existing = prev.find((a) => a.attribute_id === attr.id);
+                      if (existing) {
+                        return prev.map((a) =>
+                          a.attribute_id === attr.id ? { ...a, value } : a
+                        );
+                      } else {
+                        return [...prev, { attribute_id: attr.id, value }];
+                      }
+                    });
+                  }}
+                  value={
+                    productAttributes.find((a) => a.attribute_id === attr.id)?.value || ""
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <textarea
+          name="description"
+          placeholder="Description"
+          value={newProduct.description}
+          onChange={handleChange}
+          required
+          className="border p-2 w-full rounded"
+        />
+
+        <textarea
+          name="specification"
+          placeholder="Specification"
+          value={newProduct.specification}
           onChange={handleChange}
           required
           className="border p-2 w-full rounded"

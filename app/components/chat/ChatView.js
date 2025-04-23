@@ -182,7 +182,7 @@ const UserChat = () => {
         <motion.div
           drag
           dragConstraints={{ left: -6, right: 6, top: -6, bottom: 6 }}
-          className="fixed z-50 bottom-12 right-6 bg-gradient-to-r from-blue-500 via-teal-400 to-indigo-500 text-white p-3 rounded-full cursor-pointer shadow-xl hover:scale-105 transition"
+          className="fixed z-50 bottom-20 right-6 bg-gradient-to-r from-blue-500 via-teal-400 to-indigo-500 text-white p-3 rounded-full cursor-pointer shadow-xl hover:scale-105 transition"
           onClick={() => {
             setIsOpen(!isOpen);
             setNewMessage(false);

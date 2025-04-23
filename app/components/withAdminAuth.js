@@ -23,7 +23,7 @@ const withAdminAuth = (WrappedComponent) => {
         });
 
         if (!isAdmin) {
-          router.replace("/admin/access-denied");
+          router.replace("/access-denied");
           return;
         }
 

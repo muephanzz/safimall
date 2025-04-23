@@ -121,9 +121,9 @@ export default function ProductsPage() {
     );
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 mt-24">
+    <div className="max-w-7xl mx-auto mt-20 sm:mt-24">
       <motion.div
-        className="bg-gradient-to-r from-orange-100 to-yellow-50 shadow-xl rounded-2xl px-6 py-4 mb-6"
+        className="bg-gradient-to-r from-orange-100 to-yellow-50 shadow-xl py-2 text-center mb-6"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -134,16 +134,18 @@ export default function ProductsPage() {
       </motion.div>
 
       {/* Filter + Sort */}
-      <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
+      <div className="flex flex-wrap px-4 md:px-6 lg:px-8 justify-between items-center mb-6 gap-4">
         <form onSubmit={handleFilterSubmit} className="flex items-center gap-2">
           <input
             type="number"
             name="min"
+            min={1}
             placeholder="Min price"
             className="px-2 py-1 border rounded-md text-sm"
           />
           <input
             type="number"
+            min={1}
             name="max"
             placeholder="Max price"
             className="px-2 py-1 border rounded-md text-sm"
@@ -169,12 +171,12 @@ export default function ProductsPage() {
 
       {/* Products */}
       {products.length === 0 ? (
-        <div className="text-center text-gray-500 py-10 text-lg">
+        <div className="text-center px-4 md:px-6 lg:px-8 text-gray-500 py-10 text-lg">
           No products found.
         </div>
       ) : (
         <motion.div
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+          className="grid px-4 md:px-6 lg:px-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
