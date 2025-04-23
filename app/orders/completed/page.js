@@ -39,7 +39,7 @@ const CompletedOrders = () => {
                 <p className="text-gray-700">Quantity: {item.quantity}</p>
                 <p className="text-blue-600 font-bold">Ksh {item.price}</p>
               </div>
-              {!isAdmin && (
+              {isAdmin && viewAll || !isAdmin && viewAll || (
                 <Button
                   onClick={() => router.push(`/upload-review/${item.product_id}`)}
                   className="text-sm"
@@ -124,7 +124,6 @@ const CompletedOrders = () => {
       orders.map(async (order) => {
         const items = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
         const firstItem = items?.[0] || {};
-        const img = await loadImageAsBase64(firstItem.image_url);
         return [
           { content: order.order_id, rowSpan: 1 },
           format(new Date(order.created_at), "dd MMM yyyy"),
@@ -135,17 +134,12 @@ const CompletedOrders = () => {
           `KSh ${order.total.toLocaleString()}`,
           order.status,
           order.shipping_address || "—",
-          {
-            image: img,
-            width: 15,
-            height: 15
-          }
         ];
       })
     );
 
     autoTable(doc, {
-      head: [["Order ID", "Date", "First Item", "Total", "Status", "Shipping", "Preview"]],
+      head: [["Order ID", "Date", "First Item", "Total", "Status", "Shipping"]],
       body: tableData,
       startY: 50,
       styles: { fontSize: 10, halign: "center", valign: "middle" },

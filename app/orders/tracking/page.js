@@ -123,73 +123,66 @@ export default function OrderTracking() {
     const qrCodeData = await QRCode.toDataURL(order.order_id);
   
     // Add logo at top center
-    doc.addImage(logo, "JPG", pageWidth / 2 - 15, 10, 30, 15);
+    doc.addImage(logo, "JPG", pageWidth / 4 - 15, 10, 30, 15);
   
     // Title
     doc.setFontSize(16);
     doc.setTextColor("#1E3A8A");
-    doc.text("EPHANTRONICS", pageWidth / 2, 30, { align: "center" });
+    doc.text("EPHANTRONICS", pageWidth / 4, 30, { align: "center" });
   
     // Subheader
     doc.setFontSize(12);
     doc.setTextColor("#374151");
-    doc.text("Order Receipt", pageWidth / 2, 38, { align: "center" });
+    doc.text("Order Receipt", pageWidth / 4, 38, { align: "center" });
   
     // Timestamp
     doc.setFontSize(10);
     doc.setTextColor("#6B7280");
-    doc.text(`Generated on: ${format(new Date(), "dd MMM yyyy, hh:mm a")}`, 14, 45);
-  
+    doc.text(`Generated on: ${format(new Date(), "dd MMM yyyy, hh:mm a")}`, 14, 48);
+    
+    const startY = 50;
     // Add QR Code
-    doc.addImage(qrCodeData, "PNG", pageWidth - 50, 50, 30, 30);
+    doc.addImage(qrCodeData, "PNG", 14, startY);
   
     // Order & Customer Info
-    const startY = 55;
     doc.setFontSize(11);
     doc.setTextColor("#111827");
-    doc.text(`Order ID: ${order.order_id}`, 14, startY);
-    doc.text(`Status: ${order.status}`, 14, startY + 8);
-    doc.text(`Total: Ksh ${order.total.toLocaleString()}`, 14, startY + 16);
-    doc.text("Shipping Address:", 14, startY + 24);
-    doc.text(`Shipping Address: ${order.shipping_address}`, 14, startY + 8);
+    doc.text(`Status: ${order.status}`, 14, startY + 36);
+    doc.text(`Total: Ksh ${order.total.toLocaleString()}`, 14, startY + 44);
+    doc.text(`Shipping Address: ${order.shipping_address}`, 14, startY + 52);
 
     doc.setFontSize(11);
     doc.setTextColor("#111827");
-    doc.text("Customer Details:", 14, startY + 44);
+    doc.text("Customer Details:", 14, startY + 62);
   
     doc.setFontSize(10);
     doc.setTextColor("#4B5563");
-    doc.text(`Name: ${order.firt_name} " " ${order.last_name}|| "—"`, 14, startY + 52);
-    doc.text(`Phone: ${order.phone_number || "—"}`, 14, startY + 68);
+    doc.text(`Name: ${order.firt_name} ${order.last_name}|| "—"`, 14, startY + 70);
+    doc.text(`Phone: ${"0" + (order.phone_number).slice(3) || "—"}`, 14, startY + 78);
   
     // Items List
     const items = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
     if (items && items.length > 0) {
       doc.setFontSize(11);
       doc.setTextColor("#1E3A8A");
-      doc.text("Items:", 14, startY + 80);
+      doc.text("Items:", 14, startY + 88);
   
-      let itemY = startY + 88;
+      let itemY = startY + 96;
       doc.setFontSize(10);
       doc.setTextColor("#374151");
       items.forEach((item, index) => {
         const line = `${index + 1}. ${item.name} — Qty: ${item.quantity}, Price: Ksh ${item.price}`;
         doc.text(line, 14, itemY);
-        itemY += 8;
-      });
+        itemY += 8
+
+        doc.setFontSize(9);
+        doc.setTextColor("#9CA3AF");
+        doc.text(
+          `Thank you for shopping with us. For queries contact: 0798229783`,
+          pageWidth / 4, itemY + 10,
+          { align: "center" }
+     )})
     }
-  
-    // Footer
-    const pageHeight = doc.internal.pageSize.getHeight();
-    doc.setFontSize(9);
-    doc.setTextColor("#9CA3AF");
-    doc.text(
-      `Thank you for shopping with us — Page 1 of 1`,
-      pageWidth / 2,
-      pageHeight - 10,
-      { align: "center" }
-    );
-  
     doc.save(`Order_${order.order_id}.pdf`);
   };
   
