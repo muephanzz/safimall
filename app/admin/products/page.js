@@ -441,7 +441,7 @@ const ManageProducts = () => {
                 </h2>
                 <p><strong>Brand:</strong> {product.brand}</p>
                 <p><strong>Category:</strong> {product.categories?.category}</p>
-                <p><strong>State:</strong> {product.state}</p>
+                <p><strong>State:</strong> {product.attr?.value}</p>
                 <p><strong>Seller's Phone:</strong> {product.phone}</p>
                 <p><strong>Description:</strong> {product.description}</p>
                 <p><strong>Specification:</strong> {product.specification}</p>

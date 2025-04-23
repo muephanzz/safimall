@@ -1,4 +1,5 @@
 "use client";
+
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
@@ -11,7 +12,9 @@ export default function ProductsPage() {
   const router = useRouter();
 
   const category_id = searchParams.get("category_id");
-  const subcategory_id = searchParams.get("subcategory_id") || null;
+  const subcategory_id = searchParams.get("subcategory_id") || "";
+  const brand_id = searchParams.get("brand") || "";
+  const minRating = searchParams.get("rating") || "";
   const sort = searchParams.get("sort") || "default";
   const minPrice = parseFloat(searchParams.get("min")) || 0;
   const maxPrice = parseFloat(searchParams.get("max")) || Infinity;
@@ -20,87 +23,134 @@ export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [categoryName, setCategoryName] = useState("");
+  const [subcategoryName, setSubcategoryName] = useState("");
+  const [brands, setBrands] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const productsPerPage = 8;
   const currentPage = page;
 
+  // Helper to update URL search params
+  const updateSearchParams = (params) => {
+    const newParams = new URLSearchParams(searchParams);
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === null || value === "" || value === undefined) {
+        newParams.delete(key);
+      } else {
+        newParams.set(key, value);
+      }
+    });
+    router.push(`?${newParams.toString()}`);
+  };
+
   useEffect(() => {
+    // Fetch category name
     const fetchCategoryName = async () => {
-      if (!category_id) return;
+      if (!category_id) return setCategoryName("");
       const { data, error } = await supabase
         .from("categories")
         .select("category")
         .eq("id", category_id)
         .single();
-
-      if (!error && data) {
-        setCategoryName(data.category);
-      }
+      if (!error && data) setCategoryName(data.category);
     };
 
-    const fetchProducts = async () => {
-      if (!category_id) return;
-      setLoading(true);
+    // Fetch subcategory name
+    const fetchSubcategoryName = async () => {
+      if (!subcategory_id) return setSubcategoryName("");
+      const { data, error } = await supabase
+        .from("subcategories")
+        .select("name")
+        .eq("id", subcategory_id)
+        .single();
+      if (!error && data) setSubcategoryName(data.name);
+    };
 
-      const from = (currentPage - 1) * productsPerPage;
-      const to = from + productsPerPage - 1;
-
-      let query = supabase
-        .from("products")
-        .select("*", { count: "exact" })
+    // Fetch subcategories for current category
+    const fetchSubcategories = async () => {
+      if (!category_id) return setSubcategories([]);
+      const { data, error } = await supabase
+        .from("subcategories")
+        .select("*")
         .eq("category_id", category_id)
-        .gte("price", minPrice);
+        .order("name", { ascending: true });
+      if (!error) setSubcategories(data || []);
+    };
 
-      if (subcategory_id) {
-        query = query.eq("subcategory_id", subcategory_id);
-      }
+    // Fetch brands (optionally, filter by category if your schema supports)
+    const fetchBrands = async () => {
+      const { data, error } = await supabase
+        .from("brands")
+        .select("*")
+        .order("name", { ascending: true });
+      if (!error) setBrands(data || []);
+    };
 
-      if (isFinite(maxPrice)) {
-        query = query.lte("price", maxPrice);
-      }
+    fetchCategoryName();
+    fetchSubcategoryName();
+    fetchSubcategories();
+    fetchBrands();
+  }, [category_id, subcategory_id]);
 
-      if (sort === "asc") {
-        query = query.order("price", { ascending: true });
-      } else if (sort === "desc") {
-        query = query.order("price", { ascending: false });
-      }
+  useEffect(() => {
+    if (!category_id) return;
 
-      query = query.range(from, to);
+    setLoading(true);
+    const from = (currentPage - 1) * productsPerPage;
+    const to = from + productsPerPage - 1;
 
-      const { data, count, error } = await query;
+    let query = supabase
+      .from("products")
+      .select("*", { count: "exact" })
+      .eq("category_id", category_id)
+      .gte("price", minPrice);
 
+    if (subcategory_id) query = query.eq("subcategory_id", subcategory_id);
+    if (brand_id) query = query.eq("brand_id", brand_id);
+    if (minRating) query = query.gte("rating", minRating);
+    if (isFinite(maxPrice)) query = query.lte("price", maxPrice);
+
+    if (sort === "asc") query = query.order("price", { ascending: true });
+    else if (sort === "desc") query = query.order("price", { ascending: false });
+    else query = query.order("created_at", { ascending: false });
+
+    query = query.range(from, to);
+
+    query.then(({ data, count, error }) => {
       if (!error) {
         setProducts(data || []);
         setTotalProducts(count || 0);
       } else {
         console.error("Error fetching products:", error);
       }
-
       setLoading(false);
-    };
-
-    fetchCategoryName();
-    fetchProducts();
-  }, [category_id, subcategory_id, sort, minPrice, maxPrice, currentPage]);
+    });
+  }, [category_id, subcategory_id, brand_id, minRating, sort, minPrice, maxPrice, currentPage]);
 
   const totalPages = Math.ceil(totalProducts / productsPerPage);
 
   const handleSortChange = (e) => {
-    const newSort = e.target.value;
-    const params = new URLSearchParams(searchParams);
-    params.set("sort", newSort);
-    router.push(`?${params.toString()}`);
+    updateSearchParams({ sort: e.target.value, page: 1 });
   };
 
   const handleFilterSubmit = (e) => {
     e.preventDefault();
     const min = e.target.min.value;
     const max = e.target.max.value;
-    const params = new URLSearchParams(searchParams);
-    params.set("min", min);
-    params.set("max", max);
-    router.push(`?${params.toString()}`);
+    updateSearchParams({ min, max, page: 1 });
+  };
+
+  const handleSubcategoryChange = (e) => {
+    updateSearchParams({ subcategory_id: e.target.value || null, page: 1 });
+  };
+
+  const handleBrandChange = (e) => {
+    updateSearchParams({ brand: e.target.value || null, page: 1 });
+  };
+
+  const handleRatingChange = (e) => {
+    updateSearchParams({ rating: e.target.value || null, page: 1 });
   };
 
   if (!category_id)
@@ -110,73 +160,124 @@ export default function ProductsPage() {
       </div>
     );
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <div className="relative w-12 h-12 mb-4">
-          <div className="absolute inset-0 rounded-full border-4 border-t-transparent border-blue-500 animate-spin blur-sm"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-t-transparent border-blue-400 animate-spin"></div>
-        </div>
-      </div>
-    );
-
   return (
-    <div className="max-w-7xl mx-auto mt-20 sm:mt-24">
+    <div className="max-w-7xl mx-auto mt-20 sm:mt-24 px-4 sm:px-6 lg:px-8">
       <motion.div
-        className="bg-gradient-to-r from-orange-100 to-yellow-50 shadow-xl py-2 text-center mb-6"
+        className="bg-gradient-to-r from-orange-100 to-yellow-50 shadow-xl py-3 text-center rounded-xl mb-8"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight">
-          Products in <span className="text-orange-600">{categoryName}</span> Category
+        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+          {subcategoryName
+            ? `Products in ${subcategoryName} Subcategory`
+            : `Products in ${categoryName} Category`}
         </h1>
       </motion.div>
 
-      {/* Filter + Sort */}
-      <div className="flex flex-wrap px-4 md:px-6 lg:px-8 justify-between items-center mb-6 gap-4">
-        <form onSubmit={handleFilterSubmit} className="flex items-center gap-2">
+      {/* Filters */}
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-8 px-2 md:px-0">
+        <form
+          onSubmit={handleFilterSubmit}
+          className="flex flex-wrap items-center gap-3 bg-white shadow-md rounded-lg p-4"
+        >
           <input
             type="number"
             name="min"
-            min={1}
+            min={0}
             placeholder="Min price"
-            className="px-2 py-1 border rounded-md text-sm"
+            defaultValue={minPrice > 0 ? minPrice : ""}
+            className="w-24 px-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
           />
           <input
             type="number"
-            min={1}
+            min={0}
             name="max"
             placeholder="Max price"
-            className="px-2 py-1 border rounded-md text-sm"
+            defaultValue={maxPrice !== Infinity ? maxPrice : ""}
+            className="w-24 px-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
           />
           <button
             type="submit"
-            className="bg-orange-500 text-white px-3 py-1 rounded-md text-sm"
+            className="bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-yellow-400 hover:to-orange-500 text-white px-5 py-2 rounded-lg shadow-lg font-semibold transition transform hover:scale-105"
           >
             Filter
           </button>
         </form>
 
-        <select
-          value={sort}
-          onChange={handleSortChange}
-          className="border px-3 py-1 rounded-md text-sm"
-        >
-          <option value="default">Sort by</option>
-          <option value="asc">Price: Low to High</option>
-          <option value="desc">Price: High to Low</option>
-        </select>
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={subcategory_id}
+            onChange={handleSubcategoryChange}
+            className="border border-gray-300 rounded-md px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+          >
+            <option value="">All Subcategories</option>
+            {subcategories.map((sub) => (
+              <option key={sub.id} value={sub.id}>
+                {sub.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={brand_id}
+            onChange={handleBrandChange}
+            className="border border-gray-300 rounded-md px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+          >
+            <option value="">All Brands</option>
+            {brands.map((brand) => (
+              <option key={brand.id} value={brand.id}>
+                {brand.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={minRating}
+            onChange={handleRatingChange}
+            className="border border-gray-300 rounded-md px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
+          >
+            <option value="">All Ratings</option>
+            {[5, 4, 3, 2, 1].map((r) => (
+              <option key={r} value={r}>
+                {r}★ & up
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={sort}
+            onChange={handleSortChange}
+            className="border border-gray-300 rounded-md px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+          >
+            <option value="default">Sort by</option>
+            <option value="asc">Price: Low to High</option>
+            <option value="desc">Price: High to Low</option>
+          </select>
+        </div>
       </div>
 
-      {/* Products */}
-      {products.length === 0 ? (
+      {/* Loading */}
+      {loading && (
+        <div className="flex justify-center items-center min-h-[50vh]">
+          <div className="relative w-12 h-12 mb-4">
+            <div className="absolute inset-0 rounded-full border-4 border-t-transparent border-orange-400 animate-spin blur-sm"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-t-transparent border-yellow-400 animate-spin"></div>
+          </div>
+        </div>
+      )}
+
+      {/* No products */}
+      {!loading && products.length === 0 && (
         <div className="text-center px-4 md:px-6 lg:px-8 text-gray-500 py-10 text-lg">
           No products found.
         </div>
-      ) : (
+      )}
+
+      {/* Products Grid */}
+      {!loading && products.length > 0 && (
         <motion.div
-          className="grid px-4 md:px-6 lg:px-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 px-2 md:px-0"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -184,8 +285,9 @@ export default function ProductsPage() {
           {products.map((product, index) => (
             <motion.div
               key={product.id || `product-${index}`}
-              whileHover={{ scale: 1.03 }}
+              whileHover={{ scale: 1.05, zIndex: 10 }}
               transition={{ type: "spring", stiffness: 300 }}
+              className="relative"
             >
               <ProductCard product={product} />
             </motion.div>
@@ -193,8 +295,9 @@ export default function ProductsPage() {
         </motion.div>
       )}
 
+      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-10">
+        <div className="mt-10 flex justify-center">
           <Pagination totalPages={totalPages} currentPage={currentPage} />
         </div>
       )}

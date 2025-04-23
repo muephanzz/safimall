@@ -1,36 +1,68 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { motion } from "framer-motion";
-import { MessageSquare, ImageIcon, ArrowLeft } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { MessageSquare, ImageIcon, ArrowLeft, Smile } from "lucide-react";
 import moment from "moment";
+import { Picker } from "emoji-mart";
+import { supabase } from "@/lib/supabaseClient";
+import ChatWindow from "./ChatWindow";
 
-const UserChat = () => {
+const MessageBubble = ({ msg, isUser }) => (
+  <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-2`}>
+    <div
+      className={`rounded-2xl px-4 py-2 max-w-[75%] shadow-md ${
+        isUser
+          ? "bg-gradient-to-tr from-indigo-200 to-blue-100 text-gray-900"
+          : msg.isBot
+          ? "bg-gradient-to-tr from-yellow-100 to-yellow-200 text-yellow-900"
+          : "bg-gradient-to-tr from-blue-600 to-indigo-500 text-white"
+      }`}
+    >
+      <p className="break-words whitespace-pre-line">{msg.text || msg.user_message || msg.admin_reply}</p>
+      {msg.image_url && (
+        <img
+          src={msg.image_url}
+          alt="media"
+          className="mt-2 w-full h-36 object-cover rounded-lg"
+        />
+      )}
+      <div className="text-xs text-gray-400 mt-1 text-right">
+        {moment(msg.created_at || Date.now()).format("h:mm A")}
+      </div>
+    </div>
+  </div>
+);
+
+export default function UserChat() {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [user, setUser] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [newMessage, setNewMessage] = useState(false);
   const [image, setImage] = useState(null);
+  const [showEmoji, setShowEmoji] = useState(false);
   const messagesEndRef = useRef(null);
-  const chatRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Detect mobile device
   useEffect(() => {
-    setIsMobile(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+    setIsMobile(
+      typeof window !== "undefined" &&
+        /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+    );
   }, []);
 
+  // Get current user
   useEffect(() => {
     const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) setUser(user);
     };
     getUser();
   }, []);
 
+  // Load messages & subscribe to realtime updates
   useEffect(() => {
     if (!user) return;
 
@@ -42,7 +74,6 @@ const UserChat = () => {
         .order("created_at", { ascending: true });
       setMessages(data || []);
     };
-
     loadMessages();
 
     const channel = supabase
@@ -59,10 +90,12 @@ const UserChat = () => {
           if (msg.user_id === user.id) {
             setMessages((prev) => [...prev, msg]);
             if (!isOpen && msg.admin_reply) {
-              new Notification("New reply", {
-                body: msg.admin_reply,
-                icon: "/chat-icon.png",
-              });
+              if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("New reply", {
+                  body: msg.admin_reply,
+                  icon: "/chat-icon.png",
+                });
+              }
               setNewMessage(true);
               new Audio("/notification.mp3").play().catch(() => {});
             }
@@ -74,15 +107,82 @@ const UserChat = () => {
     return () => supabase.removeChannel(channel);
   }, [user, isOpen]);
 
-  const sendMessage = async () => {
-    if (!message.trim() && !image) return;
-    const newMessageData = { user_id: user.id, user_message: message };
-    if (image) newMessageData["image_url"] = image;
-    await supabase.from("messages").insert(newMessageData);
-    setMessage("");
-    setImage(null);
+  // Request notification permission
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isOpen]);
+
+  // Emoji picker handler
+  const addEmoji = (emoji) => {
+    setMessage((msg) => msg + (emoji.native || emoji.colons));
+    setShowEmoji(false);
   };
 
+  // Send message with OpenAI bot integration
+  const sendMessage = async () => {
+    if (!message.trim() && !image) return;
+
+    // Save user message to Supabase
+    if (user) {
+      await supabase.from("messages").insert({
+        user_id: user.id,
+        user_message: message,
+        image_url: image || null,
+      });
+    }
+
+    // Add user message locally
+    setMessages((prev) => [
+      ...prev,
+      { text: message, isUser: true, created_at: new Date().toISOString() },
+    ]);
+    setMessage("");
+    setImage(null);
+
+    // Prepare conversation for AI API
+    const conversation = messages
+      .filter((m) => m.text || m.user_message)
+      .map((m) => ({
+        role: m.isUser ? "user" : "assistant",
+        content: m.text || m.user_message || "",
+      }));
+
+    conversation.push({ role: "user", content: message });
+
+    try {
+      const response = await fetch("/api/ai-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: conversation }),
+      });
+      const data = await response.json();
+
+      if (data.text) {
+        setMessages((prev) => [
+          ...prev,
+          { text: data.text, isBot: true, created_at: new Date().toISOString() },
+        ]);
+      }
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          text: "Sorry, I couldn't reach the AI service. Please try again later.",
+          isBot: true,
+          created_at: new Date().toISOString(),
+        },
+      ]);
+    }
+  };
+
+  // Image upload handler
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -92,113 +192,96 @@ const UserChat = () => {
     }
   };
 
-  const handleTyping = (e) => setMessage(e.target.value);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const ChatWindow = () => (
-    <motion.div
-      ref={chatRef}
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      className={`fixed bottom-0 ${isMobile ? "inset-0" : "right-4 w-96"} bg-white border border-gray-300 shadow-lg flex flex-col h-[80%] max-h-[600px] rounded-t-lg`}
+  // Floating chat button for PC
+  const FloatingChatButton = () => (
+    <motion.button
+      drag
+      dragConstraints={{ left: -8, right: 8, top: -8, bottom: 8 }}
+      className="fixed z-50 bottom-8 right-8 bg-gradient-to-r from-blue-600 via-indigo-500 to-teal-400 text-white p-4 rounded-full shadow-2xl hover:scale-105 transition-all focus:outline-none"
+      onClick={() => {
+        setIsOpen(true);
+        setNewMessage(false);
+      }}
+      aria-label="Open chat"
+      style={{ width: 60, height: 60 }}
     >
-      <div className="flex items-center justify-between bg-gradient-to-r from-blue-600 via-teal-500 to-indigo-600 text-white p-4">
-        <div className="flex items-center gap-2">
-          {isMobile && (
-            <button onClick={() => setIsOpen(false)} className="text-white">
-              <ArrowLeft size={20} />
-            </button>
-          )}
-          <span className="font-bold text-lg">Chat with Support</span>
-        </div>
-        {!isMobile && (
-          <button onClick={() => setIsOpen(false)} className="text-white text-xl">
-            &times;
-          </button>
-        )}
-      </div>
+      <MessageSquare size={28} />
+      {newMessage && (
+        <span className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+          !
+        </span>
+      )}
+    </motion.button>
+  );
 
-      <div className="flex-1 overflow-y-auto bg-gray-50 p-4 space-y-3">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex ${msg.admin_reply ? "justify-start" : "justify-end"}`}
-          >
-            <div
-              className={`rounded-xl p-3 shadow-md max-w-[80%] ${msg.admin_reply ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}
-            >
-              <p>{msg.admin_reply || msg.user_message}</p>
-              {msg.image_url && (
-                <img
-                  src={msg.image_url}
-                  alt="media"
-                  className="mt-2 w-full h-40 object-cover rounded-lg"
-                />
-              )}
-              <div className="text-xs text-gray-200 mt-1 text-right">
-                {moment(msg.created_at).format("h:mm A")}
-              </div>
-            </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <div className="p-3 bg-gray-100 border-t flex gap-2">
-        <textarea
-          value={message}
-          onChange={handleTyping}
-          placeholder="Type your message..."
-          className="flex-1 resize-none rounded-lg p-2 border border-gray-300 focus:outline-none"
-        />
-        <input
-          type="file"
-          accept="image/*"
-          id="upload-image"
-          onChange={handleImageUpload}
-          className="hidden"
-        />
-        <label htmlFor="upload-image" className="cursor-pointer">
-          <ImageIcon size={24} className="text-blue-500" />
-        </label>
-        <button
-          onClick={sendMessage}
-          disabled={!message.trim() && !image}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50"
-        >
-          Send
-        </button>
-      </div>
-    </motion.div>
+  // Floating chat button for mobile
+  const MobileChatButton = () => (
+    <motion.button
+      className="fixed z-50 bottom-7 right-6 bg-gradient-to-r from-blue-600 via-indigo-500 to-teal-400 text-white p-4 rounded-full shadow-2xl hover:scale-105 transition-all focus:outline-none"
+      onClick={() => setIsOpen(true)}
+      aria-label="Open chat"
+      style={{ width: 56, height: 56 }}
+    >
+      <MessageSquare size={26} />
+      {newMessage && (
+        <span className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+          !
+        </span>
+      )}
+    </motion.button>
   );
 
   return (
-    <div>
+    <>
       {!isMobile && (
-        <motion.div
-          drag
-          dragConstraints={{ left: -6, right: 6, top: -6, bottom: 6 }}
-          className="fixed z-50 bottom-20 right-6 bg-gradient-to-r from-blue-500 via-teal-400 to-indigo-500 text-white p-3 rounded-full cursor-pointer shadow-xl hover:scale-105 transition"
-          onClick={() => {
-            setIsOpen(!isOpen);
-            setNewMessage(false);
-          }}
-        >
-          <MessageSquare size={28} />
-          {newMessage && (
-            <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-              !
-            </span>
-          )}
-        </motion.div>
+        <>
+          {!isOpen && <FloatingChatButton />}
+          <AnimatePresence>
+            {isOpen && (
+              <ChatWindow
+                isMobile={false}
+                messages={messages}
+                messagesEndRef={messagesEndRef}
+                message={message}
+                setMessage={setMessage}
+                sendMessage={sendMessage}
+                image={image}
+                setImage={setImage}
+                handleImageUpload={handleImageUpload}
+                setIsOpen={setIsOpen}
+                showEmoji={showEmoji}
+                setShowEmoji={setShowEmoji}
+                addEmoji={addEmoji}
+              />
+            )}
+          </AnimatePresence>
+        </>
       )}
-      {isOpen && <ChatWindow />}
-    </div>
-  );
-};
 
-export default UserChat;
+      {isMobile && (
+        <>
+          {!isOpen && <MobileChatButton />}
+          <AnimatePresence>
+            {isOpen && (
+              <ChatWindow
+                isMobile={true}
+                messages={messages}
+                messagesEndRef={messagesEndRef}
+                message={message}
+                setMessage={setMessage}
+                sendMessage={sendMessage}
+                image={image}
+                setImage={setImage}
+                handleImageUpload={handleImageUpload}
+                setIsOpen={setIsOpen}
+                showEmoji={showEmoji}
+                setShowEmoji={setShowEmoji}
+                addEmoji={addEmoji}
+              />
+            )}
+          </AnimatePresence>
+        </>
+      )}
+    </>
+  );
+}

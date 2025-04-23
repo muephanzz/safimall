@@ -17,7 +17,7 @@ export default function OrderTracking() {
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState(false);
   const [trackingInfo, setTrackingInfo] = useState(null);
-
+  
   const statusSteps = ["pending", "paid", "processing", "shipped", "completed"];
   const getStatusIndex = (status) => statusSteps.indexOf(status);
 
@@ -34,8 +34,15 @@ export default function OrderTracking() {
       .select("order_id, status, total, shipping_address, items")
       .eq("user_id", user.id);
 
-    if (!orderError) setOrders(orderData);
+    if (!orderError && orderData) {
+      const parsedOrders = orderData.map(order => ({
+        ...order,
+        items: typeof order.items === 'string' ? JSON.parse(order.items) : order.items,
+      }));
+      setOrders(parsedOrders);
+    }
   };
+
 
   const copyToClipboard = (orderId) => {
     navigator.clipboard.writeText(orderId);
@@ -46,28 +53,34 @@ export default function OrderTracking() {
     setLoading(true);
     setError("");
     setOrder(null);
-
+  
     if (!orderId.trim()) {
       toast.error("Order number cannot be empty!");
       setLoading(false);
       return;
     }
-
+  
     const { data, error } = await supabase
       .from("orders")
       .select("*")
       .eq("order_id", orderId)
       .single();
-
+  
     if (error || !data) {
       toast.error(`No order found for "${orderId}"`);
     } else {
+      // Parse items here
+      if (typeof data.items === 'string') {
+        data.items = JSON.parse(data.items);
+      }
+  
       setOrder(data);
       simulateShipmentTracking(data.status);
     }
-
+  
     setLoading(false);
   };
+  
 
   const handleCancelOrder = async () => {
     if (!order || !["pending", "paid"].includes(order.status)) {
@@ -105,221 +118,261 @@ export default function OrderTracking() {
   };
  
   const downloadPDF = async (order) => {
-    const doc = new jsPDF();
+    const doc = new jsPDF({
+      orientation: 'p',
+      unit: 'mm',
+      format: [80, 297], // Standard thermal receipt width
+      hotfixes: ["pxscaling"] // Better pixel scaling
+    });
+
     const pageWidth = doc.internal.pageSize.getWidth();
-  
-    // Load logo
-    const logo = await fetch("/default-avatar.jpg")
+    const margin = 4;
+    let yPos = margin;
+
+    // Load higher resolution logo
+    const logo = await fetch("/empty-box.png") // Use a 300x150px PNG
       .then((res) => res.blob())
-      .then((blob) => {
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.readAsDataURL(blob);
-        });
-      });
-  
-    // Generate QR Code for Order ID
-    const qrCodeData = await QRCode.toDataURL(order.order_id);
-  
-    // Add logo at top center
-    doc.addImage(logo, "JPG", pageWidth / 4 - 15, 10, 30, 15);
-  
-    // Title
-    doc.setFontSize(16);
-    doc.setTextColor("#1E3A8A");
-    doc.text("EPHANTRONICS", pageWidth / 4, 30, { align: "center" });
-  
-    // Subheader
-    doc.setFontSize(12);
-    doc.setTextColor("#374151");
-    doc.text("Order Receipt", pageWidth / 4, 38, { align: "center" });
-  
-    // Timestamp
-    doc.setFontSize(10);
-    doc.setTextColor("#6B7280");
-    doc.text(`Generated on: ${format(new Date(), "dd MMM yyyy, hh:mm a")}`, 14, 48);
-    
-    const startY = 50;
-    // Add QR Code
-    doc.addImage(qrCodeData, "PNG", 14, startY);
-  
-    // Order & Customer Info
-    doc.setFontSize(11);
-    doc.setTextColor("#111827");
-    doc.text(`Status: ${order.status}`, 14, startY + 36);
-    doc.text(`Total: Ksh ${order.total.toLocaleString()}`, 14, startY + 44);
-    doc.text(`Shipping Address: ${order.shipping_address}`, 14, startY + 52);
+      .then((blob) => new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      }));
 
-    doc.setFontSize(11);
-    doc.setTextColor("#111827");
-    doc.text("Customer Details:", 14, startY + 62);
-  
-    doc.setFontSize(10);
-    doc.setTextColor("#4B5563");
-    doc.text(`Name: ${order.firt_name} ${order.last_name}|| "—"`, 14, startY + 70);
-    doc.text(`Phone: ${"0" + (order.phone_number).slice(3) || "—"}`, 14, startY + 78);
-  
-    // Items List
-    const items = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
-    if (items && items.length > 0) {
-      doc.setFontSize(11);
-      doc.setTextColor("#1E3A8A");
-      doc.text("Items:", 14, startY + 88);
-  
-      let itemY = startY + 96;
-      doc.setFontSize(10);
-      doc.setTextColor("#374151");
-      items.forEach((item, index) => {
-        const line = `${index + 1}. ${item.name} — Qty: ${item.quantity}, Price: Ksh ${item.price}`;
-        doc.text(line, 14, itemY);
-        itemY += 8
+    // Generate QR Code
+    const qrCodeData = await QRCode.toDataURL(order.order_id, {
+      margin: 2,
+      width: 60
+    });
 
-        doc.setFontSize(9);
-        doc.setTextColor("#9CA3AF");
-        doc.text(
-          `Thank you for shopping with us. For queries contact: 0798229783`,
-          pageWidth / 4, itemY + 10,
-          { align: "center" }
-     )})
-    }
-    doc.save(`Order_${order.order_id}.pdf`);
+    // Header Section
+    doc.addImage(logo, "PNG", margin, yPos, 72, 36);
+    yPos += 40;
+
+    // Company Info
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("EPHANTRONICS LTD", pageWidth/2, yPos, { align: "center" });
+    yPos += 6;
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("P.O Box 12345-00100, Nairobi", pageWidth/2, yPos, { align: "center" });
+    yPos += 4;
+    doc.text("VAT No: P051XXXXXXXX", pageWidth/2, yPos, { align: "center" });
+    yPos += 8;
+
+    // Order Meta
+    doc.setDrawColor(200);
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    yPos += 6;
+    doc.setFontSize(10);
+    doc.text(`ORDER: #${order.order_id}`, margin, yPos);
+    yPos += 5;
+    doc.text(`DATE: ${format(new Date(order.created_at), "dd/MM/yy HH:mm")}`, margin, yPos);
+    yPos += 5;
+    doc.text(`STATUS: ${order.status.toUpperCase()}`, margin, yPos);
+    yPos += 8;
+
+    // Items Table
+    doc.setFont("courier", "normal");
+    doc.setFontSize(10);
+    doc.text("ITEM", margin, yPos);
+    doc.text("QTY", pageWidth - margin - 20, yPos, { align: "right" });
+    doc.text("TOTAL", pageWidth - margin, yPos, { align: "right" });
+    yPos += 6;
+
+    order.items.forEach(item => {
+      doc.text(item.name.substring(0, 22), margin, yPos);
+      doc.text(`${item.quantity}x`, pageWidth - margin - 20, yPos, { align: "right" });
+      doc.text(`Ksh ${(item.price * item.quantity).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
+      yPos += 6;
+    });
+
+    // Totals
+    yPos += 6;
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    yPos += 6;
+    doc.text("SUBTOTAL:", pageWidth - margin - 30, yPos);
+    doc.text(`Ksh ${order.total.toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
+    yPos += 6;
+    doc.text("VAT (16%):", pageWidth - margin - 30, yPos);
+    doc.text(`Ksh ${(order.total * 0.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
+    yPos += 6;
+    doc.setFont("helvetica", "bold");
+    doc.text("TOTAL:", pageWidth - margin - 30, yPos);
+    doc.text(`Ksh ${(order.total * 1.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
+    yPos += 10;
+
+    // QR Code
+    doc.addImage(qrCodeData, "PNG", pageWidth/2 - 15, yPos, 30, 30);
+    yPos += 35;
+
+    // Footer
+    doc.setFontSize(8);
+    doc.setTextColor(100);
+    doc.text("Thank you for shopping with us!", pageWidth/2, yPos, { align: "center" });
+    yPos += 4;
+    doc.text("Returns within 7 days with receipt", pageWidth/2, yPos, { align: "center" });
+
+    doc.save(`receipt_${order.order_id}.pdf`);
   };
-  
 
   return (
-    <div className="max-w-3xl mt-20 mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h1 className="text-3xl font-bold mb-6 text-center">Order Management</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="max-w-4xl mx-auto"
+      >
+        <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
+          <h1 className="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+            <span className="bg-blue-600 text-white p-2 rounded-lg">📦</span>
+            Order Tracking
+          </h1>
 
-      {/* Orders List */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-3">Your Orders</h2>
-        {orders.length === 0 ? (
-          <p className="text-gray-600">No orders found.</p>
-        ) : (
-          <ul className="space-y-3">
-            {orders.map((order) => (
-              <li key={order.order_id} className="flex items-center justify-between p-3 border rounded-lg bg-gray-100">
-                <span className="text-gray-800">{order.order_id}</span>
-                <button
-                  onClick={() => copyToClipboard(order.order_id)}
-                  className="bg-gray-700 text-white px-3 py-1 rounded text-sm hover:bg-gray-900"
-                >
-                  Copy
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Order Tracking */}
-      <div className="text-center">
-        <h2 className="text-xl font-semibold mb-4">Track Your Order</h2>
-        <input
-          type="text"
-          value={orderId}
-          onChange={(e) => setOrderId(e.target.value)}
-          placeholder="Enter your order ID"
-          className="p-2 w-full border rounded mb-3"
-        />
-        <button
-          onClick={handleTrackOrder}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          {loading ? "Loading..." : "Track Order"}
-        </button>
-      </div>
-
-      {/* Order Status Progress */}
-      {order && (
-        <div className="mt-6 p-4 border rounded-lg bg-gray-50">
-          <h3 className="text-lg font-bold mb-2">Order Status</h3>
-          <div className="flex justify-between items-center max-w-lg mx-auto mt-2">
-            {statusSteps.map((step, index) => (
-              <motion.div
-                key={step}
-                className="text-center"
-                initial={{ scale: 0 }}
-                animate={{ scale: index <= getStatusIndex(order.status) ? 1 : 0.8 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div
-                  className={`w-6 h-6 rounded-full ${
-                    index <= getStatusIndex(order.status) ? "bg-blue-600" : "bg-gray-300"
-                  } mx-auto`}
-                />
-                <p className="text-xs">{step}</p>
-              </motion.div>
-            ))}
+          <div className="flex gap-4 mb-8">
+            <input
+              type="text"
+              value={orderId}
+              onChange={(e) => setOrderId(e.target.value)}
+              placeholder="Enter order number"
+              className="flex-1 px-6 py-3 border-2 border-blue-100 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 outline-none transition"
+            />
+            <Button
+              onClick={handleTrackOrder}
+              className="px-8 py-3 text-lg bg-blue-600 hover:bg-blue-700 rounded-xl transition-transform hover:scale-105"
+            >
+              {loading ? "Searching..." : "Track Order"}
+            </Button>
           </div>
-        </div>
-      )}
 
-      {/* Order Details */}
-      {order && (
-        <div className="mt-6 p-4 border rounded-lg bg-gray-50">
-          <h2 className="text-lg font-bold mb-2">Order Details</h2>
-          <p><strong>Order Number:</strong> {order.order_id}</p>
-          <p><strong>Status:</strong> {order.status.toUpperCase()}</p>
-          <p><strong>Total:</strong> Ksh {order.total}</p>
-          <p><strong>Shipping Address:</strong> {order.shipping_address}</p>
-          <p><strong>Estimated Delivery:</strong> Less than 2 Hours</p>
+          {order && (
+            <div className="space-y-8">
+              <div className="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-xl">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h2 className="text-xl font-semibold text-slate-800">
+                      Order #{order.order_id}
+                    </h2>
+                    <p className="text-slate-600 mt-1">
+                      Placed on {format(new Date(order.created_at), "PPp")}
+                    </p>
+                  </div>
+                  <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                    {order.status.toUpperCase()}
+                  </span>
+                </div>
 
-          {/* Shipment Tracking */}
-          {trackingInfo && (
-            <div className="mt-4 text-sm text-gray-700 border rounded-lg p-4 bg-white shadow-sm">
-              <p><strong>Courier:</strong> {trackingInfo.courier}</p>
-              <p><strong>Tracking Number:</strong> {trackingInfo.trackingNumber}</p>
-              <p><strong>Expected Arrival:</strong> {trackingInfo.expectedArrival}</p>
-              <p><strong>Current Location:</strong> {trackingInfo.currentLocation}</p>
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <h3 className="font-medium text-slate-700">Shipping Address</h3>
+                    <p className="text-slate-600">{order.shipping_address}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="font-medium text-slate-700">Payment Method</h3>
+                    <p className="text-slate-600">Mobile Money (M-Pesa)</p>
+                  </div>
+                </div>
+              </div>
+
+  <div className="mt-6">
+  <h3 className="text-lg font-semibold mb-3">Order Items:</h3>
+  {order.items && order.items.length > 0 ? (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Item
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Quantity
+            </th>
+            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Price
+            </th>
+            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Total
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {order.items.map((item, index) => (
+            <tr key={index}>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 h-10 w-10">
+                    <Image
+                      src={item.image_url}
+                      width={40}
+                      height={40}
+                      className="rounded-md object-cover"
+                      alt={item.name}
+                    />
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-sm font-medium text-gray-900">{item.name}</div>
+                  </div>
+                </div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm text-gray-500">{item.quantity}</div>
+              </td>
+              <td className="px-6 py-4 text-right whitespace-nowrap">
+                <div className="text-sm text-gray-500">Ksh {item.price.toFixed(2)}</div>
+              </td>
+              <td className="px-6 py-4 text-right whitespace-nowrap">
+                <div className="text-sm font-medium text-gray-900">
+                  Ksh {(item.price * item.quantity).toFixed(2)}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    <p className="text-gray-500">Unable to load items.</p>
+  )}
+</div>
+
+              <div className="bg-white border rounded-xl p-6 shadow-sm">
+                <div className="mt-6 space-y-2">
+                  <div className="flex justify-between font-medium">
+                    <span>Subtotal</span>
+                    <span>Ksh {order.total.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>Shipping</span>
+                    <span>FREE</span>
+                  </div>
+                  <div className="flex justify-between text-blue-600 font-bold">
+                    <span>Total</span>
+                    <span>Ksh {order.total.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex gap-4">
+                  <Button
+                    onClick={() => downloadPDF(order)}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    Download Receipt
+                  </Button>
+                  {["pending", "paid"].includes(order.status) && (
+                    <Button
+                      onClick={handleCancelOrder}
+                      variant="destructive"
+                      disabled={updating}
+                    >
+                      {updating ? "Cancelling..." : "Cancel Order"}
+                    </Button>
+                  )}
+                </div>
+              </div>
             </div>
           )}
-
-          {/* Items */}
-          <h3 className="mt-4 font-semibold">Items:</h3>
-          <ul>
-            {(() => {
-              const items = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
-
-              return items && items.length > 0 ? (
-                items.map((item, index) => (
-                  <div key={index} className="flex items-center gap-4 border-b pb-4">
-                    <Image src={item.image_url} width={80} height={80} className="rounded-lg" alt={item.name} />
-                    <div className="flex-1">
-                      <h3 className="text-lg font-medium">{item.name}</h3>
-                      <p className="text-gray-700">Quantity: {item.quantity}</p>
-                      <p className="text-blue-600 font-bold">Ksh {item.price}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <li>Unable to load items.</li>
-              );
-            })()}
-          </ul>
-
-          {/* PDF Download & Cancel Button */}
-          <div className="flex gap-4 mt-6">
-            <button
-              onClick={() => downloadPDF(order)}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              Download Receipt
-            </button>
-
-            {order.status !== "cancelled" && (
-              <button
-                onClick={handleCancelOrder}
-                disabled={updating}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                {updating ? "Cancelling..." : "Cancel Order"}
-              </button>
-            )}
-          </div>
         </div>
-      )}
+      </motion.div>
     </div>
   );
 }

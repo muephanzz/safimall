@@ -88,6 +88,7 @@ const CompletedOrders = () => {
       .order("created_at", { ascending: false });
 
     let filteredOrders = ordersData;
+
     if (!admin || !viewAll) {
       filteredOrders = ordersData?.filter((order) => order.user_id === user.id);
     }
@@ -126,156 +127,142 @@ const CompletedOrders = () => {
         const firstItem = items?.[0] || {};
         return [
           { content: order.order_id, rowSpan: 1 },
-          format(new Date(order.created_at), "dd MMM yyyy"),
-          {
-            content: firstItem.name || "—",
-            styles: { cellWidth: 50 }
-          },
-          `KSh ${order.total.toLocaleString()}`,
-          order.status,
-          order.shipping_address || "—",
+          { content: format(new Date(order.created_at), "dd MMM yyyy"), rowSpan: 1 },
+          { content: `${order.firt_name} ${order.last_name}`, rowSpan: 1 },
+          { content: order.shipping_address, rowSpan: 1 },
+          { content: order.total.toLocaleString(), rowSpan: 1 },
+          { content: items?.length > 0 ? items.map(item => `${item.name} (Qty: ${item.quantity})`).join('\n') : 'No items', rowSpan: 1 }
         ];
       })
     );
 
     autoTable(doc, {
-      head: [["Order ID", "Date", "First Item", "Total", "Status", "Shipping"]],
-      body: tableData,
       startY: 50,
-      styles: { fontSize: 10, halign: "center", valign: "middle" },
-      headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: "bold" },
-      alternateRowStyles: { fillColor: [245, 245, 245] },
-      didDrawPage: (data) => {
-        const pageHeight = doc.internal.pageSize.getHeight();
-        doc.setFontSize(9);
-        doc.setTextColor("#9CA3AF");
-        doc.text(
-          `Page ${data.pageNumber} of ${doc.internal.getNumberOfPages()}`,
-          pageWidth / 2,
-          pageHeight - 10,
-          { align: "center" }
-        );
+      head: [["Order ID", "Date", "Customer", "Address", "Total", "Items"]],
+      body: tableData,
+      styles: {
+        cellPadding: 5,
+        fontSize: 9,
+        overflow: 'linebreak',
+        tableWidth: 'auto'
       },
+      columnStyles: {
+        0: { cellWidth: 22 },
+        1: { cellWidth: 25 },
+        2: { cellWidth: 25 },
+        3: { cellWidth: 30 },
+        4: { cellWidth: 18 },
+        5: { cellWidth: 50 }
+      }
     });
 
-    doc.save("Completed_Orders_Report.pdf");
+    doc.save("completed_orders.pdf");
   };
 
-  const loadImageAsBase64 = async (url) => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.readAsDataURL(blob);
-    });
-  };
-
-  const downloadCSV = () => {
-    const data = orders.map((order) => {
-      const items = JSON.parse(order.items)
-        .map((item) => `${item.name} (x${item.quantity})`)
-        .join(", ");
-      return {
-        OrderID: order.order_id,
-        Date: order.created_at,
-        Items: items,
-        Total: order.total,
-        Status: order.status,
-        Shipping: order.shipping_address,
-        Email: order.email,
-        UserID: order.user_id,
-      };
-    });
-
-    const worksheet = utils.json_to_sheet(data);
-    const workbook = utils.book_new();
-    utils.book_append_sheet(workbook, worksheet, "Orders");
-    writeFile(workbook, "completed_orders.xlsx");
+  const downloadExcel = async (orders) => {
+    const wb = utils.book_new();
+    const wsName = "Completed Orders";
+    const ws = utils.aoa_to_sheet([
+      ["Order ID", "Date", "Customer", "Address", "Total", "Items"],
+      ...orders.map((order) => {
+        const items = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
+        return [
+          order.order_id,
+          format(new Date(order.created_at), "dd MMM yyyy"),
+          `${order.firt_name} ${order.last_name}`,
+          order.shipping_address,
+          order.total.toLocaleString(),
+          items?.length > 0 ? items.map(item => `${item.name} (Qty: ${item.quantity})`).join(', ') : 'No items'
+        ];
+      }),
+    ]);
+    utils.book_append_sheet(wb, ws, wsName);
+    writeFile(wb, "completed_orders.xlsx");
   };
 
   return (
-    <div className="max-w-5xl mx-auto sm:pt-20 pt-20 md:pt-22 lg:pt-28">
-      <h1 className="text-3xl font-bold mb-4 text-center sm:text-left">
-        Completed Orders
-      </h1>
-
-      {isAdmin && (
-        <div className="flex gap-2 mb-4 justify-center sm:justify-start">
-          <Button
-            variant={!viewAll ? "default" : "outline"}
-            onClick={() => setViewAll(false)}
-          >
-            My Orders
-          </Button>
-          <Button
-            variant={viewAll ? "default" : "outline"}
-            onClick={() => setViewAll(true)}
-          >
-            All Orders
-          </Button>
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
+        <div className="bg-gray-50 border-b border-gray-200 px-4 py-5 sm:px-6">
+          <h3 className="text-lg leading-6 font-medium text-gray-900">
+            Completed Orders Management
+          </h3>
+          <p className="mt-1 max-w-2xl text-sm text-gray-500">
+            Overview of all completed orders.
+          </p>
         </div>
-      )}
 
-      <div className="flex flex-col sm:flex-row sm:items-end gap-4 justify-between mb-6">
-        <div className="flex gap-2 flex-col sm:flex-row">
-          <label className="flex flex-col text-sm">
-            From:
-            <input
-              type="date"
-              value={dateRange.from}
-              onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-              className="border rounded px-2 py-1"
-            />
-          </label>
-          <label className="flex flex-col text-sm">
-            To:
-            <input
-              type="date"
-              value={dateRange.to}
-              onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-              className="border rounded px-2 py-1"
-            />
-          </label>
-        </div>
-        {orders.length > 0 && (
-          <div className="flex gap-2">
-            <Button onClick={() => downloadPDF(orders)}>Download PDF</Button>
-            {isAdmin && <Button onClick={downloadCSV} variant="outline">Export CSV</Button>}
+        <div className="p-6">
+          {/* Date Range and View All Toggle */}
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+            <div className="flex items-center space-x-3">
+              <label htmlFor="from" className="block text-sm font-medium text-gray-700">From:</label>
+              <input
+                type="date"
+                id="from"
+                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                value={dateRange.from}
+                onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+              />
+
+              <label htmlFor="to" className="block text-sm font-medium text-gray-700">To:</label>
+              <input
+                type="date"
+                id="to"
+                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                value={dateRange.to}
+                onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+              />
+            </div>
+
+            <div className="flex items-center">
+              <label htmlFor="viewAll" className="mr-2 text-sm font-medium text-gray-700">View All Orders:</label>
+              <input
+                type="checkbox"
+                id="viewAll"
+                className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                checked={viewAll}
+                onChange={() => setViewAll(!viewAll)}
+              />
+            </div>
           </div>
-        )}
+
+          {/* Orders List */}
+          {loading ? (
+            <div className="text-center">Loading orders...</div>
+          ) : orders.length > 0 ? (
+            <ul className="divide-y divide-gray-200">
+              {orders.map((order) => (
+                <li key={order.order_id} className="py-4">
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm font-medium text-gray-900">
+                      Order ID: {order.order_id}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Placed on: {format(new Date(order.created_at), "dd MMM yyyy")}
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <OrderItems order={order} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-center">No completed orders found.</div>
+          )}
+
+          {/* Export Buttons */}
+          <div className="mt-6 flex justify-end space-x-3">
+            <Button onClick={() => downloadExcel(orders)}>
+              Export to Excel
+            </Button>
+            <Button onClick={() => downloadPDF(orders)}>
+              Export to PDF
+            </Button>
+          </div>
+        </div>
       </div>
-
-      {loading ? (
-        <div className="flex justify-center items-center min-h-[40vh]">
-          <div className="w-12 h-12 relative">
-            <div className="absolute inset-0 rounded-full border-4 border-t-transparent border-blue-500 animate-spin blur-sm"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-t-transparent border-blue-400 animate-spin"></div>
-          </div>
-        </div>
-      ) : orders.length === 0 ? (
-        <p className="text-center text-gray-500">No completed orders found.</p>
-      ) : (
-        <ul className="space-y-6">
-          {orders.map((order) => (
-            <li key={order.order_id} className="border p-4 rounded-lg shadow-sm">
-              <p><strong>Order Number:</strong> {order.order_id}</p>
-              <p><strong>Order Date:</strong> {format(new Date(order.created_at), "dd MMM yyyy, hh:mm a")}</p>
-              <p><strong>Status:</strong> {order.status}</p>
-              <p><strong>Total:</strong> Ksh {order.total}</p>
-              {isAdmin && (
-                <div className="block">
-                  <p><strong>User ID:</strong> {order.user_id}</p>
-                  <p><strong>Email:</strong> {order.email}</p>  
-                </div>
-              )}
-              <h3 className="mt-4 font-semibold">Items:</h3>
-              <OrderItems order={order} />
-              <p><strong>Shipping Address:</strong> {order.shipping_address}</p>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 };

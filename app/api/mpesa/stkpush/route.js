@@ -1,99 +1,109 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
+import axios from "axios";
+import { Resend } from "resend";
 
-const consumerKey = process.env.MPESA_CONSUMER_KEY;
-const consumerSecret = process.env.MPESA_CONSUMER_SECRET;
-const shortcode = process.env.MPESA_SHORTCODE;
-const passkey = process.env.MPESA_PASSKEY;
-const callbackURL = process.env.BASE_URL + "/api/mpesa/callback";
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const getTimestamp = () =>
-  new Date().toISOString().replace(/[^0-9]/g, "").slice(0, 14);
+async function getMpesaAccessToken() {
+  const auth = Buffer.from(`${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`).toString("base64");
 
-const formatPhone = (phone) =>
-  phone.startsWith("07") ? "254" + phone.slice(1) : phone;
+  const response = await axios.get(
+    process.env.MPESA_ENV === "production"
+      ? "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+      : "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    {
+      headers: { Authorization: `Basic ${auth}` },
+    }
+  );
 
-export async function POST(req) {
+  return response.data.access_token;
+}
+
+export async function POST(request) {
   try {
-    const body = await req.json();
-    const { amount, phone, user_id, checkoutItems, shipping_address, email } =
-      body;
+    const { amount, phone, user_id, checkoutItems, shipping_address, email } = await request.json();
 
-    if (!amount || !phone || !user_id || !checkoutItems || !shipping_address || !email) {
-      return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
+    if (!phone || !amount || !user_id) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const formattedPhone = formatPhone(phone);
-    const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
+    const accessToken = await getMpesaAccessToken();
 
-    const tokenRes = await fetch(
-      "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
-      { headers: { Authorization: `Basic ${auth}` } }
-    );
-    const { access_token } = await tokenRes.json();
+    const timestamp = new Date().toISOString().replace(/[-:TZ.]/g, "").slice(0, 14);
+    const shortCode = process.env.MPESA_SHORTCODE;
+    const passkey = process.env.MPESA_PASSKEY;
+    const password = Buffer.from(shortCode + passkey + timestamp).toString("base64");
 
-    const timestamp = getTimestamp();
-    const password = Buffer.from(`${shortcode}${passkey}${timestamp}`).toString("base64");
-
-    const stkBody = {
-      BusinessShortCode: shortcode,
+    const stkPushRequest = {
+      BusinessShortCode: shortCode,
       Password: password,
       Timestamp: timestamp,
       TransactionType: "CustomerPayBillOnline",
       Amount: amount,
-      PartyA: formattedPhone,
-      PartyB: shortcode,
-      PhoneNumber: formattedPhone,
-      CallBackURL: callbackURL,
-      AccountReference: `Order`,
-      TransactionDesc: "E-commerce Order",
+      PartyA: phone,
+      PartyB: shortCode,
+      PhoneNumber: phone,
+      CallBackURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api/mpesa/callback`,
+      AccountReference: user_id,
+      TransactionDesc: `Payment for order by user ${user_id}`,
     };
 
-    const stkRes = await fetch(
-      "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
+    const stkResponse = await axios.post(
+      process.env.MPESA_ENV === "production"
+        ? "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
+        : "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
+      stkPushRequest,
       {
-        method: "POST",
         headers: {
-          Authorization: `Bearer ${access_token}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(stkBody),
       }
     );
 
-    const stkData = await stkRes.json();
-    if (stkData.ResponseCode !== "0") {
-      return NextResponse.json({ message: "STK Push failed", details: stkData }, { status: 500 });
+    if (stkResponse.data.ResponseCode !== "0") {
+      return NextResponse.json(
+        { error: stkResponse.data.ResponseDescription || "STK Push failed" },
+        { status: 400 }
+      );
     }
 
-    const checkoutRequestId = stkData.CheckoutRequestID;
-
-    const { error: orderError } = await supabase.from("orders").insert({
+    // Save payment record with status pending
+    const { error: dbError } = await supabase.from("payments").insert({
       user_id,
-      total: amount,
-      shipping_address,
-      phone_number: formattedPhone,
-      status: "pending",
-      items: JSON.stringify(checkoutItems),
-      mpesa_transaction_id: checkoutRequestId,
-    });
-
-    const { error: paymentError } = await supabase.from("payments").insert({
-      user_id,
-      phone_number: formattedPhone,
+      phone_number: phone,
       amount,
       status: "pending",
-      checkout_request_id: checkoutRequestId,
+      mpesa_checkout_request_id: stkResponse.data.CheckoutRequestID,
+      shipping_address,
+      email,
+      checkout_items: checkoutItems, // you may want to JSON.stringify this if column is text/json
     });
 
-    if (orderError || paymentError) {
-      console.error("Supabase insert error:", { orderError, paymentError });
-      return NextResponse.json({ error: "Failed to save pending records" }, { status: 500 });
+    if (dbError) {
+      console.error("DB insert error:", dbError);
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, checkoutRequestId });
-  } catch (err) {
-    console.error("STK Push Error:", err);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+    // Send confirmation email via Resend
+    try {
+      await resend.emails.send({
+        from: "sales@yourdomain.com",
+        to: email,
+        subject: "M-Pesa Payment Initiated",
+        html: `<p>Dear customer,</p>
+               <p>Your payment of Ksh ${amount} has been initiated. Please complete the payment on your phone.</p>
+               <p>Thank you for shopping with us.</p>`,
+      });
+    } catch (emailError) {
+      console.error("Email sending error:", emailError);
+      // Continue without failing
+    }
+
+    return NextResponse.json({ checkoutRequestId: stkResponse.data.CheckoutRequestID });
+  } catch (error) {
+    console.error("STK Push error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

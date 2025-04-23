@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { useRouter } from "next/navigation";
-import { Trash2, Heart, Loader2, X } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import Image from "next/image";
 import OrderSummary from "../components/OrderSummary";
 import { toast } from "react-toastify";
@@ -18,13 +18,15 @@ export default function Cart() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
       if (error) return console.error("Error fetching session:", error.message);
 
       if (session?.user) {
         setUserId(session.user.id);
         fetchCart(session.user.id);
-        fetchWishlist(session.user.id);
       }
     };
 
@@ -36,7 +38,7 @@ export default function Cart() {
 
       if (cartError) return console.error("Error fetching cart:", cartError.message);
 
-      const productIds = cartData.map(item => item.product_id);
+      const productIds = cartData.map((item) => item.product_id);
       const { data: productsData, error: productsError } = await supabase
         .from("products")
         .select("product_id, stock")
@@ -44,9 +46,9 @@ export default function Cart() {
 
       if (productsError) return console.error("Error fetching products:", productsError.message);
 
-      const cartWithStock = cartData.map(item => ({
+      const cartWithStock = cartData.map((item) => ({
         ...item,
-        stock: productsData.find(p => p.product_id === item.product_id)?.stock || 0
+        stock: productsData.find((p) => p.product_id === item.product_id)?.stock || 0,
       }));
 
       setCartItems(cartWithStock);
@@ -94,16 +96,12 @@ export default function Cart() {
     } else {
       setCartItems((prev) =>
         prev.map((item) =>
-          item.cart_id === cart_id
-            ? { ...item, items: { ...item.items, quantity: newQuantity } }
-            : item
+          item.cart_id === cart_id ? { ...item, items: { ...item.items, quantity: newQuantity } } : item
         )
       );
       toast.success("Quantity updated!");
     }
   };
-
-  const quantity = cartItems.filter((item) => item.items.quantity, 0);
 
   const subtotal = cartItems
     .filter((item) => selectedItems[item.cart_id])
@@ -114,81 +112,130 @@ export default function Cart() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[50vh]">
-        <Loader2 className="animate-spin w-10 h-10 text-blue-500" />
+        <Loader2 className="animate-spin w-12 h-12 text-blue-600" />
       </div>
     );
   }
 
+  // Helper: Estimated delivery date (3-7 days from now)
+  const getEstimatedDelivery = () => {
+    const minDays = 3;
+    const maxDays = 7;
+    const daysToAdd = Math.floor(Math.random() * (maxDays - minDays + 1)) + minDays;
+    const date = new Date();
+    date.setDate(date.getDate() + daysToAdd);
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50 }}
+      initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="mt-28 p-4 max-w-5xl mx-auto bg-gradient-to-br from-white to-slate-100 shadow-xl rounded-2xl border"
+      className="mt-28 p-6 max-w-6xl mx-auto bg-gradient-to-br from-white to-slate-100 shadow-2xl rounded-3xl border border-gray-200"
     >
-      <h1 className="text-3xl font-semibold mb-8 text-gray-800 tracking-tight">🛒 Your Exclusive Cart</h1>
+      <h1 className="text-4xl font-extrabold mb-10 text-gray-900 tracking-wide select-none flex items-center gap-3">
+        🛒 Your Premium Cart
+        <span className="text-sm font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">Exclusive Deals</span>
+      </h1>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         <AnimatePresence>
-          {cartItems.map((item) => (
-            <motion.div
-              key={item.cart_id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.3 }}
-              className="flex flex-co sm:flex-row items-center sm:justify-between bg-white rounded-xl shadow p-4 gap-4"
-            >
-              <input
-                type="checkbox"
-                checked={!!selectedItems[item.cart_id]}
-                onChange={() => toggleSelection(item.cart_id)}
-                className="w-5 h-5 accent-blue-600"
-              />
+          {cartItems.length === 0 && (
+            <p className="text-center text-gray-500 italic text-lg">Your cart is empty. Start shopping now!</p>
+          )}
 
-              <Image
-                width={500}
-                height={500}
-                unoptimized
-                src={item.items.image_url}
-                alt={item.items.name}
-                className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border"
-              />
+          {cartItems.map((item) => {
+            const isSelected = !!selectedItems[item.cart_id];
+            const outOfStock = item.stock < item.items.quantity;
 
-              <div className="flex-1 px-4 text-center sm:text-left">
-                <h3 className="text-lg font-medium text-gray-800 leading-tight">{item.items.name}</h3>
-                <p className="text-blue-600 font-bold text-sm">{item.items.quantity} × Ksh {item.items.price}</p>
-                <p className="text-gray-700 font-semibold">Ksh {item.items.price * item.items.quantity}</p>
-              </div>
+            return (
+              <motion.div
+                key={item.cart_id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                className={`flex flex-col sm:flex-row items-center sm:justify-between bg-white rounded-2xl shadow-lg p-5 gap-5 border ${
+                  isSelected ? "border-blue-500" : "border-transparent"
+                } hover:shadow-xl transition-shadow duration-300`}
+              >
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleSelection(item.cart_id)}
+                  className="w-6 h-6 accent-blue-600 cursor-pointer"
+                  aria-label={`Select ${item.items.name}`}
+                />
 
-              <div className="flex-1 px-4 flex items-center justify-center gap-2">
-                <button
-                  onClick={() => updateQuantity(item.cart_id, item.items.quantity - 1)}
-                  className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300"
-                >−</button>
-                <span className="px-4 py-1 bg-gray-100 rounded-lg border text-gray-700">
-                  {item.items.quantity}
-                </span>
-                <button
-                  onClick={() => updateQuantity(item.cart_id, item.items.quantity + 1)}
-                  className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300"
-                >+</button>
-              </div>
+                <Image
+                  width={120}
+                  height={120}
+                  unoptimized
+                  src={item.items.image_url}
+                  alt={item.items.name}
+                  className="w-28 h-28 sm:w-32 sm:h-32 object-cover rounded-xl border border-gray-300 shadow-sm"
+                />
 
-              <div className="flex items-center justify-center gap-2">
+                <div className="flex-1 px-4 text-center sm:text-left">
+                  <h3 className="text-xl font-semibold text-gray-900 leading-tight">{item.items.name}</h3>
+
+                  <p className="text-blue-700 font-semibold text-lg mt-1">
+                    Ksh {item.items.price.toLocaleString()} × {item.items.quantity}
+                  </p>
+
+                  <p className="text-gray-800 font-bold text-lg mt-1">
+                    Total: Ksh {(item.items.price * item.items.quantity).toLocaleString()}
+                  </p>
+
+                  {outOfStock && (
+                    <p className="mt-2 text-sm text-red-600 font-semibold">
+                      ⚠️ Only {item.stock} left in stock, please reduce quantity.
+                    </p>
+                  )}
+
+                  <p className="mt-3 text-sm text-gray-500 italic select-none">
+                    Estimated delivery by <span className="font-semibold">{getEstimatedDelivery()}</span>
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-center gap-3">
+                  <button
+                    onClick={() => updateQuantity(item.cart_id, item.items.quantity - 1)}
+                    disabled={item.items.quantity <= 1}
+                    className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    aria-label={`Decrease quantity of ${item.items.name}`}
+                  >
+                    −
+                  </button>
+                  <span className="px-5 py-2 bg-gray-100 rounded-lg border text-gray-700 font-medium select-none">
+                    {item.items.quantity}
+                  </span>
+                  <button
+                    onClick={() => updateQuantity(item.cart_id, item.items.quantity + 1)}
+                    disabled={outOfStock}
+                    className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    aria-label={`Increase quantity of ${item.items.name}`}
+                  >
+                    +
+                  </button>
+                </div>
+
                 <button
                   onClick={() => handleRemoveItem(item.cart_id)}
-                  className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-full"
+                  className="p-3 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg transition"
+                  aria-label={`Remove ${item.items.name} from cart`}
+                  title="Remove item"
                 >
-                  <Trash2 size={18} />
+                  <Trash2 size={20} />
                 </button>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
       </div>
 
-      <OrderSummary quantity={quantity} subtotal={subtotal} shippingFee={shippingFee} />
+      <OrderSummary subtotal={subtotal} shippingFee={shippingFee} />
 
       <button
         onClick={() => {
@@ -204,10 +251,11 @@ export default function Cart() {
           localStorage.setItem("checkoutItems", JSON.stringify(selectedProducts));
           router.push("/orders/checkout");
         }}
-        className={`mt-6 mb-20 px-6 py-3 text-white font-medium rounded-lg w-full shadow-lg transition duration-300 ease-in-out transform hover:scale-[1.01] ${
+        className={`mt-10 mb-24 px-8 py-4 text-white font-semibold rounded-3xl w-full shadow-xl transition-transform duration-300 ease-in-out transform hover:scale-[1.03] focus:outline-none focus:ring-4 focus:ring-green-400 ${
           subtotal === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
         }`}
         disabled={subtotal === 0}
+        aria-disabled={subtotal === 0}
       >
         {subtotal === 0 ? "Select items to proceed" : "Proceed to Checkout"}
       </button>
