@@ -42,7 +42,7 @@ export default function Checkout() {
     fetchEmail();
   }, []);
 
-  const isValidPhone = (phone) => /^07\d{8}$/.test(phone);
+  const isValidPhone = (phone) => /^2547\d{8}$/.test(phone);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -71,7 +71,9 @@ export default function Checkout() {
 
       const res = await fetch("/api/mpesa/stkpush", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           amount,
           phone,
