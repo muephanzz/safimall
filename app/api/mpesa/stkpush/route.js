@@ -78,7 +78,7 @@ export async function POST(request) {
       mpesa_checkout_request_id: stkResponse.data.CheckoutRequestID,
       shipping_address,
       email,
-      checkout_items: JSON.stringify(checkoutItems),
+      checkout_items: checkoutItems,
     });
 
     if (dbError) {
