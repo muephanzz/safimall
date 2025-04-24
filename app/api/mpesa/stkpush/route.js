@@ -103,7 +103,10 @@ export async function POST(request) {
 
     return NextResponse.json({ checkoutRequestId: stkResponse.data.CheckoutRequestID });
   } catch (error) {
-    console.error("STK Push error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    console.error("STK Push error:", error.message, error.response?.data);
+    return NextResponse.json(
+      { error: error.message || "Internal server error" },
+      { status: 500 }
+    );
   }
 }
