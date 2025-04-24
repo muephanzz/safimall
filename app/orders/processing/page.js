@@ -47,7 +47,7 @@ export default function ProcessingPage() {
       <div className="min-h-screen flex flex-col items-center justify-center p-6">
         <p className="text-red-600 text-lg mb-4">{error}</p>
         <button
-          onClick={() => router.push("/checkout")}
+          onClick={() => router.push("/orders/checkout")}
           className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Go Back to Checkout

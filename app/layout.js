@@ -16,7 +16,7 @@ const mono = Roboto_Mono({
 });
 
 export const metadata = {
-  title: "mlima.com",
+  title: "safimall.co.ke",
   description: "online-shopping",
 };
 

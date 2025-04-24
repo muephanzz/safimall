@@ -89,7 +89,7 @@ export async function POST(request) {
     // Send confirmation email via Resend
     try {
       await resend.emails.send({
-        from: "sales@yourdomain.com",
+        from: "onbording@resend.dev",
         to: email,
         subject: "M-Pesa Payment Initiated",
         html: `<p>Dear customer,</p>

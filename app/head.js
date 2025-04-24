@@ -1,7 +1,7 @@
 export default function Head() {
   return (
     <>
-      <title>mlima.com</title>
+      <title>safimall.co.ke</title>
       <meta name="description" content="online-shopping" />
       <meta
         name="viewport"
