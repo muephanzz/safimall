@@ -34,14 +34,14 @@ export async function POST(request) {
       try {
         if (status === "paid") {
           await resend.emails.send({
-            from: "sales@yourdomain.com",
+            from: "onboarding@resend.dev",
             to: data.email,
             subject: "Payment Successful",
             html: `<p>Dear customer,</p><p>Your payment was successful. Thank you for your purchase!</p>`,
           });
         } else {
           await resend.emails.send({
-            from: "sales@yourdomain.com",
+            from: "onboarding@resend.dev",
             to: data.email,
             subject: "Payment Failed",
             html: `<p>Dear customer,</p><p>Your payment failed or was cancelled. Please try again or use an alternative payment method.</p>`,
