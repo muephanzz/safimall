@@ -79,6 +79,7 @@ export async function POST(request) {
       shipping_address,
       email,
       checkout_items: checkoutItems,
+      updated_at: new Date().toISOString(),
     });
 
     if (dbError) {
