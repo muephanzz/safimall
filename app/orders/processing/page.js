@@ -23,7 +23,7 @@ export default function ProcessingModal({ checkoutRequestId, onClose }) {
 
     const pollStatus = async () => {
       try {
-        const res = await fetch(`/api/mpesa/status?checkoutRequestId=${checkoutRequestId}`);
+        const res = await fetch(`/api/mpesa/status?mpesa_checkout_request_id=${checkoutRequestId}`);
         const data = await res.json();
         if (!isMounted) return;
         setStatus(data.status);
