@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Menu, X, Home, Tag } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import Logo from "./Logo";
 
 export default function MobileMenu() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -24,7 +25,7 @@ export default function MobileMenu() {
   };
 
   return (
-    <div className="md:hidden">
+    <div className="md:hidden block">
       {/* Menu Button */}
       <button
         onClick={() => setMenuOpen(!menuOpen)}
@@ -45,13 +46,13 @@ export default function MobileMenu() {
 
       {/* Sidebar Menu */}
       <aside
-        className={`fixed top-0 right-0 h-full w-64 bg-white shadow-xl rounded-l-3xl p-6 flex flex-col transform transition-transform duration-300 z-50 ${
+        className={`fixed top-0 right-0 h-full w-64 bg-white shadow-xl p-6 flex flex-col transform transition-transform duration-300 z-50 ${
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
         aria-label="Mobile navigation menu"
       >
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-extrabold text-indigo-600 select-none">Ephantronics</h1>
+          <Logo height={40} />
           <button
             onClick={() => setMenuOpen(false)}
             aria-label="Close menu"

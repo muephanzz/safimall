@@ -4,51 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Facebook, Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
 import { FaCcVisa, FaCcMastercard, FaPaypal } from "react-icons/fa";
-
-// SafiMall Logo SVG as a component
-function SafiMallLogo({ width = 160, height = 50 }) {
-  return (
-    <svg
-      width={width}
-      height={height}
-      viewBox="0 0 320 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-label="SafiMall Logo"
-    >
-      {/* Leaf icon */}
-      <path
-        d="M40 70C60 50 80 35 100 50C120 65 120 90 100 90C80 90 60 95 40 70Z"
-        fill="#2F855A"
-        stroke="#276749"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Text */}
-      <text
-        x="120"
-        y="68"
-        fontFamily="'Poppins', sans-serif"
-        fontWeight="700"
-        fontSize="42"
-        fill="#2C5282"
-        letterSpacing="2"
-      >
-        Safi
-        <tspan fill="#38A169">Mall</tspan>
-      </text>
-      {/* Sparkle */}
-      <circle cx="260" cy="28" r="5" fill="#38A169" />
-      <path
-        d="M260 20L260 36M250 28L270 28"
-        stroke="#68D391"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
+import Logo from "./Logo";
 
 export default function Footer() {
   const [isMobile, setIsMobile] = useState(false);
@@ -67,7 +23,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
         {/* Logo & About */}
         <div className="md:col-span-1 flex flex-col gap-4">
-          <SafiMallLogo width={170} height={56} />
+          <Logo width={170} height={56} />
           <h2 className="text-xl font-bold text-blue-400 mt-2">About SafiMall</h2>
           <p className="text-gray-300 text-sm leading-relaxed">
             <span className="font-semibold text-white">SafiMall</span> is your trusted destination for a clean, seamless, and premium shopping experience. Discover quality products, fast delivery, and genuine service — all in one place.

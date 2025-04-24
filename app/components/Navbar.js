@@ -40,23 +40,17 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 w-full bg-gray-900 shadow-lg z-50">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-betwee h-16">
           {/* Left: Mobile menu toggle & Logo */}
-          <div className="flex items-center space-x-4">
-            {isMobile && (
-              <MobileMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
-            )}
+          <div>
+            <MobileMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
             <Logo />
           </div>
-
-          {/* Center: Search */}
-          <div className="flex-1 mx-6 max-w-xl">
-            <SearchBar />
-          </div>
+          <SearchBar />
 
           {/* Right: Desktop menu, cart, user */}
           {!isMobile && (
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center">
               <DesktopMenu />
               <div className="flex items-center space-x-6">
                 <CartIcon cartCount={cartCount} />

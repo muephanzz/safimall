@@ -109,7 +109,7 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.3 }}
           >
             <Image
-              src="/empty-box.png"
+              src="/carousel.jpg"
               alt="Shop illustration"
               width={500}
               height={400}
