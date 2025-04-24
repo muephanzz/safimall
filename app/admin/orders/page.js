@@ -1,19 +1,29 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import AdminLayout from "@/components/AdminLayout";
 import withAdminAuth from "@/components/withAdminAuth";
 import Image from "next/image";
+import toast from "react-hot-toast"; // Notifications
+import { Loader2, Trash2, RefreshCw } from "lucide-react"; // Icons
 
-const statusSteps = ["pending", "paid", "processing", "shipped", "completed", "cancelled"];
+const statusSteps = [
+  "pending",
+  "paid",
+  "processing",
+  "shipped",
+  "completed",
+  "cancelled",
+];
 
 const statusColors = {
-  pending: "bg-yellow-400 text-black",
-  paid: "bg-blue-400 text-white",
-  processing: "bg-indigo-400 text-white",
-  shipped: "bg-purple-500 text-white",
-  completed: "bg-green-500 text-white",
-  cancelled: "bg-red-500 text-white",
+  pending: "bg-yellow-100 text-yellow-800",
+  paid: "bg-blue-100 text-blue-800",
+  processing: "bg-indigo-100 text-indigo-800",
+  shipped: "bg-purple-100 text-purple-800",
+  completed: "bg-green-100 text-green-800",
+  cancelled: "bg-red-100 text-red-800",
 };
 
 const ManageOrders = () => {
@@ -26,71 +36,109 @@ const ManageOrders = () => {
     fetchOrders();
   }, [filter, sortOrder]);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
-    let query = supabase.from("orders").select("*");
 
-    if (filter !== "all") {
-      query = query.eq("status", filter);
+    try {
+      let query = supabase.from("orders").select("*");
+
+      if (filter !== "all") {
+        query = query.eq("status", filter);
+      }
+
+      query = query.order("order_id", { ascending: sortOrder === "asc" });
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Error fetching orders:", error);
+        toast.error("Failed to load orders.");
+      } else {
+        setOrders(data || []);
+      }
+    } finally {
+      setLoading(false);
     }
-
-    query = query.order("order_id", { ascending: sortOrder === "asc" });
-
-    const { data, error } = await query;
-    if (error) console.error("Error fetching orders:", error);
-    else setOrders(data);
-    setLoading(false);
-  };
+  }, [filter, sortOrder]);
 
   const handleStatusUpdate = async (order_id, newStatus) => {
     const validTransitions = {
       pending: ["paid", "cancelled"],
-      paid: ["processing", "cancelled"],
-      processing: ["shipped", "cancelled"],
+      paid: ["processing", "shipped", "cancelled"],
+      processing: ["shipped", "completed", "cancelled"], // Corrected this line
       shipped: ["completed", "cancelled"],
       completed: [],
       cancelled: [],
     };
 
-    const currentStatus = orders.find(order => order.order_id === order_id)?.status;
+    const currentStatus = orders.find((order) => order.order_id === order_id)?.status;
 
     if (!validTransitions[currentStatus]?.includes(newStatus)) {
-      alert(`Cannot transition from ${currentStatus} to ${newStatus}`);
+      toast.error(`Invalid status transition from ${currentStatus} to ${newStatus}`);
       return;
     }
 
-    const { error } = await supabase
-      .from("orders")
-      .update({ status: newStatus })
-      .eq("order_id", order_id);
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({ status: newStatus })
+        .eq("order_id", order_id);
 
-    if (error) alert("Error updating status: " + error.message);
-    else fetchOrders();
+      if (error) {
+        console.error("Error updating status:", error);
+        toast.error("Failed to update order status.");
+      } else {
+        toast.success(`Order status updated to ${newStatus}`);
+        fetchOrders();
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("Failed to update order status.");
+    }
   };
 
   const handleDelete = async (order_id) => {
     const confirmation = window.confirm("Are you sure you want to delete this order?");
     if (!confirmation) return;
 
-    const { error } = await supabase.from("orders").delete().eq("order_id", order_id);
-    if (error) alert("Error deleting order: " + error.message);
-    else fetchOrders();
+    try {
+      const { error } = await supabase.from("orders").delete().eq("order_id", order_id);
+
+      if (error) {
+        console.error("Error deleting order:", error);
+        toast.error("Failed to delete order.");
+      } else {
+        toast.success("Order deleted successfully.");
+        fetchOrders();
+      }
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      toast.error("Failed to delete order.");
+    }
+  };
+
+  const handleRefresh = () => {
+    fetchOrders();
   };
 
   return (
     <AdminLayout>
-      <h1 className="text-3xl font-bold mb-6">Manage Orders</h1>
+      <h1 className="text-3xl font-extrabold text-gray-900 mb-6">Manage Orders</h1>
 
       {/* Filters and Sort */}
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex flex-wrap items-center gap-4 mb-6">
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="p-2 border rounded"
+          className="p-2 border rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-300 bg-white text-gray-700"
         >
           <option value="all">All Statuses</option>
           {statusSteps.map((status) => (
-            <option key={status} value={status}>
+            <option
+              key={status}
+              value={status}
+              className="capitalize" // Capitalize status
+            >
               {status.charAt(0).toUpperCase() + status.slice(1)}
             </option>
           ))}
@@ -99,105 +147,171 @@ const ManageOrders = () => {
         <select
           value={sortOrder}
           onChange={(e) => setSortOrder(e.target.value)}
-          className="p-2 border rounded"
+          className="p-2 border rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-300 bg-white text-gray-700"
         >
           <option value="desc">Newest First</option>
           <option value="asc">Oldest First</option>
         </select>
+
+        <button
+          onClick={handleRefresh}
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-200 transition-colors"
+        >
+          <RefreshCw size={16} className="inline-block mr-2" />
+          Refresh
+        </button>
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center min-h-[50vh]">
-          <div className="relative w-12 h-12 mb-4">
-            <div className="absolute inset-0 rounded-full border-4 border-t-transparent border-blue-500 animate-spin blur-sm"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-t-transparent border-blue-400 animate-spin"></div>
-          </div>
+          <Loader2 className="animate-spin w-8 h-8 text-blue-500" />
         </div>
+      ) : orders.length === 0 ? (
+        <p className="text-gray-600">No orders found.</p>
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-6">
           {orders.map((order) => {
             const items = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
 
             return (
-              <li key={order.order_id} className="border p-4 rounded-lg">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                  <div>
-                    <p><strong>Order ID:</strong> {order.order_id}</p>
-                    <p><strong>User ID:</strong> {order.user_id}</p>
-                    <p><strong>Email:</strong> {order.email}</p>
-                    <p><strong>Total:</strong> Ksh {order.total}</p>
-                    <p><strong>Shipping:</strong> {order.shipping_address}</p>
+              <li
+                key={order.order_id}
+                className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200"
+              >
+                <div className="p-4">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-3">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Order ID: <span className="text-blue-600">{order.order_id}</span>
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        User ID: {order.user_id} | Email: {order.email}
+                      </p>
+                      <p className="text-gray-700 mt-2">
+                        Shipping: {order.shipping_address}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="font-semibold text-gray-800">
+                        Total: Ksh {order.total}
+                      </span>
+                      <span
+                        className={`inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium capitalize ml-2 ${statusColors[order.status]}`}
+                      >
+                        {order.status}
+                      </span>
+                    </div>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusColors[order.status]}`}>
-                    {order.status.toUpperCase()}
-                  </span>
-                </div>
 
-                {/* Progress Bar */}
-                <div className="flex justify-between items-center mt-4">
-                  {statusSteps.map((step, index) => {
-                    const isActive = statusSteps.indexOf(order.status) >= index;
-                    return (
-                      <div key={index} className="flex-1 flex flex-col items-center">
-                        <div className={`w-6 h-6 rounded-full ${isActive ? "bg-blue-600" : "bg-gray-300"}`}></div>
-                        <span className={`text-xs mt-1 ${isActive ? "text-blue-600" : "text-gray-400"}`}>
-                          {step}
-                        </span>
-                        {index < statusSteps.length - 1 && (
-                          <div className={`w-full h-1 ${isActive ? "bg-blue-400" : "bg-gray-200"}`}></div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                  {/* Progress Bar */}
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">
+                      Order Progress
+                    </h4>
+                    <div className="flex justify-between items-center relative">
+                      {statusSteps.map((step, index) => {
+                        const isActive = statusSteps.indexOf(order.status) >= index;
+                        const isCompleted = statusSteps.indexOf(order.status) > index;
+                        return (
+                          <div key={index} className="flex-1 flex flex-col items-center">
+                            <div
+                              className={`w-6 h-6 rounded-full z-10 flex items-center justify-center ${
+                                isActive ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-700"
+                              }`}
+                            >
+                              {isCompleted && (
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className="w-4 h-4"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M19.916 4.626a.75.75 0 010 1.061l-9.9 9.9-5.21-5.21a.75.75 0 011.06-1.06l4.68 4.68 9.39-9.39a.75.75 0 011.06 0z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              )}
+                            </div>
+                            <span
+                              className={`text-xs mt-1 ${
+                                isActive ? "text-blue-600" : "text-gray-400"
+                              }`}
+                            >
+                              {step}
+                            </span>
+                            {index < statusSteps.length - 1 && (
+                              <div
+                                className={`absolute top-3 w-full h-1 ${
+                                  isCompleted ? "bg-blue-400" : "bg-gray-200"
+                                }`}
+                                style={{ zIndex: 0 }}
+                              ></div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-                {/* Items */}
-                <h3 className="mt-4 font-semibold">Items:</h3>
-                <ul className="space-y-2">
-                  {items?.length > 0 ? (
-                    items.map((item, index) => (
-                      <div key={index} className="flex items-center gap-4 border-b pb-4">
-                        <Image
-                          src={item.image_url}
-                          width={80}
-                          height={80}
-                          alt={item.name}
-                          className="rounded"
-                        />
-                        <div>
-                          <p className="font-medium">{item.name}</p>
-                          <p className="text-gray-700">Qty: {item.quantity}</p>
-                          <p className="text-blue-500 font-semibold">Ksh {item.price}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <li>Unable to load items.</li>
-                  )}
-                </ul>
+                  {/* Items */}
+                  <div className="mt-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-3">
+                      Items:
+                    </h4>
+                    {items?.length > 0 ? (
+                      <ul className="space-y-3">
+                        {items.map((item, index) => (
+                          <li key={index} className="flex items-center gap-4">
+                            <Image
+                              src={item.image_url}
+                              width={80}
+                              height={80}
+                              alt={item.name}
+                              className="rounded object-cover shadow-sm"
+                            />
+                            <div>
+                              <p className="font-medium text-gray-800">{item.name}</p>
+                              <p className="text-gray-600">Qty: {item.quantity}</p>
+                              <p className="text-blue-600 font-semibold">
+                                Ksh {item.price}
+                              </p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-gray-500">Unable to load items.</p>
+                    )}
+                  </div>
 
-                {/* Action Buttons */}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {statusSteps.map((status) => (
+                  {/* Action Buttons */}
+                  <div className="mt-6 pt-4 border-t border-gray-200 flex flex-wrap justify-end gap-2">
+                    {statusSteps.map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => handleStatusUpdate(order.order_id, status)}
+                        disabled={order.status === status}
+                        className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors focus:outline-none focus:ring focus:ring-blue-200
+                          ${
+                            order.status === status
+                              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                              : "bg-blue-500 text-white hover:bg-blue-600"
+                          }`}
+                      >
+                        Mark as {status.charAt(0).toUpperCase() + status.slice(1)}
+                      </button>
+                    ))}
                     <button
-                      key={status}
-                      onClick={() => handleStatusUpdate(order.order_id, status)}
-                      disabled={order.status === status}
-                      className={`px-3 py-1 rounded text-sm 
-                        ${order.status === status
-                          ? "bg-gray-300 cursor-not-allowed"
-                          : "bg-blue-500 text-white hover:bg-blue-600"}
-                      `}
+                      onClick={() => handleDelete(order.order_id)}
+                      className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-red-200 transition-colors"
                     >
-                      Mark as {status.charAt(0).toUpperCase() + status.slice(1)}
+                      <Trash2 size={16} className="inline-block mr-2" />
+                      Delete Order
                     </button>
-                  ))}
-                  <button
-                    onClick={() => handleDelete(order.order_id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded"
-                  >
-                    Delete Order
-                  </button>
+                  </div>
                 </div>
               </li>
             );

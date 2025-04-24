@@ -103,7 +103,7 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.3 }}
           >
             <Image
-              src="/hero-banner.png"
+              src="/empty-box.png"
               alt="Shop illustration"
               width={500}
               height={400}

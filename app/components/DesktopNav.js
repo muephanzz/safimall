@@ -36,7 +36,7 @@ export default function DesktopMenu() {
   }, []);
 
   return (
-    <nav className="absolute mt-24 left-0 right-0 z-40 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 shadow-2xl hidden md:flex w-full px-10 py-3 text-[18px] font-semibold space-x-8 rounded-b-3xl border-b-2 border-blue-700">
+    <nav className="absolute mt-28 left-0 right-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 shadow-2xl hidden md:flex w-full px-6 text-[18px] font-semibold space-x-8 rounded-b-3xl border-b-2 border-blue-700">
       {categories?.map((category) => {
         const isActive = categoryId === category.id.toString();
         const hasSubcategories = subcategories[category.id]?.length > 0;

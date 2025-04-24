@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, ImageIcon, Smile } from "lucide-react";
-import EmojiPicker from "emoji-picker-react"; // <-- use this
+//import EmojiPicker from "emoji-picker-react";   npm install emoji-picker-react
 import moment from "moment";
 
 export default function ChatWindow({
