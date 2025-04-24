@@ -24,7 +24,7 @@ export default function ProcessingPage() {
 
         if (res.ok) {
           setStatus(data.status);
-          if (data.status === "paid") {
+          if (data.status === "pending") {
             clearInterval(interval);
             router.push("/orders/success");
           } else if (data.status === "failed") {
