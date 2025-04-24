@@ -1,13 +1,14 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Search } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+"use client";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function SearchBar() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const router = useRouter();
+  const containerRef = useRef(null);
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -17,9 +18,9 @@ export default function SearchBar() {
       }
 
       const { data, error } = await supabase
-        .from('products')
-        .select('name, product_id')
-        .ilike('name', `%${query}%`)
+        .from("products")
+        .select("name, product_id")
+        .ilike("name", `%${query}%`)
         .limit(5);
 
       if (!error) setSuggestions(data);
@@ -32,38 +33,63 @@ export default function SearchBar() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (query.trim()) {
-      router.push(`/products/search?query=${query}`);
-      setQuery('');
+      router.push(`/products/search?query=${encodeURIComponent(query.trim())}`);
+      setQuery("");
       setSuggestions([]);
     }
   };
 
   const handleSuggestionClick = (name) => {
-    router.push(`/products/search?query=${name}`);
-    setQuery('');
+    router.push(`/products/search?query=${encodeURIComponent(name)}`);
+    setQuery("");
     setSuggestions([]);
   };
 
+  // Close suggestions on click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setSuggestions([]);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className="relative w-full pr-4">
-      <form onSubmit={handleSubmit} className="relative w-full mx-2">
+    <div ref={containerRef} className="relative w-full max-w-md mx-auto">
+      <form onSubmit={handleSubmit} className="relative w-full">
         <input
           type="text"
+          aria-label="Search products"
           placeholder="Search products..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full p-2 pl-10 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-full border border-gray-300 bg-white py-3 pl-12 pr-4 text-gray-900 placeholder-gray-400 shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+          spellCheck={false}
+          autoComplete="off"
         />
-        <Search className="absolute left-3 top-2.5 text-gray-500" size={20} />
+        <Search
+          size={20}
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+        />
       </form>
 
       {suggestions.length > 0 && (
-        <ul className="absolute z-10 bg-white shadow-lg w-full mt-1 rounded-md border max-h-48 overflow-y-auto">
+        <ul className="absolute z-50 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-lg ring-1 ring-black ring-opacity-5 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
           {suggestions.map((item) => (
             <li
               key={item.product_id}
               onClick={() => handleSuggestionClick(item.name)}
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+              className="cursor-pointer px-5 py-3 text-gray-800 transition hover:bg-blue-50 hover:text-blue-700"
+              role="option"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleSuggestionClick(item.name);
+                }
+              }}
             >
               {item.name}
             </li>

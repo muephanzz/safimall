@@ -23,21 +23,34 @@ export default function CategoriesPage() {
   }, []);
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Shop by Category</h1>
+    <div className="max-w-7xl mx-auto px-6 py-10">
+      <h1 className="text-4xl font-extrabold mb-8 text-gray-900 tracking-tight select-none">
+        Shop by Category
+      </h1>
 
       {loading ? (
-        <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mt-10" />
+        <div className="flex justify-center mt-20">
+          <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : categories.length === 0 ? (
+        <p className="text-center text-gray-500 text-lg mt-20 select-none">
+          No categories available at the moment.
+        </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {categories.map((category) => (
             <Link
               key={category.id}
               href={`/products?category_id=${category.id}`}
-              className="flex items-center py-4 px-5 bg-orange-100 text-gray-800 font-semibold rounded-xl shadow hover:bg-orange-600 hover:text-white transition"
+              className="flex items-center gap-4 p-5 bg-white rounded-2xl shadow-md transition hover:shadow-lg hover:bg-orange-600 hover:text-white cursor-pointer select-none"
+              aria-label={`Browse products in ${category.category}`}
             >
-              <Tag size={20} className="mr-3" />
-              {category.category}
+              <Tag
+                size={24}
+                className="text-orange-500 group-hover:text-white transition"
+                aria-hidden="true"
+              />
+              <span className="text-lg font-semibold">{category.category}</span>
             </Link>
           ))}
         </div>

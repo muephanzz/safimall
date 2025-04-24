@@ -44,60 +44,69 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 px-4">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-xl">
-        <h2 className="text-xl font-semibold text-center mb-6 text-blue-600">Sign Up</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-white to-gray-200 px-4">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl px-8 py-10">
+        <h2 className="text-3xl font-extrabold text-blue-800 text-center mb-8 select-none">
+          Create Your Account
+        </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="firstName"
-            value={form.firstName}
-            onChange={handleChange}
-            placeholder="First Name"
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          />
-          <input
-            type="text"
-            name="lastName"
-            value={form.lastName}
-            onChange={handleChange}
-            placeholder="Last Name"
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          />       
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="flex gap-4">
+            <input
+              type="text"
+              name="firstName"
+              value={form.firstName}
+              onChange={handleChange}
+              placeholder="First Name"
+              required
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 transition"
+              autoComplete="given-name"
+            />
+            <input
+              type="text"
+              name="lastName"
+              value={form.lastName}
+              onChange={handleChange}
+              placeholder="Last Name"
+              required
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 transition"
+              autoComplete="family-name"
+            />
+          </div>
+
           <input
             type="email"
             name="email"
             value={form.email}
             onChange={handleChange}
-            required
             placeholder="Email"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 transition"
+            autoComplete="email"
           />
           <input
             type="password"
             name="password"
             value={form.password}
             onChange={handleChange}
-            required
             placeholder="Password"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 transition"
+            autoComplete="new-password"
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 text-sm"
+            className="w-full bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-xl font-semibold shadow-md transition"
           >
             {loading ? "Creating account..." : "Sign Up"}
           </button>
         </form>
 
-        <p className="text-sm text-center mt-4">
+        <p className="text-center text-sm text-gray-600 mt-8">
           Already have an account?{" "}
-          <Link href="/signin" className="text-blue-600 hover:underline">
+          <Link href="/signin" className="text-blue-700 hover:underline font-medium">
             Sign in
           </Link>
         </p>

@@ -9,6 +9,49 @@ import { Button } from "@/components/ui/button";
 import QRCode from "qrcode";
 import { format } from "date-fns";
 
+// Logo component
+function Logo({ width = 72, height = 36 }) {
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox="0 0 360 120"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-label="Ephantronics Logo"
+    >
+      <path
+        d="M60 90C90 60 120 40 150 60C180 80 180 110 150 110C120 110 90 120 60 90Z"
+        fill="#2F855A"
+        stroke="#276749"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <text
+        x="190"
+        y="80"
+        fontFamily="'Poppins', sans-serif"
+        fontWeight="700"
+        fontSize="56"
+        fill="#2C5282"
+        letterSpacing="3"
+      >
+        Safi
+        <tspan fill="#38A169">Mall</tspan>
+      </text>
+      <circle cx="320" cy="30" r="6" fill="#38A169" />
+      <path
+        d="M320 22L320 38M308 30L332 30"
+        stroke="#68D391"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export default function OrderTracking() {
   const [orders, setOrders] = useState([]);
   const [orderId, setOrderId] = useState("");
@@ -129,15 +172,6 @@ export default function OrderTracking() {
     const margin = 4;
     let yPos = margin;
 
-    // Load higher resolution logo
-    const logo = await fetch("/empty-box.png") // Use a 300x150px PNG
-      .then((res) => res.blob())
-      .then((blob) => new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.readAsDataURL(blob);
-      }));
-
     // Generate QR Code
     const qrCodeData = await QRCode.toDataURL(order.order_id, {
       margin: 2,
@@ -145,7 +179,7 @@ export default function OrderTracking() {
     });
 
     // Header Section
-    doc.addImage(logo, "PNG", margin, yPos, 72, 36);
+    doc.addImage(LogoToDataURL(), "PNG", margin, yPos, 72, 36);
     yPos += 40;
 
     // Company Info
@@ -159,7 +193,7 @@ export default function OrderTracking() {
     yPos += 4;
     doc.text("VAT No: P051XXXXXXXX", pageWidth/2, yPos, { align: "center" });
     yPos += 8;
-
+    
     // Order Meta
     doc.setDrawColor(200);
     doc.line(margin, yPos, pageWidth - margin, yPos);
@@ -215,6 +249,58 @@ export default function OrderTracking() {
 
     doc.save(`receipt_${order.order_id}.pdf`);
   };
+
+  const LogoToDataURL = () => {
+    return new Promise((resolve) => {
+      const svgString = `
+      <svg
+      width="72"
+      height="36"
+      viewBox="0 0 360 120"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-label="Ephantronics Logo"
+    >
+      <path
+        d="M60 90C90 60 120 40 150 60C180 80 180 110 150 110C120 110 90 120 60 90Z"
+        fill="#2F855A"
+        stroke="#276749"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <text
+        x="190"
+        y="80"
+        fontFamily="sans-serif"
+        fontWeight="700"
+        fontSize="56"
+        fill="#2C5282"
+        letterSpacing="3"
+      >
+        Safi
+        <tspan fill="#38A169">Mall</tspan>
+      </text>
+      <circle cx="320" cy="30" r="6" fill="#38A169" />
+      <path
+        d="M320 22L320 38M308 30L332 30"
+        stroke="#68D391"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+      `;
+
+      const blob = new Blob([svgString], { type: 'image/svg+xml' });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(reader.result);
+      };
+      reader.readAsDataURL(blob);
+    });
+  };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">

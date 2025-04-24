@@ -13,7 +13,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const { user, setUser } = useAuth();
+  const { user } = useAuth();
 
   // Fetch cart count if user is logged in
   useEffect(() => {
@@ -38,27 +38,33 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="bg-gray-900 shadow-md py-4 fixed w-full top-0 z-50">
-      <div className="w-full mx-auto flex justify-between items-center">
-        {!isMobile && (
-          <>
-            <MobileMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+    <nav className="fixed top-0 left-0 w-full bg-gray-900 shadow-lg z-50">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="flex items-center justify-between h-16">
+          {/* Left: Mobile menu toggle & Logo */}
+          <div className="flex items-center space-x-4">
+            {isMobile && (
+              <MobileMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+            )}
             <Logo />
-          </>
-        )}
+          </div>
 
-        {/* Search bar is visible on all devices */}
-        <SearchBar />
+          {/* Center: Search */}
+          <div className="flex-1 mx-6 max-w-xl">
+            <SearchBar />
+          </div>
 
-        {!isMobile && (
-          <>
-            <DesktopMenu />
-            <div className="flex items-center space-x-6">
-              <CartIcon cartCount={cartCount} />
-              <UserMenu />
+          {/* Right: Desktop menu, cart, user */}
+          {!isMobile && (
+            <div className="flex items-center space-x-8">
+              <DesktopMenu />
+              <div className="flex items-center space-x-6">
+                <CartIcon cartCount={cartCount} />
+                <UserMenu />
+              </div>
             </div>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </nav>
   );

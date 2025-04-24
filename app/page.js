@@ -17,37 +17,44 @@ export default function Home() {
   const itemsPerPage = 8;
   const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch products and featured products
   useEffect(() => {
     async function fetchProducts() {
       setLoading(true);
 
-      // Featured: get 4 products marked as featured (or just first 4 if you don't have a featured flag)
       const { data: featuredData } = await supabase
         .from("products")
         .select("*")
         .eq("featured", true)
         .limit(4);
 
-      // If no featured, fallback to first 4 products
-      let featuredList = featuredData;
-      if (!featuredList || featuredList.length === 0) {
+      let featuredList = featuredData || [];
+
+      if (featuredList.length === 0) {
         const { data: fallback } = await supabase
           .from("products")
           .select("*")
           .order("created_at", { ascending: false })
           .limit(4);
-        featuredList = fallback;
+        featuredList = fallback || [];
       }
-      setFeatured(featuredList || []);
+      setFeatured(featuredList);
 
-      // Main products (excluding featured)
       const start = (currentPage - 1) * itemsPerPage;
       const end = start + itemsPerPage - 1;
-      const { data, count, error } = await supabase
+
+      let query = supabase
         .from("products")
-        .select("*", { count: "exact" })
-        .not("product_id", "in", `(${featuredList.map(f => `'${f.product_id}'`).join(",")})`)
+        .select("*", { count: "exact" });
+
+      if (featuredList.length > 0) {
+        query = query.not(
+          "product_id",
+          "in",
+          `(${featuredList.map((f) => `'${f.product_id}'`).join(",")})`
+        );
+      }
+
+      const { data, count, error } = await query
         .range(start, end);
 
       if (error) {
@@ -61,7 +68,6 @@ export default function Home() {
     }
 
     fetchProducts();
-    // eslint-disable-next-line
   }, [currentPage]);
 
   return (

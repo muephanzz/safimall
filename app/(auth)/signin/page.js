@@ -5,6 +5,49 @@ import { supabase } from "@/lib/supabaseClient";
 import { toast } from "react-toastify";
 import { FcGoogle } from "react-icons/fc";
 
+// Logo component (as provided)
+function Logo({ width = 180, height = 60 }) {
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox="0 0 360 120"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-label="SafiMall Logo"
+    >
+      <path
+        d="M60 90C90 60 120 40 150 60C180 80 180 110 150 110C120 110 90 120 60 90Z"
+        fill="#2F855A"
+        stroke="#276749"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <text
+        x="190"
+        y="80"
+        fontFamily="'Poppins', sans-serif"
+        fontWeight="700"
+        fontSize="56"
+        fill="#2C5282"
+        letterSpacing="3"
+      >
+        Safi
+        <tspan fill="#38A169">Mall</tspan>
+      </text>
+      <circle cx="320" cy="30" r="6" fill="#38A169" />
+      <path
+        d="M320 22L320 38M308 30L332 30"
+        stroke="#68D391"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export default function SignInPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -17,7 +60,6 @@ export default function SignInPage() {
     try {
       const { error } = await supabase.auth.signInWithPassword(form);
       if (error) throw error;
-
       toast.success("Signed in Successfully!");
       window.location.href = "/";
     } catch (error) {
@@ -35,56 +77,82 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 px-4">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-xl">
-        <h2 className="text-xl font-semibold text-center mb-6 text-blue-600">Sign In</h2>
-      {/*       
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-white to-gray-200 px-4">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl px-8 py-10">
+        <div className="flex flex-col items-center mb-8">
+          <Logo width={160} height={54} />
+          <h2 className="mt-4 text-2xl font-bold text-blue-800 tracking-tight">
+            Welcome Back
+          </h2>
+          <p className="text-gray-500 mt-1 text-sm">
+            Sign in to your SafiMall account
+          </p>
+        </div>
+
         <button
           onClick={handleGoogle}
-          className="w-full flex items-center justify-center bg-gray-100 py-2 rounded-lg mb-4 text-sm hover:bg-gray-200"
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 bg-gray-50 border border-gray-200 text-gray-700 py-2.5 rounded-xl font-medium shadow-sm hover:bg-gray-100 transition mb-6"
         >
-          <FcGoogle className="mr-2" size={20} /> Continue with Google
-        </button> */} 
+          <FcGoogle size={22} />
+          <span>Continue with Google</span>
+        </button>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            required
-            placeholder="Email"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          />
-          <input
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            required
-            placeholder="Password"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          />
+        <div className="flex items-center mb-6">
+          <div className="flex-grow border-t border-gray-200" />
+          <span className="mx-3 text-gray-400 text-xs">or sign in with email</span>
+          <div className="flex-grow border-t border-gray-200" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              required
+              autoComplete="email"
+              placeholder="you@example.com"
+              className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 transition"
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              required
+              autoComplete="current-password"
+              placeholder="Password"
+              className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 transition"
+            />
+          </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 text-sm"
+            className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold shadow-md transition text-lg"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
-        <div className="flex justify-center space-x-2">
-          <p className="text-sm text-center mt-4">
-            <a href="/reset-password" className="text-blue-600 hover:underline">
-              Reset Password
-            </a>
-          </p>
-          <p className="text-sm text-center mt-4">{"| "}
-            <a href="/signup" className="text-blue-600 hover:underline">
-              Sign up
-            </a>
-          </p>
+        <div className="flex justify-between items-center mt-6 text-sm">
+          <a href="/reset-password" className="text-blue-700 hover:underline transition">
+            Forgot password?
+          </a>
+          <a href="/signup" className="text-blue-700 hover:underline transition">
+            Create account
+          </a>
         </div>
       </div>
     </div>

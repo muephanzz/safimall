@@ -2,13 +2,10 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Home, Tag } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function MobileMenu() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const searchParams = useSearchParams();
-  searchParams.get("category_id"); 
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
@@ -31,62 +28,62 @@ export default function MobileMenu() {
       {/* Menu Button */}
       <button
         onClick={() => setMenuOpen(!menuOpen)}
-        className="relative text-white hover:bg-white hover:text-black rounded-full ml-4 p-2"
+        aria-label={menuOpen ? "Close menu" : "Open menu"}
+        className="relative z-50 p-2 rounded-full bg-gray-800 text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
       >
         {menuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Fullscreen Overlay */}
-      {menuOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setMenuOpen(false)}
-        />
-      )}
+      {/* Overlay */}
+      <div
+        className={`fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm transition-opacity duration-300 ${
+          menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        } z-40`}
+        onClick={() => setMenuOpen(false)}
+        aria-hidden={!menuOpen}
+      />
 
       {/* Sidebar Menu */}
-      <div
-        className={`fixed top-0 right-0 h-full w-1/2 bg-white shadow-lg transform ${
+      <aside
+        className={`fixed top-0 right-0 h-full w-64 bg-white shadow-xl rounded-l-3xl p-6 flex flex-col transform transition-transform duration-300 z-50 ${
           menuOpen ? "translate-x-0" : "translate-x-full"
-        } transition-transform duration-300 z-50 flex flex-col`}
+        }`}
+        aria-label="Mobile navigation menu"
       >
-        <button
-          onClick={() => setMenuOpen(false)}
-          className="absolute right-4 hover:text-black hover:bg-white transition-all"
-        >
-          <X className="absolute top-6 right-1 text-black" size={24} />
-        </button>
-        <h1 className="flex items-center space-x-3 p-4 top-4 right-24 text-2xl font-bold text-blue-600">
-          Ephantronics
-        </h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-extrabold text-indigo-600 select-none">Ephantronics</h1>
+          <button
+            onClick={() => setMenuOpen(false)}
+            aria-label="Close menu"
+            className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+          >
+            <X size={24} className="text-gray-700" />
+          </button>
+        </div>
 
-        {/* Scrollable Menu Content */}
-        <nav className="p-6 space-y-4 overflow-y-auto max-h-[80vh]">
+        <nav className="flex flex-col space-y-4 overflow-y-auto max-h-[calc(100vh-120px)]">
           <Link
             href="/"
-            className="flex items-center space-x-3 p-4 text-gray-700 hover:bg-gray-200 transition-all text-lg"
             onClick={handleCategoryClick}
+            className="flex items-center gap-4 px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-100 hover:text-indigo-700 font-semibold transition"
           >
-            <Home size={24} />
-            <span>Home</span>
+            <Home size={22} />
+            Home
           </Link>
 
-          {categories?.map((category) => {
- 
-            return (
-              <Link
-                key={category.id}
-                href={`/products/category?category_id=${category.id}`}
-                className="flex items-center space-x-3 p-4 text-gray-700 hover:bg-gray-200 transition-all text-lg"
-                onClick={handleCategoryClick}
-              >
-                <Tag size={18} className="mr-3" />
-                {category.category}
-              </Link>
-            );
-          })}
+          {categories.map((category) => (
+            <Link
+              key={category.id}
+              href={`/products/category?category_id=${category.id}`}
+              onClick={handleCategoryClick}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-100 hover:text-indigo-700 font-semibold transition"
+            >
+              <Tag size={20} />
+              {category.category}
+            </Link>
+          ))}
         </nav>
-      </div>
+      </aside>
     </div>
   );
 }
