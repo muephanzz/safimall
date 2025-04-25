@@ -174,6 +174,7 @@ export async function POST(request) {
           <ul>
             <li><strong>Paybill Number:</strong> 123456</li>
             <li><strong>Account Number:</strong> <code>${lastFiveAccNum}</code></li>
+            <li><strong>Amount:</strong> <code>Ksh ${amount}</code></li>
             <li><strong>Account Name:</strong> SafiMall</li>
           </ul>
 

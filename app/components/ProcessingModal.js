@@ -12,19 +12,19 @@ export default function ProcessingModal({ checkoutRequestId, onClose }) {
   const [showAlternative, setShowAlternative] = useState(false);
   const [timer, setTimer] = useState(20);
   const [refreshing, setRefreshing] = useState(false); 
-  const [orderId, setOrderId] = useState(null);
+  const [order, setOrder] = useState(null); // will hold { id, amount }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!userId) return;
 
-    async function fetchLatestOrderId() {
+    async function fetchLatestOrder() {
       setLoading(true);
       setError(null);
 
       const { data, error } = await supabase
         .from("orders")
-        .select("order_id")
+        .select("id, amount")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -32,19 +32,18 @@ export default function ProcessingModal({ checkoutRequestId, onClose }) {
 
       if (error) {
         setError(error.message);
-        setOrderId(null);
+        setOrder(null);
       } else {
-        setOrderId(data?.id ?? null);
+        setOrder(data ?? null);
       }
       setLoading(false);
     }
 
-    fetchLatestOrderId();
+    fetchLatestOrder();
   }, [userId]);
 
   if (loading) return <span>Loading...</span>;
   if (error) return <span className="text-red-600">{error}</span>;
-
 
   // Poll payment status every 5s, timeout after 20s
   useEffect(() => {
@@ -183,8 +182,12 @@ export default function ProcessingModal({ checkoutRequestId, onClose }) {
               <div className="flex justify-between mb-2">
                 <span className="font-semibold text-gray-700">Account Number:</span>
                 <span className="font-mono text-blue-700 text-lg">
-                  {orderId ? String(orderId).slice(-5) : "ORDER12345"}
+                {order?.id ? String(order.id).slice(-5) : "ORDER12345"}
                 </span>
+              </div>
+              <div className="flex justify-between mb-2">
+                <span className="font-semibold text-gray-700">Amount:</span>
+                <span className="font-mono text-green-700 text-lg">{order?.amount ?? "N/A"}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-semibold text-gray-700">Account Name:</span>
