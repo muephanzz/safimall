@@ -150,7 +150,7 @@ export default function ProcessingModal({ checkoutRequestId, onClose }) {
                 <span className="font-semibold text-gray-700">Account Number:</span>
                 <span className="font-mono text-blue-700 text-lg">
                   {/* Best practice: Use order id, user id, or product id for traceability */}
-                  {checkoutRequestId || "ORDER12345"}
+                  {`${orderId}.slice(-5)` || "ORDER12345"}
                 </span>
               </div>
               <div className="flex justify-between">
