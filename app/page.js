@@ -7,7 +7,7 @@ import Pagination from "@/components/Pagination";
 import Footer from "@/components/Footer";
 import ChatView from "@/components/chat/ChatView";
 import { motion } from "framer-motion";
-import Image from "next/image";
+import HeroCarousel from "@/components/HeroCarousel";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -108,14 +108,7 @@ export default function Home() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.3 }}
           >
-            <Image
-              src="/carousel.jpg"
-              alt="Shop illustration"
-              width={500}
-              height={400}
-              className="shadow-2xl border-4 border-white object-cover w-full max-w-[500px] h-auto"
-              priority
-            />
+            <HeroCarousel />
           </motion.div>
         </div>
       </section>
