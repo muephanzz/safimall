@@ -1,3 +1,4 @@
+// UserChat.tsx
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -19,7 +20,9 @@ const MessageBubble = ({ msg, isUser }) => (
           : "bg-gradient-to-tr from-blue-600 to-indigo-500 text-white"
       }`}
     >
-      <p className="break-words whitespace-pre-line">{msg.text || msg.user_message || msg.admin_reply}</p>
+      <p className="break-words whitespace-pre-line">
+        {msg.text || msg.user_message || msg.admin_reply}
+      </p>
       {msg.image_url && (
         <img
           src={msg.image_url}
@@ -56,7 +59,9 @@ export default function UserChat() {
   // Get current user
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) setUser(user);
     };
     getUser();
@@ -214,22 +219,22 @@ export default function UserChat() {
     </motion.button>
   );
 
-  // Floating chat button for mobile
-  const MobileChatButton = () => (
-    <motion.button
-      className="fixed z-50 bottom-7 right-6 bg-gradient-to-r from-blue-600 via-indigo-500 to-teal-400 text-white p-4 rounded-full shadow-2xl hover:scale-105 transition-all focus:outline-none"
-      onClick={() => setIsOpen(true)}
-      aria-label="Open chat"
-      style={{ width: 56, height: 56 }}
-    >
-      <MessageSquare size={26} />
-      {newMessage && (
-        <span className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-          !
-        </span>
-      )}
-    </motion.button>
-  );
+  // Floating chat button for mobile (REMOVED)
+  //   const MobileChatButton = () => (
+  //     <motion.button
+  //       className="fixed z-50 bottom-7 right-6 bg-gradient-to-r from-blue-600 via-indigo-500 to-teal-400 text-white p-4 rounded-full shadow-2xl hover:scale-105 transition-all focus:outline-none"
+  //       onClick={() => setIsOpen(true)}
+  //       aria-label="Open chat"
+  //       style={{ width: 56, height: 56 }}
+  //     >
+  //       <MessageSquare size={26} />
+  //       {newMessage && (
+  //         <span className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+  //           !
+  //         </span>
+  //       )}
+  //     </motion.button>
+  //   );
 
   return (
     <>
@@ -258,29 +263,27 @@ export default function UserChat() {
         </>
       )}
 
+      {/* Conditionally render ChatWindow only, NO button on mobile */}
       {isMobile && (
-        <>
-          {!isOpen && <MobileChatButton />}
-          <AnimatePresence>
-            {isOpen && (
-              <ChatWindow
-                isMobile={true}
-                messages={messages}
-                messagesEndRef={messagesEndRef}
-                message={message}
-                setMessage={setMessage}
-                sendMessage={sendMessage}
-                image={image}
-                setImage={setImage}
-                handleImageUpload={handleImageUpload}
-                setIsOpen={setIsOpen}
-                showEmoji={showEmoji}
-                setShowEmoji={setShowEmoji}
-                addEmoji={addEmoji}
-              />
-            )}
-          </AnimatePresence>
-        </>
+        <AnimatePresence>
+          {isOpen && (
+            <ChatWindow
+              isMobile={true}
+              messages={messages}
+              messagesEndRef={messagesEndRef}
+              message={message}
+              setMessage={setMessage}
+              sendMessage={sendMessage}
+              image={image}
+              setImage={setImage}
+              handleImageUpload={handleImageUpload}
+              setIsOpen={setIsOpen}
+              showEmoji={showEmoji}
+              setShowEmoji={setShowEmoji}
+              addEmoji={addEmoji}
+            />
+          )}
+        </AnimatePresence>
       )}
     </>
   );

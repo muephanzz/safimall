@@ -195,39 +195,41 @@ const CompletedOrders = () => {
         <div className="p-6">
           {/* Date Range and View All Toggle */}
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-            <div className="flex items-center space-x-3">
-              <label htmlFor="from" className="block text-sm font-medium text-gray-700">From:</label>
-              <input
-                type="date"
-                id="from"
-                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                value={dateRange.from}
-                onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-              />
+            {isAdmin &&(
+            <>
+              <div className="flex items-center space-x-3">
+                <label htmlFor="from" className="block text-sm font-medium text-gray-700">From:</label>
+                <input
+                  type="date"
+                  id="from"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                  value={dateRange.from}
+                  onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+                />
 
-              <label htmlFor="to" className="block text-sm font-medium text-gray-700">To:</label>
-              <input
-                type="date"
-                id="to"
-                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                value={dateRange.to}
-                onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-              />
+                <label htmlFor="to" className="block text-sm font-medium text-gray-700">To:</label>
+                <input
+                  type="date"
+                  id="to"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                  value={dateRange.to}
+                  onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+                />
+              </div>
+  
+              <div className="flex items-center">
+                <label htmlFor="viewAll" className="mr-2 text-sm font-medium text-gray-700">View All Orders:</label>
+                <input
+                  type="checkbox"
+                  id="viewAll"
+                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  checked={viewAll}
+                  onChange={() => setViewAll(!viewAll)}
+                />
+              </div>
+            </>
+            )}
             </div>
-
-          {isAdmin &&(
-            <div className="flex items-center">
-            <label htmlFor="viewAll" className="mr-2 text-sm font-medium text-gray-700">View All Orders:</label>
-            <input
-              type="checkbox"
-              id="viewAll"
-              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              checked={viewAll}
-              onChange={() => setViewAll(!viewAll)}
-            />
-          </div>
-          )}
-          </div>
 
           {/* Orders List */}
           {loading ? (
@@ -265,14 +267,6 @@ const CompletedOrders = () => {
             </Button>
           </div>
           )}
-          <div className="mt-6 flex justify-end space-x-3">
-            <Button onClick={() => downloadExcel(orders)}>
-              Export to Excel
-            </Button>
-            <Button onClick={() => downloadPDF(orders)}>
-              Export to PDF
-            </Button>
-          </div>
         </div>
       </div>
     </div>
