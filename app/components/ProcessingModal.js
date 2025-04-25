@@ -16,8 +16,6 @@ export default function ProcessingModal({ checkoutRequestId, onClose }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!userId) return;
-
     async function fetchLatestOrder() {
       setLoading(true);
       setError(null);
