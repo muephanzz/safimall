@@ -16,17 +16,27 @@ export async function POST(request) {
     let status = "failed";
     if (resultCode === 0) status = "paid";
 
-    // Update payment status in DB
+    // Extract metadata object (if available)
+    const metadata = callback.CallbackMetadata || null;
+
+    // Update payment status and save metadata as JSON object
     const { data: paymentData, error: paymentError } = await supabase
       .from("payments")
-      .update({ status, updated_at: new Date().toISOString() })
+      .update({
+        status,
+        updated_at: new Date().toISOString(),
+        metadata, // save the metadata object here
+      })
       .eq("mpesa_checkout_request_id", checkoutRequestID)
       .select()
       .single();
 
     if (paymentError) {
       console.error("Failed to update payment status:", paymentError);
-      return NextResponse.json({ message: "Failed to update payment status" }, { status: 500 });
+      return NextResponse.json(
+        { message: "Failed to update payment status" },
+        { status: 500 }
+      );
     }
 
     // Update order status in DB
@@ -39,18 +49,23 @@ export async function POST(request) {
 
     if (orderError) {
       console.error("Failed to update order status:", orderError);
-      return NextResponse.json({ message: "Failed to update order status" }, { status: 500 });
+      return NextResponse.json(
+        { message: "Failed to update order status" },
+        { status: 500 }
+      );
     }
 
     // Send confirmation email on success or failure
-    if (data && data.email) {
+    if (paymentData && paymentData.email) {
       try {
-        const lastFiveAccNum = data.order_id ? String(data.order_id).slice(-5) : "XXXXX";
-    
+        const lastFiveAccNum = paymentData.order_id
+          ? String(paymentData.order_id).slice(-5)
+          : "XXXXX";
+
         if (status === "paid") {
           await resend.emails.send({
             from: "onboarding@resend.dev",
-            to: data.email,
+            to: paymentData.email,
             subject: "Payment Successful - Thank You for Shopping with SafiMall!",
             html: `
               <p>Dear Valued Customer,</p>
@@ -66,7 +81,7 @@ export async function POST(request) {
         } else {
           await resend.emails.send({
             from: "onboarding@resend.dev",
-            to: data.email,
+            to: paymentData.email,
             subject: "Payment Unsuccessful - Alternative Payment Instructions",
             html: `
               <p>Dear Valued Customer,</p>
@@ -92,10 +107,13 @@ export async function POST(request) {
         console.error("Error sending payment email:", emailErr);
       }
     }
-    
+
     return NextResponse.json({ message: "Payment status updated" });
   } catch (error) {
     console.error("Callback error:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

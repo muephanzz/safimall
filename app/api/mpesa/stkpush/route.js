@@ -116,12 +116,11 @@ export async function POST(request) {
       user_id,
       amount,
       status: "pending",
-      mpesa_checkout_request_id: checkoutRequestId,
       shipping_address,
       email,
       checkout_items: checkoutItems,
       updated_at: nowISOString,
-      // Add other order-specific fields here if needed
+      phone_number: phone,
     };
 
     // Insert payment record
