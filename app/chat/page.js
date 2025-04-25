@@ -1,28 +1,12 @@
+// app/chat/page.tsx
 "use client";
 
-import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import UserChat from "@/components/ChatView";
 
-const ChatView = dynamic(() => import("@/components/chat/ChatView"), {
-  ssr: false,
-});
-
-export default function UserChatPage() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
+export default function ChatPage() {
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <ChatView isMobileView={isMobile} />
+    <div className="h-screen w-screen bg-white">
+      <UserChat />
     </div>
   );
 }
