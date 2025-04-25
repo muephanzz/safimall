@@ -30,7 +30,7 @@ export default function MobileMenu() {
       <button
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label={menuOpen ? "Close menu" : "Open menu"}
-        className="relative z-50 p-2 rounded-full bg-gray-800 text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
+        className="relative z-50 p-1 mr-2 text-white hover:bg-gray-800 transition"
       >
         {menuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>

@@ -78,7 +78,7 @@ export default function UserMenu({ onSignIn }) {
       {user ? (
         <Menu as="div" className="relative inline-block text-left">
           <Menu.Button
-            className="inline-flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 p-2 transition"
+            className="inline-flex items-center justify-center hover:bg-gray-800 p-2 transition"
             aria-label="User menu"
           >
             <User2 className="w-6 h-6 text-white" />
@@ -198,16 +198,14 @@ export default function UserMenu({ onSignIn }) {
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+            <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-white z-50">
               <Menu.Item>
                 {({ active }) => (
                   <Link
                     href="/signin"
-                    className={`block px-4 py-2 text-sm font-medium ${
-                      active ? "bg-indigo-100 text-indigo-700" : "text-gray-700"
-                    }`}
+                    className="block px-4 py-2 text-sm font-medium text-gray-700"
                   >
-                    <User className="inline-block mr-2 w-5 h-5 text-indigo-600" />
+                    <User className="inline-block h-5 shandow-md text-indigo-600" />
                     Sign in
                   </Link>
                 )}
