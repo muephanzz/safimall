@@ -24,7 +24,7 @@ export default function ProcessingModal({ checkoutRequestId, onClose }) {
 
       const { data, error } = await supabase
         .from("orders")
-        .select("id, amount")
+        .select("order_id, amount")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(1)
