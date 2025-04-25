@@ -52,6 +52,57 @@ function Logo({ width = 72, height = 36 }) {
   );
 }
 
+function LogoToDataURL () {
+  return new Promise((resolve) => {
+    const svgString = `
+    <svg
+    width="72"
+    height="36"
+    viewBox="0 0 360 120"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="Ephantronics Logo"
+  >
+    <path
+      d="M60 90C90 60 120 40 150 60C180 80 180 110 150 110C120 110 90 120 60 90Z"
+      fill="#2F855A"
+      stroke="#276749"
+      strokeWidth="4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <text
+      x="190"
+      y="80"
+      fontFamily="sans-serif"
+      fontWeight="700"
+      fontSize="56"
+      fill="#2C5282"
+      letterSpacing="3"
+    >
+      Safi
+      <tspan fill="#38A169">Mall</tspan>
+    </text>
+    <circle cx="320" cy="30" r="6" fill="#38A169" />
+    <path
+      d="M320 22L320 38M308 30L332 30"
+      stroke="#68D391"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+  </svg>
+    `;
+
+    const blob = new Blob([svgString], { type: 'image/svg+xml' });
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      resolve(reader.result);
+    };
+    reader.readAsDataURL(blob);
+  });
+};
+
 export default function OrderTracking() {
   const [orders, setOrders] = useState([]);
   const [orderId, setOrderId] = useState("");
@@ -74,13 +125,13 @@ export default function OrderTracking() {
 
     const { data: orderData, error: orderError } = await supabase
       .from("orders")
-      .select("order_id, status, total, shipping_address, items")
+      .select("order_id, status, total, shipping_address, checkout_items")
       .eq("user_id", user.id);
 
     if (!orderError && orderData) {
       const parsedOrders = orderData.map(order => ({
         ...order,
-        items: typeof order.items === 'string' ? JSON.parse(order.items) : order.items,
+        checkout_items: typeof order.checkout_items === 'string' ? JSON.parse(order.checkout_items) : order.checkout_items,
       }));
       setOrders(parsedOrders);
     }
@@ -112,9 +163,9 @@ export default function OrderTracking() {
     if (error || !data) {
       toast.error(`No order found for "${orderId}"`);
     } else {
-      // Parse items here
-      if (typeof data.items === 'string') {
-        data.items = JSON.parse(data.items);
+      // Parse checkout_items here
+      if (typeof data.checkout_items === 'string') {
+        data.checkout_items = JSON.parse(data.checkout_items);
       }
   
       setOrder(data);
@@ -206,7 +257,7 @@ export default function OrderTracking() {
     doc.text(`STATUS: ${order.status.toUpperCase()}`, margin, yPos);
     yPos += 8;
 
-    // Items Table
+    // checkout_Items Table
     doc.setFont("courier", "normal");
     doc.setFontSize(10);
     doc.text("ITEM", margin, yPos);
@@ -214,7 +265,7 @@ export default function OrderTracking() {
     doc.text("TOTAL", pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
 
-    order.items.forEach(item => {
+    order.checkout_items.forEach(item => {
       doc.text(item.name.substring(0, 22), margin, yPos);
       doc.text(`${item.quantity}x`, pageWidth - margin - 20, yPos, { align: "right" });
       doc.text(`Ksh ${(item.price * item.quantity).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
@@ -225,15 +276,15 @@ export default function OrderTracking() {
     yPos += 6;
     doc.line(margin, yPos, pageWidth - margin, yPos);
     yPos += 6;
-    doc.text("SUBTOTAL:", pageWidth - margin - 30, yPos);
-    doc.text(`Ksh ${order.total.toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
+    doc.text("SUBTOTAL:", pageWidth - margin - 35, yPos);
+    doc.text(`Ksh ${order.amount.toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
-    doc.text("VAT (16%):", pageWidth - margin - 30, yPos);
-    doc.text(`Ksh ${(order.total * 0.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
+    doc.text("VAT (16%):", pageWidth - margin - 35, yPos);
+    doc.text(`Ksh ${(order.amount * 0.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
     doc.setFont("helvetica", "bold");
     doc.text("TOTAL:", pageWidth - margin - 30, yPos);
-    doc.text(`Ksh ${(order.total * 1.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
+    doc.text(`Ksh ${(order.amount * 1.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 10;
 
     // QR Code
@@ -250,7 +301,7 @@ export default function OrderTracking() {
     doc.save(`receipt_${order.order_id}.pdf`);
   };
 
-  const LogoToDataURL = () => {
+ {/* const LogoToDataURL = () => {
     return new Promise((resolve) => {
       const svgString = `
       <svg
@@ -299,7 +350,7 @@ export default function OrderTracking() {
       };
       reader.readAsDataURL(blob);
     });
-  };
+  };  */}
   
 
   return (
@@ -310,7 +361,7 @@ export default function OrderTracking() {
         className="max-w-4xl mx-auto"
       >
         <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-slate-800 mb-6 flex checkout_items-center gap-3">
             <span className="bg-blue-600 text-white p-2 rounded-lg">📦</span>
             Order Tracking
           </h1>
@@ -334,7 +385,7 @@ export default function OrderTracking() {
           {order && (
             <div className="space-y-8">
               <div className="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-xl">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex flex-col sm:flex-row justify-between checkout_items-start sm:checkout_items-center gap-4">
                   <div>
                     <h2 className="text-xl font-semibold text-slate-800">
                       Order #{order.order_id}
@@ -361,8 +412,8 @@ export default function OrderTracking() {
               </div>
 
   <div className="mt-6">
-  <h3 className="text-lg font-semibold mb-3">Order Items:</h3>
-  {order.items && order.items.length > 0 ? (
+  <h3 className="text-lg font-semibold mb-3">Order checkout_Items:</h3>
+  {order.checkout_items && order.checkout_items.length > 0 ? (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
@@ -382,10 +433,10 @@ export default function OrderTracking() {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {order.items.map((item, index) => (
+          {order.checkout_items.map((item, index) => (
             <tr key={index}>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center">
+                <div className="flex checkout_items-center">
                   <div className="flex-shrink-0 h-10 w-10">
                     <Image
                       src={item.image_url}
@@ -417,7 +468,7 @@ export default function OrderTracking() {
       </table>
     </div>
   ) : (
-    <p className="text-gray-500">Unable to load items.</p>
+    <p className="text-gray-500">Unable to load checkout_items.</p>
   )}
 </div>
 
@@ -425,7 +476,7 @@ export default function OrderTracking() {
                 <div className="mt-6 space-y-2">
                   <div className="flex justify-between font-medium">
                     <span>Subtotal</span>
-                    <span>Ksh {order.total.toFixed(2)}</span>
+                    <span>Ksh {(order.amount).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-slate-600">
                     <span>Shipping</span>
@@ -433,7 +484,7 @@ export default function OrderTracking() {
                   </div>
                   <div className="flex justify-between text-blue-600 font-bold">
                     <span>Total</span>
-                    <span>Ksh {order.total.toFixed(2)}</span>
+                    <span>Ksh {(order.amount).toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -461,4 +512,4 @@ export default function OrderTracking() {
       </motion.div>
     </div>
   );
-}
+}  

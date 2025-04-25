@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
 
-const PAYBILL_NUMBER = "123456";
+const PAYBILL_NUMBER = "139426";
 const ACCOUNT_NAME = "SafiMall";
 
 export default function ProcessingModal({ checkoutRequestId, onClose }) {

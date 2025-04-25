@@ -43,9 +43,16 @@ const AdminLayout = ({ children }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="ml-64 flex-1 p-8 overflow-y-auto max-h-screen">
-        {/* Container to limit max width for premium look */}
-        <div className="max-w-7xl mx-auto bg-white rounded-3xl shadow-xl p-8 min-h-[80vh]">
+      <main className="ml-0 sm:ml-0 md:ml-0 lg:ml-64 flex-1 overflow-y-auto max-h-screen p-0 sm:p-0 md:p-0 lg:p-8 relative">
+        {/* Fixed welcome header */}
+        <header className="fixed top-0 left-0 right-0 lg:left-64 bg-white shadow-md z-40 px-6 py-4 flex items-center">
+          <h1 className="text-2xl font-semibold text-gray-900 select-none">
+            Welcome to Admin Dashboard
+          </h1>
+        </header>
+
+        {/* Content container with padding top to avoid overlap */}
+        <div className="max-w-7xl mx-auto bg-white rounded-3xl shadow-xl p-6 pt-20 min-h-[80vh]">
           {children}
         </div>
       </main>

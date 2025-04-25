@@ -168,7 +168,7 @@ export async function POST(request) {
           <p><em>If you do not receive the M-Pesa prompt within a few minutes, or if the payment fails, you can use the alternative manual payment method below:</em></p>
 
           <ul>
-            <li><strong>Paybill Number:</strong> 123456</li>
+            <li><strong>Paybill Number:</strong> 139426</li>
             <li><strong>Account Number:</strong> <code>${checkoutRequestId ? checkoutRequestId.slice(-5) : phone_number.slice(-5)}</code></li>
             <li><strong>Amount:</strong> <code>Ksh ${amount}</code></li>
             <li><strong>Account Name:</strong> SafiMall</li>

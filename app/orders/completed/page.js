@@ -215,16 +215,18 @@ const CompletedOrders = () => {
               />
             </div>
 
+          {isAdmin &&(
             <div className="flex items-center">
-              <label htmlFor="viewAll" className="mr-2 text-sm font-medium text-gray-700">View All Orders:</label>
-              <input
-                type="checkbox"
-                id="viewAll"
-                className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                checked={viewAll}
-                onChange={() => setViewAll(!viewAll)}
-              />
-            </div>
+            <label htmlFor="viewAll" className="mr-2 text-sm font-medium text-gray-700">View All Orders:</label>
+            <input
+              type="checkbox"
+              id="viewAll"
+              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              checked={viewAll}
+              onChange={() => setViewAll(!viewAll)}
+            />
+          </div>
+          )}
           </div>
 
           {/* Orders List */}
@@ -253,6 +255,16 @@ const CompletedOrders = () => {
           )}
 
           {/* Export Buttons */}
+          {isAdmin &&(
+            <div className="mt-6 flex justify-end space-x-3">
+            <Button onClick={() => downloadExcel(orders)}>
+              Export to Excel
+            </Button>
+            <Button onClick={() => downloadPDF(orders)}>
+              Export to PDF
+            </Button>
+          </div>
+          )}
           <div className="mt-6 flex justify-end space-x-3">
             <Button onClick={() => downloadExcel(orders)}>
               Export to Excel
