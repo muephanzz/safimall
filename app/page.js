@@ -14,7 +14,7 @@ export default function Home() {
   const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 60;
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export default function Home() {
               alt="Shop illustration"
               width={500}
               height={400}
-              className="rounded-3xl shadow-2xl border-4 border-white object-cover w-full max-w-[500px] h-auto"
+              className="shadow-2xl border-4 border-white object-cover w-full max-w-[500px] h-auto"
               priority
             />
           </motion.div>
@@ -161,18 +161,18 @@ export default function Home() {
         >
           All Products
         </motion.h2>
-        <section className="bg-white/80 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-gray-200">
+        <section className="bg-white/80 backdrop-blur-md p-6 shadow-xl border border-gray-200">
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
               {[...Array(itemsPerPage)].map((_, i) => (
                 <div
                   key={i}
-                  className="bg-gradient-to-tr from-gray-200 to-gray-100 rounded-2xl p-4 shadow-lg animate-pulse flex flex-col"
+                  className="bg-gradient-to-tr from-gray-200 to-gray-100 p-4 shadow-lg animate-pulse flex flex-col"
                 >
-                  <div className="h-48 rounded-xl bg-gray-300 mb-4" />
-                  <div className="h-5 w-3/4 bg-gray-300 rounded mb-3" />
-                  <div className="h-4 w-full bg-gray-200 rounded mb-2" />
-                  <div className="h-6 w-1/2 bg-indigo-200 rounded" />
+                  <div className="h-48 bg-gray-300 mb-4" />
+                  <div className="h-5 w-3/4 bg-gray-300 mb-3" />
+                  <div className="h-4 w-full bg-gray-200 mb-2" />
+                  <div className="h-6 w-1/2 bg-indigo-200" />
                 </div>
               ))}
             </div>

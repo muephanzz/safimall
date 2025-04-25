@@ -17,11 +17,11 @@ export default function ProductCard({ product, loading }) {
   return (
     <Link href={`/products/${product.product_id}`} className="group block" aria-label={`View details for ${product.name}`}>
       <motion.div
-        className="bg-white rounded-3xl shadow-md hover:shadow-2xl border border-transparent hover:border-indigo-400 transition-all duration-300 p-5 overflow-hidden relative flex flex-col"
+        className="bg-white hover:shadow-md border border-transparent transition-al pb-2 overflow-hidden relative flex flex-col"
         whileHover={{ scale: 1.05 }}
         transition={{ type: "spring", stiffness: 250, damping: 20 }}
       >
-        <div className="relative w-full h-56 rounded-2xl overflow-hidden shadow-sm">
+        <div className="relative w-full h-56 overflow-hidden shadow-sm">
           <Image
             src={product.image_urls?.[0] || "/placeholder.jpg"}
             alt={product.name || "Product Image"}
@@ -37,16 +37,16 @@ export default function ProductCard({ product, loading }) {
           )}
         </div>
 
-        <div className="mt-5 flex flex-col flex-grow">
-          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 truncate" title={product.name}>
+        <div className="mt-1 flex flex-col flex-grow">
+          <h3 className="text-lg font-semibold text-gray-900 truncate" title={product.name}>
             {product.name}
           </h3>
 
-          <p className="text-sm text-gray-500 mt-1 line-clamp-2" title={product.description || "No description available"}>
+          <p className="text-sm text-gray-500 mt- line-clamp-2" title={product.description || "No description available"}>
             {product.description || "No description available"}
           </p>
 
-          <p className="mt-auto font-extrabold text-indigo-700 text-lg sm:text-xl tracking-tight">
+          <p className="mt-auto font-extrabold text-red-500 text-lg sm:text-xl tracking-tight">
             Ksh {Number(product.price).toLocaleString()}
           </p>
         </div>

@@ -45,7 +45,7 @@ export default function Navbar() {
           {!isMobile && (
           <div>
             <MobileMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
-            <Logo /> 
+            {/*<Logo />*/} 
           </div>
           )}  
           <SearchBar />
