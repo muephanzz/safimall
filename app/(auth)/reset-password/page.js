@@ -88,3 +88,6 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
+
+//git config --global http.proxy http://proxy_host:proxy_port
+//git config --global https.proxy https://proxy_host:proxy_port
