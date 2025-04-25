@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Loader2, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient"; 
 
 const PAYBILL_NUMBER = "123456";
 const ACCOUNT_NAME = "SafiMall";
@@ -10,7 +11,40 @@ export default function ProcessingModal({ checkoutRequestId, onClose }) {
   const [error, setError] = useState(null);
   const [showAlternative, setShowAlternative] = useState(false);
   const [timer, setTimer] = useState(20);
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false); 
+  const [orderId, setOrderId] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    async function fetchLatestOrderId() {
+      setLoading(true);
+      setError(null);
+
+      const { data, error } = await supabase
+        .from("orders")
+        .select("order_id")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) {
+        setError(error.message);
+        setOrderId(null);
+      } else {
+        setOrderId(data?.id ?? null);
+      }
+      setLoading(false);
+    }
+
+    fetchLatestOrderId();
+  }, [userId]);
+
+  if (loading) return <span>Loading...</span>;
+  if (error) return <span className="text-red-600">{error}</span>;
+
 
   // Poll payment status every 5s, timeout after 20s
   useEffect(() => {
@@ -149,8 +183,7 @@ export default function ProcessingModal({ checkoutRequestId, onClose }) {
               <div className="flex justify-between mb-2">
                 <span className="font-semibold text-gray-700">Account Number:</span>
                 <span className="font-mono text-blue-700 text-lg">
-                  {/* Best practice: Use order id, user id, or product id for traceability */}
-                  {`${orderId}.slice(-5)` || "ORDER12345"}
+                  {orderId ? String(orderId).slice(-5) : "ORDER12345"}
                 </span>
               </div>
               <div className="flex justify-between">
