@@ -154,10 +154,6 @@ export async function POST(request) {
 
     // Send confirmation email with alternative payment instructions
     try {
-      const lastFiveAccNum = orderInsertData?.id
-        ? String(orderInsertData.id).slice(-5)
-        : "XXXXX";
-
       await resend.emails.send({
         from: "onboarding@resend.dev",
         to: email,
@@ -173,7 +169,7 @@ export async function POST(request) {
 
           <ul>
             <li><strong>Paybill Number:</strong> 123456</li>
-            <li><strong>Account Number:</strong> <code>${lastFiveAccNum}</code></li>
+            <li><strong>Account Number:</strong> <code>${checkoutRequestId ? checkoutRequestId.slice(-5) : phone_number.slice(-5)}</code></li>
             <li><strong>Amount:</strong> <code>Ksh ${amount}</code></li>
             <li><strong>Account Name:</strong> SafiMall</li>
           </ul>
