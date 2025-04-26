@@ -3,17 +3,35 @@ import withAdminAuth from "@/components/withAdminAuth";
 import Link from "next/link";
 
 const AdminLayout = ({ children }) => {
-  return (
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+return (
     <div className="min-h-screen flex bg-gray-100">
-      {/* Fixed Sidebar */}
-      <aside className="fixed top-0 left-0 h-screen w-64 bg-gray-900 text-white flex flex-col p-6 shadow-lg z-30">
+      {/* Hamburger Menu (Mobile) */}
+      <button
+        onClick={toggleSidebar}
+        className="lg:hidden fixed top-4 left-4 bg-gray-800 text-white p-2 rounded-md shadow-md z-50"
+      >
+        {isSidebarOpen ? "Close" : "Menu"}
+      </button>
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 h-screen w-64 bg-gray-900 text-white flex flex-col p-6 shadow-lg z-40 transform transition-transform duration-300 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0 lg:z-30`}
+      >
         <h2 className="text-2xl font-extrabold mb-8 tracking-wide select-none">
           Admin Panel
         </h2>
         <nav className="flex flex-col space-y-4 text-lg font-medium">
           <Link
             href="/"
-            className="block px-3 py-2 rounded-md hover:bg-blue-600 hover:text-white transition"
+            className="block px-3 py-2 rounded-md hover:bg-green-600 hover:text-white transition"
           >
             Home
           </Link>
@@ -31,7 +49,7 @@ const AdminLayout = ({ children }) => {
           </Link>
           <Link
             href="/admin/chat"
-            className="block px-3 py-2 rounded-md hover:bg-purple-600 hover:text-white transition"
+            className="block px-3 py-2 rounded-md hover:bg-blue-600 hover:text-white transition"
           >
             Manage Chat
           </Link>
@@ -43,10 +61,14 @@ const AdminLayout = ({ children }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="ml-0 sm:ml-0 md:ml-0 lg:ml-64 flex-1 overflow-y-auto max-h-screen p-0 sm:p-0 md:p-0 lg:p-8 relative">
+      <main
+        className={`flex-1 overflow-y-auto max-h-screen p-0 sm:p-0 md:p-0 lg:p-8 relative transition-transform duration-300 ${
+          isSidebarOpen ? "translate-x-0" : "translate-x-0"
+        } lg:translate-x-64`}
+      >
         {/* Fixed welcome header */}
         <header className="fixed top-0 left-0 right-0 lg:left-64 bg-white shadow-md z-40 px-6 py-4 flex items-center">
-          <h1 className="text-2xl font-semibold text-gray-900 select-none">
+          <h1 className="text-2xl font-semibold text-center justify-center text-green-600 select-none">
             Welcome to Admin Dashboard
           </h1>
         </header>
