@@ -5,13 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import AdminLayout from "@/components/AdminLayout";
 import withAdminAuth from "@/components/withAdminAuth";
 import toast from "react-hot-toast";
-import {
-    XCircle,
-    Edit,
-    Trash2,
-    ImagePlus,
-    Loader2,
-} from "lucide-react";
+import { XCircle, Edit, Trash2, ImagePlus, Loader2 } from "lucide-react";
 
 const ManageProducts = () => {
     const [products, setProducts] = useState([]);
@@ -231,31 +225,6 @@ const ManageProducts = () => {
               productId = data.product_id;
               toast.success("Product added successfully!");
           }
-          
-  
-          if (editingProduct) {
-              const { error } = await supabase
-                  .from("products")
-                  .update(productData)
-                  .eq("product_id", editingProduct.product_id);
-  
-              if (error) throw new Error(error.message);
-  
-              productId = editingProduct.product_id;
-              toast.success("Product updated successfully!");
-          } else {
-              const { data, error } = await supabase
-                  .from("products")
-                  .insert([productData])
-                  .select("product_id")
-                  .single();
-  
-              if (error) throw new Error(error.message);
-  
-              productId = data.product_id;
-              toast.success("Product added successfully!");
-          }
-  
           fetchProducts();
           resetForm();
       } catch (error) {
@@ -618,7 +587,7 @@ const ManageProducts = () => {
                                         </td>
                                         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                             <p className="text-gray-900 whitespace-no-wrap">
-                                                {product.categories?.subcategories?.name}
+                                                {product.subcategories?.name}
                                             </p>
                                         </td>
                                         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
