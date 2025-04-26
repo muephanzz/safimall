@@ -127,7 +127,7 @@ export default function OrderTracking() {
     });
 
     const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 4;
+    const margin = 12;
     let yPos = margin;
 
     // Generate QR Code
@@ -139,11 +139,13 @@ export default function OrderTracking() {
     // Header Section
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.text("SafiMall", pageWidth / 2, yPos, { align: "center" });
+    doc.text("SafiMall Online Shopping", pageWidth / 2, yPos, { align: "center" });
     yPos += 6;
     doc.setFontSize(10);
     doc.setTextColor(100);
-    doc.text("P.O Box 12345-00100, Nairobi", pageWidth / 2, yPos, { align: "center" });
+    doc.text("P.O Box 068-60100, Embu", pageWidth / 2, yPos, { align: "center" });
+    yPos += 4;
+    doc.text("www.safimall.com, 0798229783", pageWidth / 2, yPos, { align: "center" });
     yPos += 4;
     doc.text("VAT No: P051XXXXXXXX", pageWidth / 2, yPos, { align: "center" });
     yPos += 8;
@@ -179,10 +181,10 @@ export default function OrderTracking() {
     yPos += 6;
     doc.line(margin, yPos, pageWidth - margin, yPos);
     yPos += 6;
-    doc.text("SUBTOTAL:", pageWidth - margin - 35, yPos);
+    doc.text("SUBTOTAL:", pageWidth - margin - 37, yPos);
     doc.text(`Ksh ${order.amount.toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
-    doc.text("VAT (16%):", pageWidth - margin - 35, yPos);
+    doc.text("VAT (16%):", pageWidth - margin - 32, yPos);
     doc.text(`Ksh ${(order.amount * 0.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
     doc.setFont("helvetica", "bold");
@@ -205,7 +207,7 @@ export default function OrderTracking() {
   };
 
   return (
-    <div className="min-h-screen mt-20 sm:mt-20 lg:mt-28 bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-0 sm:px-0 lg:px-8">
+    <div className="min-h-screen mt-20 sm:mt-20 lg:mt-24 bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-0 sm:px-0 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
           <h1 className="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
