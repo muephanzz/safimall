@@ -223,7 +223,7 @@ export default function ProductDetails() {
               </motion.p>
 
               <motion.div
-                className="text-2xl font-bold text-blue-700"
+                className="text-2xl font-bold text-red-700"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
@@ -232,7 +232,7 @@ export default function ProductDetails() {
               </motion.div>
 
               <motion.div
-                className="flex flex-col gap-4 pt-4"
+                className="flex flex-row gap-4 pt-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}

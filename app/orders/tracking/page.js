@@ -209,7 +209,7 @@ export default function OrderTracking() {
   };
 
   return (
-    <div className="min-h-screen mt-20 sm:mt-20 lg:mt-24 bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-0 sm:px-0 lg:px-8">
+    <div className="mt-28 p-6 max-w-6xl mx-auto bg-gradient-to-br from-white to-slate-100 shadow-2xl rounded-3xl border border-gray-200">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
           <h1 className="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">

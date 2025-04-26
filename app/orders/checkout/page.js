@@ -99,7 +99,7 @@ export default function Checkout() {
   };
 
   return (
-    <div className="min-h-screen py-10 px-2 sm:px-6 flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-50">
+    <div className="mt-28 p-6 max-w-6xl mx-auto bg-gradient-to-br from-white to-slate-100 shadow-2xl rounded-3xl border border-gray-200">
       <div className="bg-white shadow-2xl rounded-3xl p-6 sm:p-10 w-full max-w-lg border border-blue-100 transition-all duration-500">
         <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-blue-800 mb-8 tracking-tight">Secure Checkout</h2>
 
