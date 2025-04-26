@@ -126,7 +126,7 @@ const ManageOrders = () => {
       <h1 className="text-3xl font-extrabold text-gray-900 mb-6">Manage Orders</h1>
 
       {/* Filters and Sort */}
-      <div className="flex flex-wrap items-center gap-4 mb-6">
+      <div className="flex flex-wrap checkout_items-center gap-4 mb-6">
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
@@ -163,7 +163,7 @@ const ManageOrders = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center min-h-[50vh]">
+        <div className="flex justify-center checkout_items-center min-h-[50vh]">
           <Loader2 className="animate-spin w-8 h-8 text-blue-500" />
         </div>
       ) : orders.length === 0 ? (
@@ -171,7 +171,7 @@ const ManageOrders = () => {
       ) : (
         <ul className="space-y-6">
           {orders.map((order) => {
-            const items = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
+            const checkout_items = typeof order.checkout_items === "string" ? JSON.parse(order.checkout_items) : order.checkout_items;
 
             return (
               <li
@@ -179,7 +179,7 @@ const ManageOrders = () => {
                 className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200"
               >
                 <div className="p-4">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-3">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:checkout_items-start gap-3 mb-3">
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">
                         Order ID: <span className="text-blue-600">{order.order_id}</span>
@@ -197,7 +197,7 @@ const ManageOrders = () => {
                         Total: Ksh {order.total}
                       </span>
                       <span
-                        className={`inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium capitalize ml-2 ${statusColors[order.status]}`}
+                        className={`inline-flex checkout_items-center px-3 py-0.5 rounded-full text-sm font-medium capitalize ml-2 ${statusColors[order.status]}`}
                       >
                         {order.status}
                       </span>
@@ -209,14 +209,14 @@ const ManageOrders = () => {
                     <h4 className="text-sm font-medium text-gray-700 mb-2">
                       Order Progress
                     </h4>
-                    <div className="flex justify-between items-center relative">
+                    <div className="flex justify-between checkout_items-center relative">
                       {statusSteps.map((step, index) => {
                         const isActive = statusSteps.indexOf(order.status) >= index;
                         const isCompleted = statusSteps.indexOf(order.status) > index;
                         return (
-                          <div key={index} className="flex-1 flex flex-col items-center">
+                          <div key={index} className="flex-1 flex flex-col checkout_items-center">
                             <div
-                              className={`w-6 h-6 rounded-full z-10 flex items-center justify-center ${
+                              className={`w-6 h-6 rounded-full z-10 flex checkout_items-center justify-center ${
                                 isActive ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-700"
                               }`}
                             >
@@ -256,15 +256,15 @@ const ManageOrders = () => {
                     </div>
                   </div>
 
-                  {/* Items */}
+                  {/* checkout_items */}
                   <div className="mt-6">
                     <h4 className="text-lg font-semibold text-gray-800 mb-3">
-                      Items:
+                      checkout_items:
                     </h4>
-                    {items?.length > 0 ? (
+                    {checkout_items?.length > 0 ? (
                       <ul className="space-y-3">
-                        {items.map((item, index) => (
-                          <li key={index} className="flex items-center gap-4">
+                        {checkout_items.map((item, index) => (
+                          <li key={index} className="flex checkout_items-center gap-4">
                             <Image
                               src={item.image_url}
                               width={80}
@@ -283,7 +283,7 @@ const ManageOrders = () => {
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-gray-500">Unable to load items.</p>
+                      <p className="text-gray-500">Unable to load checkout_items.</p>
                     )}
                   </div>
 
