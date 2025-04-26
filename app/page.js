@@ -48,17 +48,11 @@ export default function Home() {
       const start = (currentPage - 1) * itemsPerPage;
       const end = start + itemsPerPage - 1;
 
-      let query = supabase
+        let query = supabase
         .from("products")
-        .select("*", { count: "exact" });
-
-      if (featuredList.length > 0) {
-        query = query.not(
-          "product_id",
-          "in",
-          `(${featuredList.map((f) => `'${f.product_id}'`).join(",")})`
-        );
-      }
+        .select("*", { count: "exact" })
+        .neq("featured", true); // Only non-featured products
+      
 
       const { data, count, error } = await query.range(start, end);
 
