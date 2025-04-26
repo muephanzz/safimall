@@ -69,7 +69,7 @@ return (
         } lg:translate-x-64`}
       >
         {/* Fixed welcome header */}
-        <header className="fixed top-0 left-0 right-0 p-2 bg-white shadow-md z-20 px-6 py-4 flex">
+        <header className="fixed w-3/4 top-0 left-0 right-0 p-2 bg-white shadow-md z-20 px-6 py-4 flex">
           <h1 className="text-2xl font-semibold items-center justify-center text-green-600 select-none">
             Welcome to Admin Dashboard
           </h1>
