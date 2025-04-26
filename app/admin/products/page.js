@@ -37,6 +37,7 @@ const ManageProducts = () => {
       { id: 5, name: "Weight" },
       { id: 6, name: "Dimensions" },
       { id: 7, name: "Warranty" },
+      { id: 8, name: "State" },
     ];
 
     const [specRows, setSpecRows] = useState([{ name: "", value: "" }]);
