@@ -21,14 +21,20 @@ export default function Home() {
     async function fetchProducts() {
       setLoading(true);
 
-      const { data: featuredData } = await supabase
+      // Fetch all featured products (no limit)
+      const { data: featuredData, error: featuredError } = await supabase
         .from("products")
         .select("*")
-        .eq("featured", true)
-        .limit(4);
+        .eq("featured", true);
 
       let featuredList = featuredData || [];
 
+      if (featuredError) {
+        console.error("Error fetching featured products:", featuredError);
+        featuredList = [];
+      }
+
+      // If no featured products, fallback to latest 4 products
       if (featuredList.length === 0) {
         const { data: fallback } = await supabase
           .from("products")
@@ -54,8 +60,7 @@ export default function Home() {
         );
       }
 
-      const { data, count, error } = await query
-        .range(start, end);
+      const { data, count, error } = await query.range(start, end);
 
       if (error) {
         console.error("Error fetching products:", error);
@@ -117,7 +122,7 @@ export default function Home() {
       {featured && featured.length > 0 && (
         <section className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-10">
           <motion.h2
-            className="text-2xl md:text-3xl font-bold mb-6 text-indigo-800"
+            className="text-xl md:text-2xl font-bold mb-4 text-gray-800"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
