@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -23,6 +24,7 @@ export default function ProductDetails() {
   const [recommended, setRecommended] = useState([]);
   const [activeTab, setActiveTab] = useState("specifications");
   const imageGalleryRef = useRef(null);
+  const [touchStartX, setTouchStartX] = useState(null);
 
   useEffect(() => {
     if (!id) return;
@@ -114,6 +116,31 @@ export default function ProductDetails() {
     }
   };
 
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX === null) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchDiff = touchStartX - touchEndX;
+
+    if (touchDiff > 50) {
+      // Swipe left
+      const currentIndex = product.image_urls.indexOf(mainImage);
+      const nextIndex = (currentIndex + 1) % product.image_urls.length;
+      setMainImage(product.image_urls[nextIndex]);
+    } else if (touchDiff < -50) {
+      // Swipe right
+      const currentIndex = product.image_urls.indexOf(mainImage);
+      const prevIndex = (currentIndex - 1 + product.image_urls.length) % product.image_urls.length;
+      setMainImage(product.image_urls[prevIndex]);
+    }
+
+    setTouchStartX(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden">
@@ -137,21 +164,23 @@ export default function ProductDetails() {
                 className="relative rounded-2xl shadow-lg overflow-hidden bg-gradient-to-br from-gray-50 to-white border border-gray-200"
                 whileHover={{ scale: 1.03 }}
                 transition={{ duration: 0.3 }}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
               >
                 <Image
                   src={mainImage}
-                  width={700}
-                  height={700}
+                  width={500} // Reduced width
+                  height={500} // Reduced height
                   alt={product.name}
-                  className="object-contain w-full h-auto max-h-[500px]"
+                  className="object-contain w-full h-auto max-h-[400px]" // Adjusted max-h
                 />
               </motion.div>
 
-              {/* Image Gallery with Scroll Buttons */}
-              <div className="relative mt-4">
+              {/* Absolute positioned Image Gallery */}
+              <div className="absolute left-0 bottom-0 w-full">
                 <div
                   ref={imageGalleryRef}
-                  className="flex gap-3 overflow-x-auto scroll-smooth scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-gray-100 py-2"
+                  className="flex gap-2 overflow-x-auto scroll-smooth scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-gray-100 py-2"
                 >
                   {product.image_urls?.map((img, index) => (
                     <motion.div
@@ -161,8 +190,8 @@ export default function ProductDetails() {
                     >
                       <Image
                         src={img}
-                        width={120}
-                        height={120}
+                        width={80} // Reduced width
+                        height={80} // Reduced height
                         alt="Thumbnail"
                         onClick={() => setMainImage(img)}
                         className={`cursor-pointer rounded-xl border-4 transition-all duration-300 ${mainImage === img ? "border-blue-500 shadow-md" : "border-transparent hover:border-blue-300"}`}
