@@ -447,15 +447,39 @@ const ManageProducts = () => {
                     <h2 className="text-xl font-semibold text-gray-700 mb-4">
                         Specification
                     </h2>
-                    <textarea
-                        id="specification"
-                        name="specification"
-                        placeholder="Specification"
-                        value={newProduct.specification}
-                        onChange={handleChange}
-                        required
-                        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                    />
+                    <table className="w-full">
+                        <thead>
+                        <tr>
+                            <th className="text-left">Name</th>
+                            <th className="text-left">Value</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {specRows.map((row, idx) => (
+                            <tr key={idx}>
+                            <td>
+                                <input
+                                type="text"
+                                value={row.name}
+                                onChange={e => handleSpecChange(idx, "name", e.target.value)}
+                                className="border rounded px-2 py-1 w-full"
+                                placeholder="e.g. RAM"
+                                />
+                            </td>
+                            <td>
+                                <input
+                                type="text"
+                                value={row.value}
+                                onChange={e => handleSpecChange(idx, "value", e.target.value)}
+                                className="border rounded px-2 py-1 w-full"
+                                placeholder="e.g. 8GB"
+                                />
+                            </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                    <button type="button" onClick={addSpecRow} className="mt-2 text-blue-600">+ Add Row</button>
                 </section>
 
                 {/* Image Upload */}
