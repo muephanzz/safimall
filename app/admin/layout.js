@@ -76,7 +76,7 @@ return (
         </header>
 
         {/* Content container with padding top to avoid overlap */}
-        <div className="max-w-7xl mx-auto bg-white rounded-3xl shadow-xl p-6 pt-20 min-h-[80vh]">
+        <div className="max-w-7xl mx-auto overflow-x-hidden bg-white rounded-3xl shadow-xl p-6 pt-20 min-h-[80vh]">
           {children}
         </div>
       </main>
