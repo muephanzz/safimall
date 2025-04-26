@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import ProductCard from "@/components/ProductCard";
@@ -10,9 +10,9 @@ import { motion } from "framer-motion";
 export default function ProductsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { subcategory_id } = useParams(); // Get subcategory_id from params
 
   const category_id = searchParams.get("category_id");
-  const subcategory_id = searchParams.get("subcategory_id") || "";
   const brand_id = searchParams.get("brand") || "";
   const minRating = searchParams.get("rating") || "";
   const sort = searchParams.get("sort") || "default";

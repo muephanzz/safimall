@@ -69,9 +69,9 @@ export default function DesktopMenu() {
                     const isActive = subcategoryId === (sub.subcategory_id).toString();
 
                     return (
-                      <li key={sub.id}>
+                      <li key={sub.subcategory_id}>
                         <Link
-                          href={`/products/subcategory?subcategory_id=${sub.id}`}
+                          href={`/products/subcategory_id=${sub.subcategory_id}`}
                           className={`flex items-center gap-2 px-6 py-2 text-gray-700 font-medium rounded-lg hover:bg-gradient-to-r hover:from-indigo-100 hover:to-blue-100 hover:text-indigo-700 transition-all duration-200 ${
                             isActive ? "bg-indigo-100 text-indigo-700 font-bold" : ""
                           }`}
