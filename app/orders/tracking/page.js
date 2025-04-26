@@ -122,12 +122,12 @@ export default function OrderTracking() {
     const doc = new jsPDF({
       orientation: 'p',
       unit: 'mm',
-      format: [80, 297], // Standard thermal receipt width
+      format: [84, 297], // Standard thermal receipt width
       hotfixes: ["pxscaling"] // Better pixel scaling
     });
 
     const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 12;
+    const margin = 14;
     let yPos = margin;
 
     // Generate QR Code
@@ -145,7 +145,9 @@ export default function OrderTracking() {
     doc.setTextColor(100);
     doc.text("P.O Box 068-60100, Embu", pageWidth / 2, yPos, { align: "center" });
     yPos += 4;
-    doc.text("www.safimall.com, 0798229783", pageWidth / 2, yPos, { align: "center" });
+    doc.link("www.safimall.com", pageWidth / 2, yPos, { align: "center" });
+    yPos += 4;
+    doc.text("0798229783", pageWidth / 2, yPos, { align: "center" });
     yPos += 4;
     doc.text("VAT No: P051XXXXXXXX", pageWidth / 2, yPos, { align: "center" });
     yPos += 8;
@@ -181,10 +183,10 @@ export default function OrderTracking() {
     yPos += 6;
     doc.line(margin, yPos, pageWidth - margin, yPos);
     yPos += 6;
-    doc.text("SUBTOTAL:", pageWidth - margin - 37, yPos);
+    doc.text("SUBTOTAL:", pageWidth - margin - 30, yPos);
     doc.text(`Ksh ${order.amount.toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
-    doc.text("VAT (16%):", pageWidth - margin - 32, yPos);
+    doc.text("VAT (16%):", pageWidth - margin - 30, yPos);
     doc.text(`Ksh ${(order.amount * 0.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
     doc.setFont("helvetica", "bold");
