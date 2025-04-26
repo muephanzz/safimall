@@ -122,7 +122,7 @@ export default function OrderTracking() {
     const doc = new jsPDF({
       orientation: 'p',
       unit: 'mm',
-      format: [84, 297], // Standard thermal receipt width
+      format: [80, 297], // Standard thermal receipt width
       hotfixes: ["pxscaling"] // Better pixel scaling
     });
 
@@ -183,14 +183,14 @@ export default function OrderTracking() {
     yPos += 6;
     doc.line(margin, yPos, pageWidth - margin, yPos);
     yPos += 6;
-    doc.text("SUBTOTAL:", pageWidth - margin - 30, yPos);
+    doc.text("SUBTOTAL:", pageWidth - margin - 40, yPos);
     doc.text(`Ksh ${order.amount.toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
-    doc.text("VAT (16%):", pageWidth - margin - 30, yPos);
+    doc.text("VAT (16%):", pageWidth - margin - 40, yPos);
     doc.text(`Ksh ${(order.amount * 0.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
     doc.setFont("helvetica", "bold");
-    doc.text("TOTAL:", pageWidth - margin - 30, yPos);
+    doc.text("TOTAL:", pageWidth - margin - 40, yPos);
     doc.text(`Ksh ${(order.amount * 1.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 10;
 
