@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const slides = [
   {
-    src: "/carousel1.jpg",
+    src: "/carousel3.jpg",
     alt: "Modern living room",
   },
   {
@@ -58,12 +58,12 @@ export default function HeroCarousel() {
       <div
         className="
           relative
-          w-full h-16 p-1
-          sm:h-20 sm:p-2
-          md:w-full md:h-40 md:p-4
-          lg:w-[340px] lg:h-3/4 lg:p-6
-          xl:w-[400px] xl:h-[600px] xl:p-8
-          2xl:w-[480px] 2xl:h-[700px] 2xl:p-10
+          w-full h-16 p-0
+          sm:h-20 sm:p-1
+          md:w-full md:h-40 md:p-2
+          lg:w-[340px] lg:h-3/4 lg:p-4
+          xl:w-[400px] xl:h-[600px] xl:p-6
+          2xl:w-[480px] 2xl:h-[700px] 2xl:p-8
           transition-all duration-500
           rounded-md overflow-hidden shadow-2xl border-4 border-white
           bg-gray-200

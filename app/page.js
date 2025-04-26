@@ -70,7 +70,7 @@ export default function Home() {
   }, [currentPage]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-slate-100 text-gray-900 flex flex-col">
+    <div className="min-h-screen mt-0 sm:mt-0 lg:mt-0 bg-gradient-to-br from-white via-blue-50 to-slate-100 text-gray-900 flex flex-col">
       {/* HERO BANNER */}
       <section className="relative w-full bg-gradient-to-r from-blue-100 to-indigo-100 overflow-hidden shadow-sm">
         <div className="max-w-7xl mx-auto flex flex-col-reverse md:flex-row items-center justify-between gap-8 px-4 sm:px-8 py-12 md:py-20">
@@ -114,7 +114,7 @@ export default function Home() {
 
       {/* FEATURED PRODUCTS */}
       {featured && featured.length > 0 && (
-        <section className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-10">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-8">
           <motion.h2
             className="text-xl md:text-2xl font-bold mb-4 text-gray-800"
             initial={{ opacity: 0, y: 20 }}
@@ -123,6 +123,7 @@ export default function Home() {
           >
             Featured Products
           </motion.h2>
+          <section className="bg-white/80 backdrop-blur-md p-6 shadow-xl border border-gray-200">
           <motion.div
             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6"
             initial={{ opacity: 0 }}
@@ -141,6 +142,7 @@ export default function Home() {
             ))}
           </motion.div>
         </section>
+      </div>
       )}
 
       {/* MAIN PRODUCT GRID */}
