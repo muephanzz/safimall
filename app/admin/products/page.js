@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import AdminLayout from "@/components/AdminLayout";
 import withAdminAuth from "@/components/withAdminAuth";
@@ -38,6 +38,22 @@ const ManageProducts = () => {
       { id: 6, name: "Dimensions" },
       { id: 7, name: "Warranty" },
     ];
+
+    const [specRows, setSpecRows] = useState([{ name: "", value: "" }]);
+
+    // Handler to update specRows on input change
+    const handleSpecChange = (index, field, value) => {
+      setSpecRows((prevRows) =>
+        prevRows.map((row, i) =>
+          i === index ? { ...row, [field]: value } : row
+        )
+      );
+    };
+  
+    // Add new empty row
+    const addSpecRow = () => {
+      setSpecRows((prevRows) => [...prevRows, { name: "", value: "" }]);
+    };
     
     // Fetch data on mount
     useEffect(() => {

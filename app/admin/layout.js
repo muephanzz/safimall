@@ -2,6 +2,7 @@
 import { useState } from "react";
 import withAdminAuth from "@/components/withAdminAuth";
 import Link from "next/link";
+import { Menu, X } from "lucide-react";
 
 const AdminLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -15,9 +16,9 @@ return (
       {/* Hamburger Menu (Mobile) */}
       <button
         onClick={toggleSidebar}
-        className="lg:hidden fixed top-4 left-4 bg-gray-800 text-white p-2 rounded-md shadow-md z-50"
+        className="lg:hidden fixed top-4 left-4 text-black p-2 rounded-md shadow-md z-50"
       >
-        {isSidebarOpen ? "Close" : "Menu"}
+        {isSidebarOpen ? <X /> : <Menu />}
       </button>
 
       {/* Sidebar */}
@@ -68,7 +69,7 @@ return (
         } lg:translate-x-64`}
       >
         {/* Fixed welcome header */}
-        <header className="fixed top-0 left-0 right-0 lg:left-64 bg-white shadow-md z-40 px-6 py-4 flex items-center">
+        <header className="fixed w-full top-0 left-0 right-0 bg-white shadow-md z-20 px-6 py-4 flex items-center">
           <h1 className="text-2xl font-semibold text-center justify-center text-green-600 select-none">
             Welcome to Admin Dashboard
           </h1>
