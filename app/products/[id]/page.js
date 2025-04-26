@@ -142,7 +142,7 @@ export default function ProductDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-0 sm:px-0 lg:px-8">
       <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden">
         <div className="p-8">
           <div className="mb-6">
@@ -190,8 +190,8 @@ export default function ProductDetails() {
                     >
                       <Image
                         src={img}
-                        width={80} // Reduced width
-                        height={80} // Reduced height
+                        width={40} // Reduced width
+                        height={40} // Reduced height
                         alt="Thumbnail"
                         onClick={() => setMainImage(img)}
                         className={`cursor-pointer rounded-xl border-4 transition-all duration-300 ${mainImage === img ? "border-blue-500 shadow-md" : "border-transparent hover:border-blue-300"}`}
@@ -232,7 +232,7 @@ export default function ProductDetails() {
               </motion.div>
 
               <motion.div
-                className="flex flex-col sm:flex-row gap-4 pt-4"
+                className="flex flex-col gap-4 pt-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
@@ -261,7 +261,7 @@ export default function ProductDetails() {
                   disabled={checking}
                   className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-blue-400 to-indigo-400 text-white rounded-xl shadow-md hover:shadow-lg transition duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {checking ? "Processing..." : "{Buy Now"}
+                  Buy Now
                 </button>
               </motion.div>
             </div>
