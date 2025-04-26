@@ -103,7 +103,7 @@ export default function Home() {
             </motion.a>
           </div>
           <motion.div
-            className="flex-1 flex items-center justify-center"
+            className="flex-1 w-full flex items-center justify-center"
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.3 }}

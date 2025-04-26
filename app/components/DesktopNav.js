@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 
 export default function DesktopMenu() {
   const searchParams = useSearchParams();
-  const categoryId = searchParams.get("category_id");
+  const subcategoryId = searchParams.get("subcategory_id"); // track subcategory_id for active state
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState({});
 
@@ -38,41 +38,64 @@ export default function DesktopMenu() {
   return (
     <nav className="absolute mt-28 left-0 right-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 shadow-2xl hidden md:flex w-full px-6 text-[18px] font-semibold space-x-8 rounded-b-3xl border-b-2 border-blue-700">
       {categories?.map((category) => {
-        const isActive = categoryId === category.id.toString();
         const hasSubcategories = subcategories[category.id]?.length > 0;
 
         return (
           <div key={category.id} className="relative group">
-            <Link
-              href={`/products/category?category_id=${category.id}`}
-              className={`transition-all duration-300 px-4 py-2 rounded-xl flex items-center gap-2
-                ${isActive
-                  ? "bg-white/90 text-indigo-700 shadow font-bold border-b-4 border-indigo-700"
-                  : "text-white hover:bg-indigo-500/80 hover:text-yellow-200 hover:shadow-lg"
-                }
+            {/* Category name without link */}
+            <div
+              className={`transition-all duration-300 px-4 py-2 rounded-xl flex items-center gap-2 cursor-default select-none
+                text-white
               `}
             >
               {category.category}
               {hasSubcategories && (
-                <svg className="ml-1 w-4 h-4 text-yellow-300 group-hover:rotate-180 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M19 9l-7 7-7-7"/>
+                <svg
+                  className="ml-1 w-4 h-4 text-yellow-300 group-hover:rotate-180 transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M19 9l-7 7-7-7" />
                 </svg>
               )}
-            </Link>
+            </div>
 
             {hasSubcategories && (
               <div className="absolute left-0 top-full min-w-[220px] mt-3 bg-white/95 rounded-2xl shadow-2xl border border-indigo-100 opacity-0 group-hover:opacity-100 group-hover:visible invisible pointer-events-none group-hover:pointer-events-auto transition-all duration-300 backdrop-blur-xl">
                 <ul className="py-3">
-                  {subcategories[category.id].map((sub) => (
-                    <li key={sub.id}>
-                      <Link
-                        href={`/products/category?category_id=${category.id}/subcategory_id=${sub.id}`}
-                        className="block px-6 py-2 text-gray-700 font-medium rounded-lg hover:bg-gradient-to-r hover:from-indigo-100 hover:to-blue-100 hover:text-indigo-700 transition-all duration-200"
-                      >
-                        {sub.name}
-                      </Link>
-                    </li>
-                  ))}
+                  {subcategories[category.id].map((sub) => {
+                    const isActive = subcategoryId === (sub.subcategory_id).toString();
+
+                    return (
+                      <li key={sub.id}>
+                        <Link
+                          href={`/products/subcategory?subcategory_id=${sub.id}`}
+                          className={`flex items-center gap-2 px-6 py-2 text-gray-700 font-medium rounded-lg hover:bg-gradient-to-r hover:from-indigo-100 hover:to-blue-100 hover:text-indigo-700 transition-all duration-200 ${
+                            isActive ? "bg-indigo-100 text-indigo-700 font-bold" : ""
+                          }`}
+                        >
+                          {/* Icon for subcategory */}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                            className="w-5 h-5 text-indigo-600"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          {sub.name}
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}

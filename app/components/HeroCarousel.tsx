@@ -53,19 +53,19 @@ export default function HeroCarousel() {
   };
 
   return (
-    <div className="relative w-full flex items-center justify-center select-none">
-      {/* Slide */}
+    <div className="relative mt-5 w-full flex items-center justify-center select-none">
+      {/* Slide container with responsive width, height, and padding */}
       <div
         className="
           relative
-          w-[320px] h-[200px]
-          sm:w-[480px] sm:h-[300px]
-          md:w-[600px] md:h-[320px]
-          lg:w-[340px] lg:h-[520px]
-          xl:w-[400px] xl:h-[600px]
-          2xl:w-[480px] 2xl:h-[700px]
+          w-full h-16 p-1
+          sm:h-20 sm:p-2
+          md:w-full md:h-40 md:p-4
+          lg:w-[340px] lg:h-3/4 lg:p-6
+          xl:w-[400px] xl:h-[600px] xl:p-8
+          2xl:w-[480px] 2xl:h-[700px] 2xl:p-10
           transition-all duration-500
-          rounded-3xl overflow-hidden shadow-2xl border-4 border-white
+          rounded-md overflow-hidden shadow-2xl border-4 border-white
           bg-gray-200
         "
       >
@@ -84,32 +84,19 @@ export default function HeroCarousel() {
               fill
               className="object-cover"
               sizes="
+                (min-width: 1536px) 480px,
                 (min-width: 1280px) 400px,
                 (min-width: 1024px) 340px,
                 (min-width: 768px) 600px,
                 (min-width: 640px) 480px,
-                320px
+                100vw
               "
               priority
             />
           </motion.div>
         </AnimatePresence>
       </div>
-      {/* Controls */}
-      <button
-        aria-label="Previous slide"
-        onClick={prevSlide}
-        className="absolute left-2 md:left-0 z-10 p-2 rounded-full bg-white/80 hover:bg-white transition shadow-lg"
-      >
-        <ChevronLeft className="w-7 h-7 text-indigo-700" />
-      </button>
-      <button
-        aria-label="Next slide"
-        onClick={nextSlide}
-        className="absolute right-2 md:right-0 z-10 p-2 rounded-full bg-white/80 hover:bg-white transition shadow-lg"
-      >
-        <ChevronRight className="w-7 h-7 text-indigo-700" />
-      </button>
+
       {/* Indicators */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
         {slides.map((_, idx) => (

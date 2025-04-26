@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import ProductCard from "@/components/ProductCard";
 import Pagination from "@/components/Pagination";
@@ -27,6 +27,8 @@ export default function ProductsPage() {
   const [brands, setBrands] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false); // State to manage filter visibility
+  const filterRef = useRef(null); // Ref for the filter section
 
   const productsPerPage = 8;
   const currentPage = page;
@@ -153,6 +155,27 @@ export default function ProductsPage() {
     updateSearchParams({ rating: e.target.value || null, page: 1 });
   };
 
+  // Function to toggle filter visibility
+  const toggleFilterVisibility = () => {
+    setIsFilterOpen(!isFilterOpen);
+  };
+
+  // Close the filter when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setIsFilterOpen(false);
+      }
+    }
+
+    // Bind the event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // Unbind the event listener on clean up
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [filterRef]);
+
   if (!category_id)
     return (
       <div className="text-center text-lg text-gray-700 py-20">
@@ -175,8 +198,23 @@ export default function ProductsPage() {
         </h1>
       </motion.div>
 
+      {/* Hamburger Menu for Filters (Visible on smaller screens) */}
+      <div className="sm:hidden flex justify-end mb-4">
+        <button
+          onClick={toggleFilterVisibility}
+          className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded shadow"
+        >
+          {isFilterOpen ? "Close Filters" : "Open Filters"}
+        </button>
+      </div>
+
       {/* Filters */}
-      <div className="flex flex-wrap justify-between items-center gap-4 mb-8 px-2 md:px-0">
+      <div
+        className={`flex flex-wrap justify-between items-center gap-4 mb-8 px-2 md:px-0 ${
+          isFilterOpen ? "block" : "hidden"
+        } sm:flex`}
+        ref={filterRef}
+      >
         <form
           onSubmit={handleFilterSubmit}
           className="flex flex-wrap items-center gap-3 bg-white shadow-md rounded-lg p-4"

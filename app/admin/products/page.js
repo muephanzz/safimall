@@ -6,632 +6,656 @@ import AdminLayout from "@/components/AdminLayout";
 import withAdminAuth from "@/components/withAdminAuth";
 import toast from "react-hot-toast";
 import {
-  PlusCircle,
-  XCircle,
-  Edit,
-  Trash2,
-  ImagePlus,
-  Loader2,
+    XCircle,
+    Edit,
+    Trash2,
+    ImagePlus,
+    Loader2,
 } from "lucide-react";
 
 const ManageProducts = () => {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
-  const [attributes, setAttributes] = useState([]);
-  const [selectedSubcategory, setSelectedSubcategory] = useState("");
-  const [productAttributes, setProductAttributes] = useState([]);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    phone: "",
-    description: "",
-    specification: "",
-    stock: "",
-    price: "",
-    image_urls: [],
-    category_id: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [files, setFiles] = useState([]);
-  const [previews, setPreviews] = useState([]);
-  const [uploading, setUploading] = useState(false);
-
-  // Fetch data on mount
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-    fetchSubcategories();
-    fetchAttributes();
-  }, []);
-
-  // Fetch subcategories
-  const fetchSubcategories = async () => {
-    const { data, error } = await supabase.from("subcategories").select("*");
-    if (error) {
-      console.error("Error fetching subcategories:", error);
-      toast.error("Failed to load subcategories.");
-    } else {
-      setSubcategories(data);
-    }
-  };
-
-  // Fetch attributes
-  const fetchAttributes = async () => {
-    const { data, error } = await supabase.from("attributes").select("*");
-    if (error) {
-      console.error("Error fetching attributes:", error);
-      toast.error("Failed to load attributes.");
-    } else {
-      setAttributes(data);
-    }
-  };
-
-  // Fetch products
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("products")
-      .select("*, categories(category)");
-    if (error) {
-      console.error("Error fetching products:", error);
-      toast.error("Failed to load products.");
-    } else {
-      setProducts(data);
-    }
-    setLoading(false);
-  }, []);
-
-  // Fetch categories
-  const fetchCategories = async () => {
-    const { data, error } = await supabase.from("categories").select("*");
-    if (error) {
-      console.error("Error fetching categories:", error);
-      toast.error("Failed to load categories.");
-    } else {
-      setCategories(data);
-    }
-  };
-
-  // Handle input change
-  const handleChange = (e) => {
-    setNewProduct((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  // Remove image from preview
-  const removeImage = (index) => {
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // Handle file change for image upload
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    setFiles(selectedFiles);
-
-    const filePreviews = selectedFiles.map((file) => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(file);
-      });
+    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [subcategories, setSubcategories] = useState([]);
+    const [filteredSubcategories, setFilteredSubcategories] = useState([]);
+    const [editingProduct, setEditingProduct] = useState(null);
+    const [newProduct, setNewProduct] = useState({
+        name: "",
+        phone: "",
+        description: "",
+        specification: "",
+        stock: "",
+        price: "",
+        image_urls: [],
+        category_id: "",
+        subcategory_id: "",
+        attributes: {},
     });
+    const [loading, setLoading] = useState(false);
+    const [files, setFiles] = useState([]);
+    const [previews, setPreviews] = useState([]);
+    const [uploading, setUploading] = useState(false);
+    const defaultAttributes = [
+      { id: 1, name: "Color" },
+      { id: 2, name: "Size" },
+      { id: 3, name: "Material" },
+      { id: 4, name: "Brand" },
+      { id: 5, name: "Weight" },
+      { id: 6, name: "Dimensions" },
+      { id: 7, name: "Warranty" },
+    ];
+    
+    // Fetch data on mount
+    useEffect(() => {
+        fetchProducts();
+        fetchCategories();
+        fetchSubcategories();
+    }, []);
 
-    Promise.all(filePreviews).then(setPreviews);
-  };
+    useEffect(() => {
+        filterSubcategories(newProduct.category_id);
+    }, [newProduct.category_id]);
 
-  // Sanitize file name
-  const sanitizeFileName = (name) => name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    // Fetch subcategories
+    const fetchSubcategories = async (categoryId = null) => {
+        let query = supabase.from("subcategories").select("*");
+        if (categoryId) {
+            query = query.eq("category_id", categoryId);
+        }
+        const { data, error } = await query;
 
-  // Upload images to Supabase storage
-  const uploadImages = async () => {
-    const imageUrls = await Promise.all(
-      files.map(async (file) => {
-        const fileName = `${Date.now()}-${sanitizeFileName(file.name)}`;
-        const { error: uploadError } = await supabase.storage
-          .from("products")
-          .upload(`images/${fileName}`, file, {
-            cacheControl: "3600",
-            upsert: false,
-          });
+        if (error) {
+            console.error("Error fetching subcategories:", error);
+            toast.error("Failed to load subcategories.");
+        } else {
+            setSubcategories(data);
+            setFilteredSubcategories(data);
+        }
+    };
 
-        if (uploadError) throw new Error(uploadError.message);
+    const filterSubcategories = (categoryId) => {
+        if (!categoryId) {
+            setFilteredSubcategories(subcategories);
+        } else {
+            const filtered = subcategories.filter((sub) => sub.category_id === categoryId);
+            setFilteredSubcategories(filtered);
+        }
+    };
 
-        const { data: urlData, error: urlError } = supabase.storage
-          .from("products")
-          .getPublicUrl(`images/${fileName}`);
-
-        if (urlError) throw new Error(urlError.message);
-
-        return urlData.publicUrl;
-      })
-    );
-
-    return imageUrls;
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const { name, stock, price, category_id } = newProduct;
-
-    if (!name || !stock || !price || !category_id) {
-      toast.error("Please fill in all required fields!");
-      return;
-    }
-
-    setUploading(true);
-    try {
-      let imageUrls = editingProduct?.image_urls || [];
-
-      if (files.length > 0) {
-        imageUrls = await uploadImages();
-      }
-
-      const productData = {
-        ...newProduct,
-        price: parseFloat(newProduct.price),
-        image_urls: imageUrls,
-        subcategory_id: selectedSubcategory || null,
-      };
-
-      let productId;
-
-      if (editingProduct) {
-        const { error } = await supabase
-          .from("products")
-          .update(productData)
-          .eq("product_id", editingProduct.product_id);
-
-        if (error) throw new Error(error.message);
-
-        productId = editingProduct.product_id;
-        toast.success("Product updated successfully!");
-      } else {
+    // Fetch products
+    const fetchProducts = useCallback(async () => {
+        setLoading(true);
         const { data, error } = await supabase
-          .from("products")
-          .insert([productData])
-          .select("product_id")
-          .single();
+          .from('products')
+          .select('*, categories!products_category_id_fkey(*)');
+          
+        if (error) {
+            console.error("Error fetching products:", error);
+            toast.error("Failed to load products.");
+        } else {
+            setProducts(data);
+        }
+        setLoading(false);
+    }, []);
 
-        if (error) throw new Error(error.message);
+    // Fetch categories
+    const fetchCategories = async () => {
+        const { data, error } = await supabase.from("categories").select("*");
+        if (error) {
+            console.error("Error fetching categories:", error);
+            toast.error("Failed to load categories.");
+        } else {
+            setCategories(data);
+        }
+    };
 
-        productId = data.product_id;
-        toast.success("Product added successfully!");
-      }
-
-      await supabase
-        .from("product_attributes")
-        .delete()
-        .eq("product_id", productId);
-
-      if (productAttributes.length > 0) {
-        const attrInsert = productAttributes.map((attr) => ({
-          product_id: productId,
-          attribute_id: attr.attribute_id,
-          value: attr.value,
-        }));
-        const { error: attrError } = await supabase
-          .from("product_attributes")
-          .insert(attrInsert);
-        if (attrError) throw new Error(attrError.message);
-      }
-
-      fetchProducts();
-      resetForm();
-    } catch (error) {
-      console.error("Error saving product:", error);
-      toast.error("Operation failed: " + error.message);
-    } finally {
-      setUploading(false);
-    }
+    // Generic handle input change
+    const handleChange = (e) => {
+      const { name, value } = e.target;
+      setNewProduct(prev => ({
+          ...prev,
+          [name]: value,
+      }));
   };
 
-  // Handle product deletion
-  const handleDelete = async (productId) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    // Handle Attribute Change
+    const handleAttributeChange = (attrName, value) => {
+      setNewProduct(prev => ({
+        ...prev,
+        attributes: {
+          ...prev.attributes,
+          [attrName]: value,
+        },
+      }));
+    };
+  
+    // Remove image from preview
+    const removeImage = (index) => {
+        setPreviews((prev) => prev.filter((_, i) => i !== index));
+        setFiles((prev) => prev.filter((_, i) => i !== index));
+    };
 
-    const { error } = await supabase
-      .from("products")
-      .delete()
-      .eq("product_id", productId);
+    // Handle file change for image upload
+    const handleFileChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        setFiles(selectedFiles);
 
-    if (error) {
-      console.error("Error deleting product:", error.message);
-      toast.error("Error deleting product: " + error.message);
-    } else {
-      toast.success("Product deleted successfully!");
-      fetchProducts();
-    }
-  };
+        const filePreviews = selectedFiles.map((file) => {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(file);
+            });
+        });
 
-  // Handle editing a product
-  const handleEdit = (product) => {
-    setEditingProduct(product);
-    setNewProduct({ ...product });
-    setFiles([]);
-    setPreviews(product.image_urls || []);
-    setSelectedSubcategory(product.subcategory_id || "");
-    setProductAttributes(
-      attributes.map((attr) => ({
-        attribute_id: attr.id,
-        value: product[attr.name] || "",
-      }))
-    );
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+        Promise.all(filePreviews).then(setPreviews);
+    };
 
-  // Reset the form
-  const resetForm = () => {
-    setNewProduct({
-      name: "",
-      phone: "",
-      description: "",
-      specification: "",
-      stock: "",
-      price: "",
-      image_urls: [],
-      category_id: "",
-    });
-    setFiles([]);
-    setPreviews([]);
-    setSelectedSubcategory("");
-    setProductAttributes([]);
-    setEditingProduct(null);
-  };
+    // Sanitize file name
+    const sanitizeFileName = (name) => name.replace(/[^a-zA-Z0-9._-]/g, "_");
 
-  return (
-    <AdminLayout>
-      <h1 className="text-3xl font-extrabold text-gray-800 mb-6">
-        {editingProduct ? "Edit Product" : "Add New Product"}
-      </h1>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Product Details */}
-        <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">
-            Product Details
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="name" className="block text-sm font-medium">
-                Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Product Name"
-                value={newProduct.name}
-                onChange={handleChange}
-                required
-                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="category" className="block text-sm font-medium">
-                Category
-              </label>
-              <select
-                id="category"
-                name="category_id"
-                onChange={handleChange}
-                value={newProduct.category_id}
-                required
-                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.category}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="subcategory" className="block text-sm font-medium">
-                Subcategory
-              </label>
-              <select
-                id="subcategory"
-                name="subcategory_id"
-                onChange={handleChange}
-                value={selectedSubcategory}
-                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              >
-                <option value="">Select Subcategory</option>
-                {subcategories.map((sub) => (
-                  <option key={sub.id} value={sub.id}>
-                    {sub.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="stock" className="block text-sm font-medium">
-                Stock
-              </label>
-              <input
-                type="number"
-                id="stock"
-                name="stock"
-                min={1}
-                placeholder="Stock"
-                value={newProduct.stock}
-                onChange={handleChange}
-                required
-                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="phone" className="block text-sm font-medium">
-                Phone
-              </label>
-              <input
-                type="text"
-                id="phone"
-                name="phone"
-                maxLength={10}
-                placeholder="Seller's Phone Number"
-                value={newProduct.phone}
-                onChange={handleChange}
-                required
-                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="price" className="block text-sm font-medium">
-                Price
-              </label>
-              <input
-                type="number"
-                id="price"
-                name="price"
-                min={1}
-                placeholder="Price"
-                value={newProduct.price}
-                onChange={handleChange}
-                required
-                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Product Attributes */}
-        <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">
-            Product Attributes
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {attributes.map((attr) => (
-              <div key={attr.id} className="space-y-2">
-                <label
-                  htmlFor={`attribute-${attr.id}`}
-                  className="block text-sm font-medium"
-                >
-                  {attr.name}
-                </label>
-                <input
-                  type="text"
-                  id={`attribute-${attr.id}`}
-                  placeholder={`Enter ${attr.name}`}
-                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setProductAttributes((prev) => {
-                      const existing = prev.find(
-                        (a) => a.attribute_id === attr.id
-                      );
-                      if (existing) {
-                        return prev.map((a) =>
-                          a.attribute_id === attr.id ? { ...a, value } : a
-                        );
-                      } else {
-                        return [...prev, { attribute_id: attr.id, value }];
-                      }
+    // Upload images to Supabase storage
+    const uploadImages = async () => {
+        const imageUrls = await Promise.all(
+            files.map(async (file) => {
+                const fileName = `${Date.now()}-${sanitizeFileName(file.name)}`;
+                const { error: uploadError } = await supabase.storage
+                    .from("products")
+                    .upload(`images/${fileName}`, file, {
+                        cacheControl: "3600",
+                        upsert: false,
                     });
-                  }}
-                  value={
-                    productAttributes.find((a) => a.attribute_id === attr.id)
-                      ?.value || ""
-                  }
-                />
-              </div>
-            ))}
-          </div>
-        </section>
 
-        {/* Product Description */}
-        <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">
-            Description
-          </h2>
-          <textarea
-            id="description"
-            name="description"
-            placeholder="Description"
-            value={newProduct.description}
-            onChange={handleChange}
-            required
-            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          />
-        </section>
+                if (uploadError) throw new Error(uploadError.message);
 
-        {/* Product Specification */}
-        <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">
-            Specification
-          </h2>
-          <textarea
-            id="specification"
-            name="specification"
-            placeholder="Specification"
-            value={newProduct.specification}
-            onChange={handleChange}
-            required
-            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          />
-        </section>
+                const { data: urlData, error: urlError } = supabase.storage
+                    .from("products")
+                    .getPublicUrl(`images/${fileName}`);
 
-        {/* Image Upload */}
-        <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2">
-            Images
-            <label
-              htmlFor="imageUpload"
-              className="cursor-pointer bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700 transition"
-            >
-              <ImagePlus size={18} className="inline-block mr-1" />
-              Add Images
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileChange}
-              className="hidden"
-              id="imageUpload"
-            />
-          </h2>
+                if (urlError) throw new Error(urlError.message);
 
-          {previews.length > 0 && (
-            <div className="flex flex-wrap gap-4 mt-4">
-              {previews.map((src, i) => (
-                <div key={i} className="relative w-32 h-32">
-                  <img
-                    src={src}
-                    alt="Preview"
-                    className="w-full h-full object-cover rounded-lg border border-gray-300 shadow-sm"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(i)}
-                    className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-2 py-1 hover:bg-red-700 transition shadow-md"
-                  >
-                    <XCircle size={16} className="inline-block" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                return urlData.publicUrl;
+            })
+        );
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={uploading}
-          className="flex items-center justify-center bg-green-600 text-white p-3 rounded-md hover:bg-green-700 transition focus:outline-none focus:ring-2 focus:ring-green-500 font-semibold shadow-sm"
-        >
-          {uploading ? (
-            <>
-              <Loader2 size={20} className="mr-2 animate-spin" />
-              Uploading...
-            </>
-          ) : (
-            <>
-              {editingProduct ? (
-                <>
-                  <Edit size={20} className="mr-2" />
-                  Update Product
-                </>
-              ) : (
-                <>
-                  <PlusCircle size={20} className="mr-2" />
-                  Add Product
-                </>
-              )}
-            </>
-          )}
-        </button>
-      </form>
+        return imageUrls;
+    };
 
-      {/* Product List */}
-      <section className="mt-12">
-        <h2 className="text-2xl font-bold mb-4">Products</h2>
-        {loading ? (
-          <div className="flex justify-center items-center min-h-[30vh]">
-            <Loader2 className="animate-spin w-8 h-8 text-blue-500" />
-          </div>
-        ) : products.length === 0 ? (
-          <p className="text-gray-600">No products found.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <div
-                key={product.product_id}
-                className="bg-white rounded-2xl shadow-md p-5 border border-gray-200"
-              >
-                <h3 className="text-xl font-semibold mb-2 text-gray-800">
-                  {product.name}
-                </h3>
-                <div className="mb-3">
-                  <strong className="block mb-1">Category:</strong>
-                  <span className="text-gray-700">
-                    {product.categories?.category || "N/A"}
-                  </span>
-                </div>
-                <div className="mb-3">
-                  <strong className="block mb-1">Phone:</strong>
-                  <span className="text-gray-700">{product.phone || "N/A"}</span>
-                </div>
-                <div className="mb-3">
-                  <strong className="block mb-1">Description:</strong>
-                  <span className="text-gray-700">{product.description || "N/A"}</span>
-                </div>
-                <div className="mb-3">
-                  <strong className="block mb-1">Specification:</strong>
-                  <span className="text-gray-700">
-                    {product.specification || "N/A"}
-                  </span>
-                </div>
-                <div className="mb-3">
-                  <strong className="block mb-1">Stock:</strong>
-                  <span className="text-gray-700">{product.stock || "N/A"}</span>
-                </div>
-                <div className="mb-3">
-                  <strong className="block mb-1">Price:</strong>
-                  <span className="text-gray-700">KES {product.price || "N/A"}</span>
-                </div>
-                {product.image_urls?.length > 0 && (
-                  <div className="mb-3">
-                    <strong className="block mb-1">Images:</strong>
-                    <div className="flex flex-wrap gap-2">
-                      {product.image_urls.map((url, idx) => (
-                        <img
-                          key={idx}
-                          src={url}
-                          alt="Product"
-                          className="w-20 h-20 object-cover rounded-lg border border-gray-300 shadow-sm"
-                        />
-                      ))}
+    // Handle form submission
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+  
+      const { name, stock, price, category_id } = newProduct;
+  
+      if (!name || !stock || !price || !category_id) {
+          toast.error("Please fill in all required fields!");
+          return;
+      }
+  
+      setUploading(true);
+      try {
+          let imageUrls = editingProduct?.image_urls || [];
+  
+          if (files.length > 0) {
+              imageUrls = await uploadImages();
+          }
+  
+          const productData = {
+            ...newProduct,
+            price: parseFloat(newProduct.price),
+            stock: parseInt(newProduct.stock, 10),
+            image_urls: imageUrls,
+          };
+          
+          let productId;
+          
+          if (editingProduct) {
+              const { error } = await supabase
+                  .from("products")
+                  .update(productData) // <--- Sending the entire productData (including attributes)
+                  .eq("product_id", editingProduct.product_id);
+          
+              if (error) throw new Error(error.message);
+          
+              productId = editingProduct.product_id;
+              toast.success("Product updated successfully!");
+          } else {
+              const { data, error } = await supabase
+                  .from("products")
+                  .insert([productData]) // <--- Sending the entire productData (including attributes)
+                  .select("product_id")
+                  .single();
+          
+              if (error) throw new Error(error.message);
+          
+              productId = data.product_id;
+              toast.success("Product added successfully!");
+          }
+          
+  
+          if (editingProduct) {
+              const { error } = await supabase
+                  .from("products")
+                  .update(productData)
+                  .eq("product_id", editingProduct.product_id);
+  
+              if (error) throw new Error(error.message);
+  
+              productId = editingProduct.product_id;
+              toast.success("Product updated successfully!");
+          } else {
+              const { data, error } = await supabase
+                  .from("products")
+                  .insert([productData])
+                  .select("product_id")
+                  .single();
+  
+              if (error) throw new Error(error.message);
+  
+              productId = data.product_id;
+              toast.success("Product added successfully!");
+          }
+  
+          fetchProducts();
+          resetForm();
+      } catch (error) {
+          console.error("Error saving product:", error);
+          toast.error("Operation failed: " + error.message);
+      } finally {
+          setUploading(false);
+      }
+  };
+  
+    // Handle product deletion
+    const handleDelete = async (productId) => {
+        if (!window.confirm("Are you sure you want to delete this product?")) return;
+
+        const { error } = await supabase
+            .from("products")
+            .delete()
+            .eq("product_id", productId);
+
+        if (error) {
+            console.error("Error deleting product:", error.message);
+            toast.error("Error deleting product: " + error.message);
+        } else {
+            toast.success("Product deleted successfully!");
+            fetchProducts();
+        }
+    };
+
+    // Handle editing a product
+    const handleEdit = (product) => {
+      setEditingProduct(product);
+      setNewProduct({
+        ...product,
+        category_id: product.categories?.category_id || "",    // add these
+        subcategory_id: product.subcategories?.subcategory_id || "", //add these
+      });
+      setFiles([]);
+      setPreviews(product.image_urls || []);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+    
+    // Reset the form
+    const resetForm = () => {
+        setNewProduct({
+            name: "",
+            phone: "",
+            description: "",
+            specification: "",
+            stock: "",
+            price: "",
+            image_urls: [],
+            category_id: "",
+            subcategory_id: "",
+            attributes: {},
+        });
+        setFiles([]);
+        setPreviews([]);
+        setEditingProduct(null);
+    };
+
+    return (
+        <AdminLayout>
+            <h1 className="text-3xl font-extrabold text-gray-800 mb-6">
+                {editingProduct ? "Edit Product" : "Add New Product"}
+            </h1>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Product Details */}
+                <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
+                    <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                        Product Details
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                            <label htmlFor="name" className="block text-sm font-medium">
+                                Name
+                            </label>
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                placeholder="Product Name"
+                                value={newProduct.name}
+                                onChange={handleChange}
+                                required
+                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="category" className="block text-sm font-medium">
+                                Category
+                            </label>
+                            <select
+                              name="category_id"
+                              onChange={handleChange}
+                              value={newProduct.category_id}
+                            >
+                              <option value="">Select Category</option>
+                              {categories.map(cat => (
+                                <option key={cat.id} value={cat.id}>{cat.category}</option>
+                              ))}
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="subcategory" className="block text-sm font-medium">
+                                Subcategory
+                            </label>
+                            <select
+                                id="subcategory"
+                                name="subcategory_id"
+                                onChange={handleChange}
+                                value={newProduct.subcategory_id}
+                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            >
+                                <option value="">Select Subcategory</option>
+                                {filteredSubcategories.map((sub) => (
+                                    <option key={sub.subcategory_id} value={sub.subcategory_id}>
+                                        {sub.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="stock" className="block text-sm font-medium">
+                                Stock
+                            </label>
+                            <input
+                                type="number"
+                                id="stock"
+                                name="stock"
+                                min={1}
+                                placeholder="Stock"
+                                value={newProduct.stock}
+                                onChange={handleChange}
+                                required
+                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="phone" className="block text-sm font-medium">
+                                Phone
+                            </label>
+                            <input
+                                type="text"
+                                id="phone"
+                                name="phone"
+                                maxLength={10}
+                                placeholder="Seller's Phone Number"
+                                value={newProduct.phone}
+                                onChange={handleChange}
+                                required
+                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="price" className="block text-sm font-medium">
+                                Price
+                            </label>
+                            <input
+                                type="number"
+                                id="price"
+                                name="price"
+                                min={1}
+                                placeholder="Price"
+                                value={newProduct.price}
+                                onChange={handleChange}
+                                required
+                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            />
+                        </div>
                     </div>
+                </section>
+
+                {/* Product Attributes */}
+                <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
+                  <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                    Product Attributes
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {defaultAttributes.map((attr) => (
+                      <div key={attr.id} className="space-y-2">
+                        <label
+                          htmlFor={`attribute-${attr.id}`}
+                          className="block text-sm font-medium"
+                        >
+                          {attr.name}
+                        </label>
+                        <input
+                          type="text"
+                          id={`attribute-${attr.id}`}
+                          placeholder={`Enter ${attr.name}`}
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                          onChange={(e) => handleAttributeChange(attr.name, e.target.value)}
+                          value={newProduct.attributes[attr.name] || ""}
+                        />
+                      </div>
+                    ))}
                   </div>
-                )}
-                <div className="flex justify-end gap-4 mt-4">
-                  <button
-                    onClick={() => handleEdit(product)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <Edit size={16} className="inline-block mr-1" />
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(product.product_id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition focus:outline-none focus:ring-2 focus:ring-red-500"
-                  >
-                    <Trash2 size={16} className="inline-block mr-1" />
-                    Delete
-                  </button>
+                </section>
+
+
+                {/* Product Description */}
+                <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
+                    <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                        Description
+                    </h2>
+                    <textarea
+                        id="description"
+                        name="description"
+                        placeholder="Description"
+                        value={newProduct.description}
+                        onChange={handleChange}
+                        required
+                        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                    />
+                </section>
+
+                {/* Product Specification */}
+                <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
+                    <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                        Specification
+                    </h2>
+                    <textarea
+                        id="specification"
+                        name="specification"
+                        placeholder="Specification"
+                        value={newProduct.specification}
+                        onChange={handleChange}
+                        required
+                        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                    />
+                </section>
+
+                {/* Image Upload */}
+                <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
+                    <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                        Image Upload
+                    </h2>
+                    <div className="flex items-center justify-center w-full">
+                        <label
+                            htmlFor="dropzone-file"
+                            className="flex flex-col items-center justify-center w-full h-64 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-blue-600 dark:hover:border-blue-500 dark:hover:bg-bray-800"
+                        >
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                <ImagePlus className="w-8 h-8 mb-4 text-blue-500 dark:text-blue-400" />
+                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="font-semibold">Click to upload</span> or drag
+                                    and drop
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    SVG, PNG, JPG or GIF (MAX. 800x400px)
+                                </p>
+                            </div>
+                            <input
+                                id="dropzone-file"
+                                type="file"
+                                className="hidden"
+                                multiple
+                                onChange={handleFileChange}
+                            />
+                        </label>
+                    </div>
+
+                    {/* Image Preview */}
+                    {previews.length > 0 && (
+                        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {previews.map((preview, index) => (
+                                <div key={index} className="relative">
+                                    <img
+                                        src={preview}
+                                        alt={`Uploaded preview ${index + 1}`}
+                                        className="rounded-md"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeImage(index)}
+                                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700 transition duration-200"
+                                    >
+                                        <XCircle size={20} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </section>
+
+                {/* Action Buttons */}
+                <div className="flex justify-between">
+                    <button
+                        type="submit"
+                        disabled={uploading}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50"
+                    >
+                        {uploading ? (
+                            <>
+                                Saving <Loader2 className="ml-2 inline-block animate-spin" size={16} />
+                            </>
+                        ) : (
+                            "Save Product"
+                        )}
+                    </button>
+                    {editingProduct && (
+                        <button
+                            type="button"
+                            onClick={resetForm}
+                            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        >
+                            Cancel Edit
+                        </button>
+                    )}
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-    </AdminLayout>
-  );
+            </form>
+
+            {/* Product List */}
+            <section className="mt-12">
+                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                    Product List
+                </h2>
+                {loading ? (
+                    <div className="flex justify-center">
+                        <Loader2 className="animate-spin" />
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full leading-normal">
+                            <thead>
+                                <tr>
+                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        Name
+                                    </th>
+                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        Category
+                                    </th>
+                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        Subcategory
+                                    </th>
+                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        Stock
+                                    </th>
+                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        Price
+                                    </th>
+                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {products.map((product) => (
+                                    <tr key={product.product_id}>
+                                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                            <p className="text-gray-900 whitespace-no-wrap">
+                                                {product.name}
+                                            </p>
+                                        </td>
+                                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                            <p className="text-gray-900 whitespace-no-wrap">
+                                                {product.categories?.category}
+                                            </p>
+                                        </td>
+                                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                            <p className="text-gray-900 whitespace-no-wrap">
+                                                {product.categories?.subcategories?.name}
+                                            </p>
+                                        </td>
+                                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                            <p className="text-gray-900 whitespace-no-wrap">
+                                                {product.stock}
+                                            </p>
+                                        </td>
+                                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                            <p className="text-gray-900 whitespace-no-wrap">
+                                                {product.price}
+                                            </p>
+                                        </td>
+                                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                            <div className="flex space-x-2">
+                                                <button
+                                                    onClick={() => handleEdit(product)}
+                                                    className="text-blue-500 hover:text-blue-700"
+                                                >
+                                                    <Edit className="inline-block" size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(product.product_id)}
+                                                    className="text-red-500 hover:text-red-700"
+                                                >
+                                                    <Trash2 className="inline-block" size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </section>
+        </AdminLayout>
+    );
 };
 
 export default withAdminAuth(ManageProducts);
