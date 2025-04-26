@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const slides = [
   {
@@ -41,16 +40,6 @@ export default function HeroCarousel() {
       resetTimeout();
     };
   }, [current]);
-
-  const nextSlide = () => {
-    resetTimeout();
-    setCurrent((c) => (c + 1) % slides.length);
-  };
-
-  const prevSlide = () => {
-    resetTimeout();
-    setCurrent((c) => (c - 1 + slides.length) % slides.length);
-  };
 
   return (
     <div className="relative mt-5 w-full flex items-center justify-center select-none">
@@ -95,23 +84,6 @@ export default function HeroCarousel() {
             />
           </motion.div>
         </AnimatePresence>
-      </div>
-
-      {/* Indicators */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-        {slides.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => {
-              resetTimeout();
-              setCurrent(idx);
-            }}
-            className={`w-2.5 h-2.5 rounded-full transition-all ${
-              current === idx ? "bg-indigo-600 scale-125" : "bg-white/60"
-            }`}
-            aria-label={`Go to slide ${idx + 1}`}
-          />
-        ))}
       </div>
     </div>
   );
