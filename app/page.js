@@ -123,7 +123,7 @@ export default function Home() {
           >
             Featured Products
           </motion.h2>
-          <section className="bg-white/80 backdrop-blur-md p-6 shadow-xl border border-gray-200">
+          <section className="bg-white/80 backdrop-blur-md p-6 sm:p-0 lg:p-6 shadow-xl border border-gray-200">
           <motion.div
             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6"
             initial={{ opacity: 0 }}

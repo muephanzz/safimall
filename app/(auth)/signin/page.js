@@ -77,7 +77,7 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-white to-gray-200 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-white to-gray-200 p-6 sm:p-0 lg:p-6">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl px-8 py-10">
         <div className="flex flex-col items-center mb-8">
           <Logo width={160} height={54} />
