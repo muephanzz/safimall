@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -22,12 +22,38 @@ const slides = [
 
 export default function HeroCarousel() {
   const [current, setCurrent] = useState(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const delay = 5000; // 5 seconds
 
-  const nextSlide = () => setCurrent((c) => (c + 1) % slides.length);
-  const prevSlide = () => setCurrent((c) => (c - 1 + slides.length) % slides.length);
+  const resetTimeout = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  };
+
+  useEffect(() => {
+    resetTimeout();
+    timeoutRef.current = setTimeout(() => {
+      setCurrent((prevIndex) => (prevIndex + 1) % slides.length);
+    }, delay);
+
+    return () => {
+      resetTimeout();
+    };
+  }, [current]);
+
+  const nextSlide = () => {
+    resetTimeout();
+    setCurrent((c) => (c + 1) % slides.length);
+  };
+
+  const prevSlide = () => {
+    resetTimeout();
+    setCurrent((c) => (c - 1 + slides.length) % slides.length);
+  };
 
   return (
-    <div className="relative w-full flex items-center justify-center">
+    <div className="relative w-full flex items-center justify-center select-none">
       {/* Slide */}
       <div
         className="
@@ -89,8 +115,13 @@ export default function HeroCarousel() {
         {slides.map((_, idx) => (
           <button
             key={idx}
-            onClick={() => setCurrent(idx)}
-            className={`w-2.5 h-2.5 rounded-full transition-all ${current === idx ? "bg-indigo-600 scale-125" : "bg-white/60"}`}
+            onClick={() => {
+              resetTimeout();
+              setCurrent(idx);
+            }}
+            className={`w-2.5 h-2.5 rounded-full transition-all ${
+              current === idx ? "bg-indigo-600 scale-125" : "bg-white/60"
+            }`}
             aria-label={`Go to slide ${idx + 1}`}
           />
         ))}
