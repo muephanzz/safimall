@@ -31,7 +31,7 @@ export default function BottomNav() {
     fetchCartCount();
   }, [user]);
 
-  if (!isMobile) return null;
+  if (!isMobile || pathname === "/chat") return null;
 
   const buttonStyle = (active: boolean) =>
     `flex flex-col items-center justify-center text-xs font-semibold transition-transform duration-300 ease-in-out ${
@@ -66,16 +66,16 @@ export default function BottomNav() {
         </Link>
 
         {/* Messages link navigates to /chat */}
-        <Link href="/chat" aria-label="Messages">
-          <button
-            className={buttonStyle(pathname === "/chat")}
-            aria-current={pathname === "/chat" ? "page" : undefined}
-            type="button"
-          >
-            <MessageSquare size={26} />
-            <span className="mt-1 select-none">Messages</span>
-          </button>
-        </Link>
+      <Link href="/chat" aria-label="Messages">
+        <button
+          className={buttonStyle(pathname === "/chat")}
+          aria-current={pathname === "/chat" ? "page" : undefined}
+          type="button"
+        >
+          <MessageSquare size={26} />
+          <span className="mt-1 select-none text-xs">Messages</span>
+        </button>
+      </Link>
 
         <Link href="/cart" aria-label="Cart">
           <button
