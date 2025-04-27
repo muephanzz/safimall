@@ -13,7 +13,7 @@ export async function POST(request) {
     const resultCode = callback.ResultCode;
     const resultDesc = callback.ResultDesc;
 
-    let status = "failed";
+    let status = "pending";
     if (resultCode === 0) status = "paid";
 
     // Extract metadata object (if available)
@@ -62,7 +62,7 @@ export async function POST(request) {
           ? String(paymentData.order_id).slice(-5)
           : "XXXXX";
 
-        if (status === "paid") {
+        if (status === "pending") {
           await resend.emails.send({
             from: "onboarding@resend.dev",
             to: paymentData.email,
