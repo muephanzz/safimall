@@ -203,6 +203,10 @@ export default function OrderTracking() {
     yPos += 5;
     doc.text(`DATE: ${format(new Date(order.created_at), "dd/MM/yy HH:mm")}`, margin, yPos);
     yPos += 5;
+    doc.text(`PHONE: ${"0" + (order.phone_number).slice(3)}`, margin, yPos);
+    yPos += 5;
+    doc.text(`NAME: ${order.profiles?.first_name}`, margin, yPos);
+    yPos += 5;
     doc.text(`STATUS: ${order.status.toUpperCase()}`, margin, yPos);
     yPos += 8;
 
