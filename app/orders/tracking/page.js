@@ -157,11 +157,10 @@ export default function OrderTracking() {
         progress: 100,
       });
     } else {
-      setTrackingInfo("Order has been Cancelled. If you think this was a mistake, please contact us for assistance");
+      setTrackingInfo(null);
     }
   };
   
-
   const downloadPDF = async (order) => {
     const doc = new jsPDF({
       orientation: 'p',

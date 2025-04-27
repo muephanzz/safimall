@@ -196,9 +196,9 @@ const ManageProducts = () => {
     const handleSubmit = async (e) => {
       e.preventDefault();
   
-      const { name, stock, price, category_id } = newProduct;
+      const { name, stock, price, category_id, subcategory_id } = newProduct;
   
-      if (!name || !stock || !price || !category_id) {
+      if (!name || !stock || !price || !category_id || !subcategories) {
           toast.error("Please fill in all required fields!");
           return;
       }
@@ -275,7 +275,7 @@ const ManageProducts = () => {
       setEditingProduct(product);
       setNewProduct({
         ...product,
-        category_id: product.categories?.category_id || "",    // add these
+        category_id: product.categories?.id || "",    // add these
         subcategory_id: product.subcategories?.subcategory_id || "", //add these
       });
       setFiles([]);
