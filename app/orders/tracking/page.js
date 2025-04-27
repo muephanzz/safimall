@@ -273,7 +273,7 @@ export default function OrderTracking() {
             </Button>
           </div>
 
-          {order && trackingInfo && (
+          {order && trackingInfo &&  (
             <div className="space-y-8">
               <div className="mt-8 border-l-4 border-blue-600 bg-blue-50 p-6 rounded-xl border border-blue-200">
                 <div>
@@ -292,6 +292,26 @@ export default function OrderTracking() {
                   </svg>
                   Shipment Tracking
                 </h3>
+
+                <div className="mb-6">
+                  <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-blue-600 transition-all duration-500"
+                      style={{ width: `${trackingInfo.progress}%` }}
+                    />
+                  </div>
+                  <div className="mt-2 flex justify-between text-sm text-gray-600">
+                    {["pending", "paid", "processing", "shipped", "completed"].map((step, index) => (
+                      <span
+                        key={step}
+                        className={index * 25 <= trackingInfo.progress ? "text-blue-600" : ""}
+                      >
+                        {step.charAt(0).toUpperCase() + step.slice(1)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
                 {trackingInfo.message ? (
                   <p className="text-gray-700">
                     {trackingInfo.message}
@@ -305,62 +325,41 @@ export default function OrderTracking() {
                     )}
                   </p>
                 ) : (
-                  <>
-                    <div className="mb-6">
-                      <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-blue-600 transition-all duration-500"
-                          style={{ width: `${trackingInfo.progress}%` }}
-                        />
-                      </div>
-                      <div className="mt-2 flex justify-between text-sm text-gray-600">
-                        {["pending", "paid", "processing", "shipped", "completed"].map((step, index) => (
-                          <span
-                            key={step}
-                            className={index * 25 <= trackingInfo.progress ? "text-blue-600" : ""}
-                          >
-                            {step.charAt(0).toUpperCase() + step.slice(1)}
-                          </span>
-                        ))}
-                      </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
+                    <div>
+                      <p className="text-gray-500">Shipping Address</p>
+                      <p className="font-medium">{order.shipping_address}</p>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
-                      <div>
-                        <p className="text-gray-500">Shipping Address</p>
-                        <p className="font-medium">{order.shipping_address}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Payment Method</p>
-                        <p className="font-medium">Mobile Money (M-Pesa)</p>
-                      </div>
-                      <div>
-                        <p className="font-semibold">Courier</p>
-                        <p>{trackingInfo.courier || "N/A"}</p>
-                      </div>
-                      <div>
-                        <p className="font-semibold">Help Number</p>
-                        {trackingInfo.helpNumber ? (
-                          <a href={`tel:${trackingInfo.helpNumber}`} className="text-blue-600 underline">
-                            {trackingInfo.helpNumber}
-                          </a>
-                        ) : (
-                          <p>N/A</p>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-semibold">Expected Arrival</p>
-                        <p>{trackingInfo.expectedArrival || "N/A"}</p>
-                      </div>
-                      <div>
-                        <p className="font-semibold">Current Location</p>
-                        <p>{trackingInfo.currentLocation || "N/A"}</p>
-                      </div>
+                    <div>
+                      <p className="text-gray-500">Payment Method</p>
+                      <p className="font-medium">Mobile Money (M-Pesa)</p>
                     </div>
-                  </>
+                    <div>
+                      <p className="font-semibold">Courier</p>
+                      <p>{trackingInfo.courier || "N/A"}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">Help Number</p>
+                      {trackingInfo.helpNumber ? (
+                        <a href={`tel:${trackingInfo.helpNumber}`} className="text-blue-600 underline">
+                          {trackingInfo.helpNumber}
+                        </a>
+                      ) : (
+                        <p>N/A</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-semibold">Expected Arrival</p>
+                      <p>{trackingInfo.expectedArrival || "N/A"}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">Current Location</p>
+                      <p>{trackingInfo.currentLocation || "N/A"}</p>
+                    </div>
+                  </div>
                 )}
               </div>
-
+              
               <div className="mt-6">
                 <h3 className="text-lg font-semibold mb-3">Order Items:</h3>
                 {order.items && order.items.length > 0 ? (
