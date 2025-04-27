@@ -18,7 +18,7 @@ export default function OrderTracking() {
   const [updating, setUpdating] = useState(false);
   const [trackingInfo, setTrackingInfo] = useState(null);
 
-  const statusSteps = ["pending", "paid", "processing", "shipped", "completed", "cancelled"];
+  const statusSteps = ["pending", "paid", "processing", "shipped", "completed"];
 
   useEffect(() => {
     fetchOrders();
@@ -96,11 +96,14 @@ export default function OrderTracking() {
     setUpdating(false);
   };
   
-  const getExpectedArrival = () => {
-    const now = new Date();
-    const arrival = new Date(now.getTime() + 40 * 60000); // 40 minutes later
+  const getExpectedArrival = (order) => {
+    if (!order?.updated_at) return "N/A";
+  
+    const updatedAt = new Date(order.updated_at);
+    const arrival = new Date(updatedAt.getTime() + 40 * 60000); // 40 minutes after updated_at
+  
     return `Today ${arrival.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-  };
+  };  
   
   const simulateShipmentTracking = (status, shippingAddress) => {
     if (status === "pending") {
@@ -136,7 +139,7 @@ export default function OrderTracking() {
     } else if (status === "shipped") {
       setTrackingInfo({
         status,
-        message: null,
+        message: "Shipping to your location",
         courier: "Personal Car",
         helpNumber: "0798229783",
         expectedArrival: getExpectedArrival(),
@@ -146,7 +149,7 @@ export default function OrderTracking() {
     } else if (status === "completed") {
       setTrackingInfo({
         status,
-        message: null,
+        message: "Order has been completed",
         courier: "Personal Car",
         helpNumber: "0798229783",
         expectedArrival: "Delivered",
@@ -217,13 +220,13 @@ export default function OrderTracking() {
     doc.setFont("courier", "normal");
     doc.setFontSize(10);
     doc.text("ITEM", margin, yPos);
-    doc.text("QTY", pageWidth - margin - 20, yPos, { align: "right" });
+    doc.text("QTY", pageWidth - margin - 24, yPos, { align: "right" });
     doc.text("TOTAL", pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
 
     order.items.forEach(item => {
       doc.text(item.name.substring(0, 22), margin, yPos);
-      doc.text(`${item.quantity}x`, pageWidth - margin - 20, yPos, { align: "right" });
+      doc.text(`${item.quantity}x`, pageWidth - margin - 24, yPos, { align: "right" });
       doc.text(`Ksh ${(item.price * item.quantity).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
       yPos += 6;
     });
@@ -232,14 +235,14 @@ export default function OrderTracking() {
     yPos += 6;
     doc.line(margin, yPos, pageWidth - margin, yPos);
     yPos += 6;
-    doc.text("SUBTOTAL:", pageWidth - margin - 37, yPos);
+    doc.text("SUBTOTAL:", pageWidth - margin - 40, yPos);
     doc.text(`Ksh ${order.amount.toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
-    doc.text("VAT (16%):", pageWidth - margin - 32, yPos);
+    doc.text("VAT (16%):", pageWidth - margin - 40, yPos);
     doc.text(`Ksh ${(order.amount * 0.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
     doc.setFont("helvetica", "bold");
-    doc.text("TOTAL:", pageWidth - margin - 30, yPos);
+    doc.text("TOTAL:", pageWidth - margin - 40, yPos);
     doc.text(`Ksh ${(order.amount * 1.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 10;
 
