@@ -62,7 +62,7 @@ export async function POST(request) {
           ? String(paymentData.order_id).slice(-5)
           : "XXXXX";
 
-        if (status === "pending") {
+        if (status === "paid") {
           await resend.emails.send({
             from: "onboarding@resend.dev",
             to: paymentData.email,

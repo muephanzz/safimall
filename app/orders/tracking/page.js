@@ -18,7 +18,7 @@ export default function OrderTracking() {
   const [updating, setUpdating] = useState(false);
   const [trackingInfo, setTrackingInfo] = useState(null);
 
-  const statusSteps = ["pending", "paid", "processing", "shipped", "completed"];
+  const statusSteps = ["pending", "paid", "processing", "shipped", "completed", "cancelled"];
 
   useEffect(() => {
     fetchOrders();
@@ -153,6 +153,16 @@ export default function OrderTracking() {
         currentLocation: "Delivered to customer",
         progress: 100,
       });
+    } else if (status === "cancelled") {
+      setTrackingInfo({
+        status,
+        message: "Order has been Cancelled",
+        courier: null,
+        helpNumber: null,
+        expectedArrival: null,
+        currentLocation: null,
+        progress: null,
+      });
     } else {
       setTrackingInfo(null);
     }
@@ -168,8 +178,8 @@ export default function OrderTracking() {
     });
 
     const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 12;
-    let yPos = margin;
+    const margin = 4;
+    let yPos = 14;
 
     // Generate QR Code
     const qrCodeData = await QRCode.toDataURL(order.order_id, {

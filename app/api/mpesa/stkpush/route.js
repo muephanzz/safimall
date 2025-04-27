@@ -105,7 +105,7 @@ export async function POST(request) {
       phone_number: phone,
       amount,
       status: "pending",
-      mpesa_request_id: checkoutRequestId,
+      mpesa_checkout_request_id: checkoutRequestId,
       email,
       items: checkoutItems,
       updated_at: nowISOString,
