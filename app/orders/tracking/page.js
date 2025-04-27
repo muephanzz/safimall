@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import toast from "react-hot-toast";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import jsPDF from "jspdf";
 import { Button } from "@/components/ui/button";
 import QRCode from "qrcode";
@@ -44,12 +43,6 @@ export default function OrderTracking() {
     }
   };
 
-
-  const copyToClipboard = (orderId) => {
-    navigator.clipboard.writeText(orderId);
-    toast.success("Order ID copied!");
-  };
-
   const handleTrackOrder = async () => {
     setLoading(true);
     setError("");
@@ -82,7 +75,6 @@ export default function OrderTracking() {
     setLoading(false);
   };
 
-
   const handleCancelOrder = async () => {
     if (!order || !["pending", "paid"].includes(order.status)) {
       toast.error("Order cannot be cancelled after processing.");
@@ -105,13 +97,34 @@ export default function OrderTracking() {
     setUpdating(false);
   };
 
+  const generateTrackingNumber = () => {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    return `SWX${Array.from({length: 8}, () => numbers[Math.floor(Math.random() * numbers.length)]).join('')}KE`;
+  };
+  
   const simulateShipmentTracking = (status) => {
-    if (status === "shipped" || status === "completed") {
+    if (status === "shipped") {
       setTrackingInfo({
-        courier: "SwiftX Delivery",
-        trackingNumber: "SWX12345678KE",
-        expectedArrival: "2 - 4 days",
-        currentLocation: "Nairobi Dispatch Center",
+        courier: ["SwiftX Logistics", "SafiCourier", "AfriExpress"][Math.floor(Math.random() * 3)],
+        trackingNumber: generateTrackingNumber(),
+        expectedArrival: new Date(Date.now() + 3*86400000).toLocaleDateString('en-GB', { 
+          day: 'numeric', month: 'short' 
+        }) + " - " + 
+        new Date(Date.now() + 5*86400000).toLocaleDateString('en-GB', { 
+          day: 'numeric', month: 'short' 
+        }),
+        currentLocation: ["Nairobi Sorting Facility", "Mombasa Port Terminal", 
+                         "Kisumu Distribution Center"][Math.floor(Math.random() * 3)],
+        progress: 75 // 3/4 steps completed
+      });
+    } else if (status === "completed") {
+      setTrackingInfo({
+        courier: "SwiftX Logistics",
+        trackingNumber: generateTrackingNumber(),
+        expectedArrival: "Delivered",
+        currentLocation: "Delivered to customer",
+        progress: 100
       });
     } else {
       setTrackingInfo(null);
@@ -127,7 +140,7 @@ export default function OrderTracking() {
     });
 
     const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 14;
+    const margin = 12;
     let yPos = margin;
 
     // Generate QR Code
@@ -145,9 +158,7 @@ export default function OrderTracking() {
     doc.setTextColor(100);
     doc.text("P.O Box 068-60100, Embu", pageWidth / 2, yPos, { align: "center" });
     yPos += 4;
-    doc.link("www.safimall.com", pageWidth / 2, yPos, { align: "center" });
-    yPos += 4;
-    doc.text("0798229783", pageWidth / 2, yPos, { align: "center" });
+    doc.text("www.safimall.com, 0798229783", pageWidth / 2, yPos, { align: "center" });
     yPos += 4;
     doc.text("VAT No: P051XXXXXXXX", pageWidth / 2, yPos, { align: "center" });
     yPos += 8;
@@ -183,14 +194,14 @@ export default function OrderTracking() {
     yPos += 6;
     doc.line(margin, yPos, pageWidth - margin, yPos);
     yPos += 6;
-    doc.text("SUBTOTAL:", pageWidth - margin - 40, yPos);
+    doc.text("SUBTOTAL:", pageWidth - margin - 37, yPos);
     doc.text(`Ksh ${order.amount.toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
-    doc.text("VAT (16%):", pageWidth - margin - 40, yPos);
+    doc.text("VAT (16%):", pageWidth - margin - 32, yPos);
     doc.text(`Ksh ${(order.amount * 0.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
     doc.setFont("helvetica", "bold");
-    doc.text("TOTAL:", pageWidth - margin - 40, yPos);
+    doc.text("TOTAL:", pageWidth - margin - 30, yPos);
     doc.text(`Ksh ${(order.amount * 1.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 10;
 
@@ -209,7 +220,7 @@ export default function OrderTracking() {
   };
 
   return (
-    <div className="mt-28 p-6 max-w-6xl mx-auto bg-gradient-to-br from-white to-slate-100 shadow-2xl rounded-3xl border border-gray-200">
+    <div className="min-h-screen mt-20 sm:mt-20 lg:mt-24 bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-0 sm:px-0 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
           <h1 className="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
@@ -262,6 +273,56 @@ export default function OrderTracking() {
                   </div>
                 </div>
               </div>
+
+//Rendering in your component:
+{trackingInfo && (
+  <div className="mt-8 bg-blue-50 p-6 rounded-xl border border-blue-200">
+    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" 
+           viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+      </svg>
+      Shipment Tracking
+    </h3>
+
+    {/* Progress indicator */}
+    <div className="mb-6">
+      <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
+        <div 
+          className="h-full bg-blue-600 transition-all duration-500" 
+          style={{ width: `${trackingInfo.progress}%` }}
+        ></div>
+      </div>
+      <div className="mt-2 flex justify-between text-sm text-gray-600">
+        {statusSteps.map((step, index) => (
+          <span key={step} className={index * 25 <= trackingInfo.progress ? 'text-blue-600' : ''}>
+            {step.charAt(0).toUpperCase() + step.slice(1)}
+          </span>
+        ))}
+      </div>
+    </div>
+
+    <div className="grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <p className="text-gray-500">Courier</p>
+        <p className="font-medium">{trackingInfo.courier}</p>
+      </div>
+      <div>
+        <p className="text-gray-500">Tracking Number</p>
+        <p className="font-mono font-medium">{trackingInfo.trackingNumber}</p>
+      </div>
+      <div>
+        <p className="text-gray-500">Expected Delivery</p>
+        <p className="font-medium">{trackingInfo.expectedArrival}</p>
+      </div>
+      <div>
+        <p className="text-gray-500">Current Location</p>
+        <p className="font-medium">{trackingInfo.currentLocation}</p>
+      </div>
+    </div>
+  </div>
+)}
 
               <div className="mt-6">
                 <h3 className="text-lg font-semibold mb-3">Order Items:</h3>
