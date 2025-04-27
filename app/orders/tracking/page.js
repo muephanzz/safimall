@@ -119,24 +119,24 @@ export default function OrderTracking() {
         message: "Your payment has been received. Your order is being prepared.",
         progress: 25,
         courier: null,
-        helpNumber: "0798229783",
-        expectedArrival: getExpectedArrival(),
-        currentLocation: "Embu Town",
+        helpNumber: null,
+        expectedArrival: null,
+        currentLocation: null,
       });
     } else if (status === "processing") {
       setTrackingInfo({
         status,
         message: "Your order is being processed and will be delivered soon.",
         progress: 50,
-        courier: "Personal Car",
-        helpNumber: "0798229783",
-        expectedArrival: getExpectedArrival(),
-        currentLocation: "Embu Town",
+        courier: null,
+        helpNumber: null,
+        expectedArrival: null,
+        currentLocation: null,
       });
     } else if (status === "shipped") {
       setTrackingInfo({
         status,
-        message: "You order is on the way to Destination",
+        message: null,
         courier: "Personal Car",
         helpNumber: "0798229783",
         expectedArrival: getExpectedArrival(),
@@ -146,7 +146,7 @@ export default function OrderTracking() {
     } else if (status === "completed") {
       setTrackingInfo({
         status,
-        message: "Order Completed",
+        message: null,
         courier: "Personal Car",
         helpNumber: "0798229783",
         expectedArrival: "Delivered",
@@ -273,7 +273,7 @@ export default function OrderTracking() {
             </Button>
           </div>
 
-          {order && trackingInfo &&  (
+          {order && trackingInfo && (
             <div className="space-y-8">
               <div className="mt-8 border-l-4 border-blue-600 bg-blue-50 p-6 rounded-xl border border-blue-200">
                 <div>
@@ -284,82 +284,75 @@ export default function OrderTracking() {
                     Placed on {format(new Date(order.created_at), "PPp")}
                   </p>
                 </div>
+
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" 
+                      viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                          d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                   </svg>
                   Shipment Tracking
                 </h3>
-
-                <div className="mb-6">
-                  <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-600 transition-all duration-500"
-                      style={{ width: `${trackingInfo.progress}%` }}
-                    />
-                  </div>
-                  <div className="mt-2 flex justify-between text-sm text-gray-600">
-                    {["pending", "paid", "processing", "shipped", "completed"].map((step, index) => (
-                      <span
-                        key={step}
-                        className={index * 25 <= trackingInfo.progress ? "text-blue-600" : ""}
-                      >
-                        {step.charAt(0).toUpperCase() + step.slice(1)}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
                 {trackingInfo.message ? (
-                  <p className="text-gray-700">
-                    {trackingInfo.message}
-                    {trackingInfo.status === "completed" && (
-                      <>
-                        {" "}
-                        <a href="/orders/completed" className="text-blue-600 underline">
-                          Review
-                        </a>
-                      </>
-                    )}
-                  </p>
+                  <p className="text-gray-700">{trackingInfo.message}</p>
+                  
                 ) : (
-                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
-                    <div>
-                      <p className="text-gray-500">Shipping Address</p>
-                      <p className="font-medium">{order.shipping_address}</p>
+                  <>
+                    <div className="mb-6">
+                      <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-blue-600 transition-all duration-500"
+                          style={{ width: `${trackingInfo.progress}%` }}
+                        />
+                      </div>
+                      <div className="mt-2 flex justify-between text-sm text-gray-600">
+                        {statusSteps.map((step, index) => (
+                          <span
+                            key={step}
+                            className={index * 25 <= trackingInfo.progress ? "text-blue-600" : ""}
+                          >
+                            {step.charAt(0).toUpperCase() + step.slice(1)}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-gray-500">Payment Method</p>
-                      <p className="font-medium">Mobile Money (M-Pesa)</p>
+
+                    <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
+                      <div>
+                        <p className="text-gray-500">Shipping Address</p>
+                        <p className="font-medium">{order.shipping_address}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Payment Method</p>
+                        <p className="font-medium">Mobile Money (M-Pesa)</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Courier</p>
+                        <p>{trackingInfo.courier || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Help Number</p>
+                        {trackingInfo.helpNumber ? (
+                          <a href={`tel:${trackingInfo.helpNumber}`} className="text-blue-600 underline">
+                            {trackingInfo.helpNumber}
+                          </a>
+                        ) : (
+                          <p>N/A</p>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-semibold">Expected Arrival</p>
+                        <p>{trackingInfo.expectedArrival || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Current Location</p>
+                        <p>{trackingInfo.currentLocation || "N/A"}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-semibold">Courier</p>
-                      <p>{trackingInfo.courier || "N/A"}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold">Help Number</p>
-                      {trackingInfo.helpNumber ? (
-                        <a href={`tel:${trackingInfo.helpNumber}`} className="text-blue-600 underline">
-                          {trackingInfo.helpNumber}
-                        </a>
-                      ) : (
-                        <p>N/A</p>
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-semibold">Expected Arrival</p>
-                      <p>{trackingInfo.expectedArrival || "N/A"}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold">Current Location</p>
-                      <p>{trackingInfo.currentLocation || "N/A"}</p>
-                    </div>
-                  </div>
+                  </>
                 )}
               </div>
-              
+
               <div className="mt-6">
                 <h3 className="text-lg font-semibold mb-3">Order Items:</h3>
                 {order.items && order.items.length > 0 ? (
@@ -439,12 +432,12 @@ export default function OrderTracking() {
 
                 <div className="mt-8 flex justify-between items-center">
                   {["paid", "processing", "shipped", "completed"].includes(order.status) && (
-                    <Button
+                    <Button 
                       onClick={() => downloadPDF(order)}
                     >
                       Download Receipt
                     </Button>
-                  )}
+                     )}
                   {["pending", "paid"].includes(order.status) && (
                     <Button
                       onClick={handleCancelOrder}
