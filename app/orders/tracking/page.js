@@ -119,24 +119,24 @@ export default function OrderTracking() {
         message: "Your payment has been received. Your order is being prepared.",
         progress: 25,
         courier: null,
-        helpNumber: null,
-        expectedArrival: null,
-        currentLocation: null,
+        helpNumber: "0798229783",
+        expectedArrival: getExpectedArrival(),
+        currentLocation: "Embu Town",
       });
     } else if (status === "processing") {
       setTrackingInfo({
         status,
         message: "Your order is being processed and will be delivered soon.",
         progress: 50,
-        courier: null,
-        helpNumber: null,
-        expectedArrival: null,
-        currentLocation: null,
+        courier: "Personal Car",
+        helpNumber: "0798229783",
+        expectedArrival: getExpectedArrival(),
+        currentLocation: "Embu Town",
       });
     } else if (status === "shipped") {
       setTrackingInfo({
         status,
-        message: null,
+        message: "You order is on the to Destination",
         courier: "Personal Car",
         helpNumber: "0798229783",
         expectedArrival: getExpectedArrival(),
@@ -146,7 +146,7 @@ export default function OrderTracking() {
     } else if (status === "completed") {
       setTrackingInfo({
         status,
-        message: null,
+        message: "Order Completed",
         courier: "Personal Car",
         helpNumber: "0798229783",
         expectedArrival: "Delivered",
@@ -294,7 +294,17 @@ export default function OrderTracking() {
                   Shipment Tracking
                 </h3>
                 {trackingInfo.message ? (
-                  <p className="text-gray-700">{trackingInfo.message}</p>
+                  <p className="text-gray-700">
+                    {trackingInfo.message}
+                    {trackingInfo.status === "completed" && (
+                      <>
+                        {" "}
+                        <a href="/orders/completed" className="text-blue-600 underline">
+                          Review
+                        </a>
+                      </>
+                    )}
+                  </p>
                 ) : (
                   <>
                     <div className="mb-6">
@@ -317,6 +327,14 @@ export default function OrderTracking() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
+                      <div>
+                        <p className="text-gray-500">Shipping Address</p>
+                        <p className="font-medium">{order.shipping_address}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Payment Method</p>
+                        <p className="font-medium">Mobile Money (M-Pesa)</p>
+                      </div> 
                       <div>
                         <p className="font-semibold">Courier</p>
                         <p>{trackingInfo.courier || "N/A"}</p>
@@ -342,32 +360,6 @@ export default function OrderTracking() {
                     </div>
                   </>
                 )}
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-gray-500">Shipping Address</p>
-                      <p className="font-medium">{order.shipping_address}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Payment Method</p>
-                      <p className="font-medium">Mobile Money (M-Pesa)</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Courier</p>
-                      <p className="font-medium">{trackingInfo.courier}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Help Number</p>
-                      <p className="font-mono font-medium">{trackingInfo.helpNumber}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Expected Delivery</p>
-                      <p className="font-medium">{trackingInfo.expectedArrival}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Current Location</p>
-                      <p className="font-medium">{trackingInfo.currentLocation}</p>
-                    </div>
-                  </div>
               </div>
 
               <div className="mt-6">

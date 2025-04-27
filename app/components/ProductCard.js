@@ -17,7 +17,7 @@ export default function ProductCard({ product, loading }) {
   return (
     <Link href={`/products/${product.product_id}`} className="group block" aria-label={`View details for ${product.name}`}>
       <motion.div
-        className="bg-white hover:shadow-md border border-transparent transition-al pb-2 px-1 overflow-hidden relative flex flex-col"
+        className="bg-white hover:shadow-md hover:rounded-md border border-transparent transition-al pb-2 px-1 overflow-hidden relative flex flex-col"
         whileHover={{ scale: 1.05 }}
         transition={{ type: "spring", stiffness: 250, damping: 20 }}
       >
