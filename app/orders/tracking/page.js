@@ -139,7 +139,7 @@ export default function OrderTracking() {
     } else if (status === "shipped") {
       setTrackingInfo({
         status,
-        message: "Shipping to your location",
+        message: null,
         courier: "Personal Car",
         helpNumber: "0798229783",
         expectedArrival: getExpectedArrival(),
@@ -149,25 +149,15 @@ export default function OrderTracking() {
     } else if (status === "completed") {
       setTrackingInfo({
         status,
-        message: "Order has been completed",
+        message: null,
         courier: "Personal Car",
         helpNumber: "0798229783",
         expectedArrival: "Delivered",
         currentLocation: "Delivered to customer",
         progress: 100,
       });
-    } else if (status === "cancelled") {
-      setTrackingInfo({
-        status,
-        message: "Order has been Cancelled",
-        courier: null,
-        helpNumber: null,
-        expectedArrival: null,
-        currentLocation: null,
-        progress: null,
-      });
     } else {
-      setTrackingInfo(null);
+      setTrackingInfo("Order has been Cancelled. If you think this was a mistake, please contact us for assistance");
     }
   };
   
@@ -235,14 +225,14 @@ export default function OrderTracking() {
     yPos += 6;
     doc.line(margin, yPos, pageWidth - margin, yPos);
     yPos += 6;
-    doc.text("SUBTOTAL:", pageWidth - margin - 40, yPos);
+    doc.text("SUBTOTAL:", pageWidth - margin - 44, yPos);
     doc.text(`Ksh ${order.amount.toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
-    doc.text("VAT (16%):", pageWidth - margin - 40, yPos);
+    doc.text("VAT (16%):", pageWidth - margin - 44, yPos);
     doc.text(`Ksh ${(order.amount * 0.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
     doc.setFont("helvetica", "bold");
-    doc.text("TOTAL:", pageWidth - margin - 40, yPos);
+    doc.text("TOTAL:", pageWidth - margin - 44, yPos);
     doc.text(`Ksh ${(order.amount * 1.16).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 10;
 
