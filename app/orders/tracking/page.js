@@ -19,7 +19,6 @@ export default function OrderTracking() {
   const [trackingInfo, setTrackingInfo] = useState(null);
 
   const statusSteps = ["pending", "paid", "processing", "shipped", "completed"];
-  const getStatusIndex = (status) => statusSteps.indexOf(status);
 
   useEffect(() => {
     fetchOrders();
@@ -96,40 +95,69 @@ export default function OrderTracking() {
 
     setUpdating(false);
   };
-
-  const generateTrackingNumber = () => {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const numbers = '0123456789';
-    return `SWX${Array.from({length: 8}, () => numbers[Math.floor(Math.random() * numbers.length)]).join('')}KE`;
+  
+  const getExpectedArrival = () => {
+    const now = new Date();
+    const arrival = new Date(now.getTime() + 40 * 60000); // 40 minutes later
+    return `Today ${arrival.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   };
   
-  const simulateShipmentTracking = (status) => {
-    if (status === "shipped") {
+  const simulateShipmentTracking = (status, shippingAddress) => {
+    if (status === "pending") {
       setTrackingInfo({
-        courier: ["SwiftX Logistics", "SafiCourier", "AfriExpress"][Math.floor(Math.random() * 3)],
-        trackingNumber: generateTrackingNumber(),
-        expectedArrival: new Date(Date.now() + 3*86400000).toLocaleDateString('en-GB', { 
-          day: 'numeric', month: 'short' 
-        }) + " - " + 
-        new Date(Date.now() + 5*86400000).toLocaleDateString('en-GB', { 
-          day: 'numeric', month: 'short' 
-        }),
-        currentLocation: ["Nairobi Sorting Facility", "Mombasa Port Terminal", 
-                         "Kisumu Distribution Center"][Math.floor(Math.random() * 3)],
-        progress: 75 // 3/4 steps completed
+        status,
+        message: "Your order is pending. We will confirm your payment shortly.",
+        progress: 0,
+        courier: null,
+        helpNumber: null,
+        expectedArrival: null,
+        currentLocation: null,
+      });
+    } else if (status === "paid") {
+      setTrackingInfo({
+        status,
+        message: "Your payment has been received. Your order is being prepared.",
+        progress: 25,
+        courier: null,
+        helpNumber: null,
+        expectedArrival: null,
+        currentLocation: null,
+      });
+    } else if (status === "processing") {
+      setTrackingInfo({
+        status,
+        message: "Your order is being processed and will be delivered soon.",
+        progress: 50,
+        courier: null,
+        helpNumber: null,
+        expectedArrival: null,
+        currentLocation: null,
+      });
+    } else if (status === "shipped") {
+      setTrackingInfo({
+        status,
+        message: null,
+        courier: "Personal Car",
+        helpNumber: "0798229783",
+        expectedArrival: getExpectedArrival(),
+        currentLocation: "On the way to" + " " + order.shipping_address || "On the way",
+        progress: 75,
       });
     } else if (status === "completed") {
       setTrackingInfo({
-        courier: "SwiftX Logistics",
-        trackingNumber: generateTrackingNumber(),
+        status,
+        message: null,
+        courier: "Personal Car",
+        helpNumber: "0798229783",
         expectedArrival: "Delivered",
         currentLocation: "Delivered to customer",
-        progress: 100
+        progress: 100,
       });
     } else {
       setTrackingInfo(null);
     }
   };
+  
 
   const downloadPDF = async (order) => {
     const doc = new jsPDF({
@@ -256,6 +284,7 @@ export default function OrderTracking() {
                     Placed on {format(new Date(order.created_at), "PPp")}
                   </p>
                 </div>
+
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" 
                       viewBox="0 0 24 24" stroke="currentColor">
@@ -264,50 +293,81 @@ export default function OrderTracking() {
                   </svg>
                   Shipment Tracking
                 </h3>
+                {trackingInfo.message ? (
+                  <p className="text-gray-700">{trackingInfo.message}</p>
+                ) : (
+                  <>
+                    <div className="mb-6">
+                      <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-blue-600 transition-all duration-500"
+                          style={{ width: `${trackingInfo.progress}%` }}
+                        />
+                      </div>
+                      <div className="mt-2 flex justify-between text-sm text-gray-600">
+                        {["pending", "paid", "processing", "shipped", "completed"].map((step, index) => (
+                          <span
+                            key={step}
+                            className={index * 25 <= trackingInfo.progress ? "text-blue-600" : ""}
+                          >
+                            {step.charAt(0).toUpperCase() + step.slice(1)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
 
-                {/* Progress indicator */}
-                <div className="mb-6">
-                  <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-blue-600 transition-all duration-500" 
-                      style={{ width: `${trackingInfo.progress}%` }}
-                    ></div>
+                    <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
+                      <div>
+                        <p className="font-semibold">Courier</p>
+                        <p>{trackingInfo.courier || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Help Number</p>
+                        {trackingInfo.helpNumber ? (
+                          <a href={`tel:${trackingInfo.helpNumber}`} className="text-blue-600 underline">
+                            {trackingInfo.helpNumber}
+                          </a>
+                        ) : (
+                          <p>N/A</p>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-semibold">Expected Arrival</p>
+                        <p>{trackingInfo.expectedArrival || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Current Location</p>
+                        <p>{trackingInfo.currentLocation || "N/A"}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-500">Shipping Address</p>
+                      <p className="font-medium">{order.shipping_address}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Payment Method</p>
+                      <p className="font-medium">Mobile Money (M-Pesa)</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Courier</p>
+                      <p className="font-medium">{trackingInfo.courier}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Help Number</p>
+                      <p className="font-mono font-medium">{trackingInfo.helpNumber}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Expected Delivery</p>
+                      <p className="font-medium">{trackingInfo.expectedArrival}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Current Location</p>
+                      <p className="font-medium">{trackingInfo.currentLocation}</p>
+                    </div>
                   </div>
-                  <div className="mt-2 flex justify-between text-sm text-gray-600">
-                    {statusSteps.map((step, index) => (
-                      <span key={step} className={index * 25 <= trackingInfo.progress ? 'text-blue-600' : ''}>
-                        {step.charAt(0).toUpperCase() + step.slice(1)}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-500">Shipping Address</p>
-                    <p className="font-medium">{order.shipping_address}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Payment Method</p>
-                    <p className="font-medium">Mobile Money (M-Pesa)</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Courier</p>
-                    <p className="font-medium">{trackingInfo.courier}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Tracking Number</p>
-                    <p className="font-mono font-medium">{trackingInfo.trackingNumber}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Expected Delivery</p>
-                    <p className="font-medium">{trackingInfo.expectedArrival}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Current Location</p>
-                    <p className="font-medium">{trackingInfo.currentLocation}</p>
-                  </div>
-                </div>
               </div>
 
               <div className="mt-6">
@@ -388,7 +448,13 @@ export default function OrderTracking() {
                 </div>
 
                 <div className="mt-8 flex justify-between items-center">
-                  <Button onClick={() => downloadPDF(order)}>Download Receipt</Button>
+                  {["paid", "processing", "shipped", "completed"].includes(order.status) && (
+                    <Button 
+                      onClick={() => downloadPDF(order)}
+                    >
+                      Download Receipt
+                    </Button>
+                     )}
                   {["pending", "paid"].includes(order.status) && (
                     <Button
                       onClick={handleCancelOrder}
