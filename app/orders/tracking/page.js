@@ -31,13 +31,13 @@ export default function OrderTracking() {
 
     const { data: orderData, error: orderError } = await supabase
       .from("orders")
-      .select("order_id, status, total, shipping_address, checkout_items")
+      .select("order_id, status, total, shipping_address, items")
       .eq("user_id", user.id);
 
     if (!orderError && orderData) {
       const parsedOrders = orderData.map(order => ({
         ...order,
-        checkout_items: typeof order.checkout_items === 'string' ? JSON.parse(order.checkout_items) : order.checkout_items,
+        items: typeof order.items === 'string' ? JSON.parse(order.items) : order.items,
       }));
       setOrders(parsedOrders);
     }
@@ -63,9 +63,9 @@ export default function OrderTracking() {
     if (error || !data) {
       toast.error(`No order found for "${orderId}"`);
     } else {
-      // Parse checkout_items here
-      if (typeof data.checkout_items === 'string') {
-        data.checkout_items = JSON.parse(data.checkout_items);
+      // Parse items here
+      if (typeof data.items === 'string') {
+        data.items = JSON.parse(data.items);
       }
 
       setOrder(data);
@@ -175,7 +175,7 @@ export default function OrderTracking() {
     doc.text(`STATUS: ${order.status.toUpperCase()}`, margin, yPos);
     yPos += 8;
 
-    // checkout_Items Table
+    // items Table
     doc.setFont("courier", "normal");
     doc.setFontSize(10);
     doc.text("ITEM", margin, yPos);
@@ -183,7 +183,7 @@ export default function OrderTracking() {
     doc.text("TOTAL", pageWidth - margin, yPos, { align: "right" });
     yPos += 6;
 
-    order.checkout_items.forEach(item => {
+    order.items.forEach(item => {
       doc.text(item.name.substring(0, 22), margin, yPos);
       doc.text(`${item.quantity}x`, pageWidth - margin - 20, yPos, { align: "right" });
       doc.text(`Ksh ${(item.price * item.quantity).toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
@@ -245,88 +245,74 @@ export default function OrderTracking() {
             </Button>
           </div>
 
-          {order && (
+          {order && trackingInfo && (
             <div className="space-y-8">
-              <div className="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-xl">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h2 className="text-xl font-semibold text-slate-800">
-                      Order #{order.order_id}
-                    </h2>
-                    <p className="text-slate-600 mt-1">
-                      Placed on {format(new Date(order.created_at), "PPp")}
-                    </p>
+              <div className="mt-8 border-l-4 border-blue-600 bg-blue-50 p-6 rounded-xl border border-blue-200">
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-800">
+                    Order #{order.order_id}
+                  </h2>
+                  <p className="text-slate-600 mt-1">
+                    Placed on {format(new Date(order.created_at), "PPp")}
+                  </p>
+                </div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" 
+                      viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                          d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  </svg>
+                  Shipment Tracking
+                </h3>
+
+                {/* Progress indicator */}
+                <div className="mb-6">
+                  <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-blue-600 transition-all duration-500" 
+                      style={{ width: `${trackingInfo.progress}%` }}
+                    ></div>
                   </div>
-                  <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                    {order.status.toUpperCase()}
-                  </span>
+                  <div className="mt-2 flex justify-between text-sm text-gray-600">
+                    {statusSteps.map((step, index) => (
+                      <span key={step} className={index * 25 <= trackingInfo.progress ? 'text-blue-600' : ''}>
+                        {step.charAt(0).toUpperCase() + step.slice(1)}
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <h3 className="font-medium text-slate-700">Shipping Address</h3>
-                    <p className="text-slate-600">{order.shipping_address}</p>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Shipping Address</p>
+                    <p className="font-medium">{order.shipping_address}</p>
                   </div>
-                  <div className="space-y-2">
-                    <h3 className="font-medium text-slate-700">Payment Method</h3>
-                    <p className="text-slate-600">Mobile Money (M-Pesa)</p>
+                  <div>
+                    <p className="text-gray-500">Payment Method</p>
+                    <p className="font-medium">Mobile Money (M-Pesa)</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Courier</p>
+                    <p className="font-medium">{trackingInfo.courier}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Tracking Number</p>
+                    <p className="font-mono font-medium">{trackingInfo.trackingNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Expected Delivery</p>
+                    <p className="font-medium">{trackingInfo.expectedArrival}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Current Location</p>
+                    <p className="font-medium">{trackingInfo.currentLocation}</p>
                   </div>
                 </div>
               </div>
 
-//Rendering in your component:
-{trackingInfo && (
-  <div className="mt-8 bg-blue-50 p-6 rounded-xl border border-blue-200">
-    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" 
-           viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-      </svg>
-      Shipment Tracking
-    </h3>
-
-    {/* Progress indicator */}
-    <div className="mb-6">
-      <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-blue-600 transition-all duration-500" 
-          style={{ width: `${trackingInfo.progress}%` }}
-        ></div>
-      </div>
-      <div className="mt-2 flex justify-between text-sm text-gray-600">
-        {statusSteps.map((step, index) => (
-          <span key={step} className={index * 25 <= trackingInfo.progress ? 'text-blue-600' : ''}>
-            {step.charAt(0).toUpperCase() + step.slice(1)}
-          </span>
-        ))}
-      </div>
-    </div>
-
-    <div className="grid grid-cols-2 gap-4 text-sm">
-      <div>
-        <p className="text-gray-500">Courier</p>
-        <p className="font-medium">{trackingInfo.courier}</p>
-      </div>
-      <div>
-        <p className="text-gray-500">Tracking Number</p>
-        <p className="font-mono font-medium">{trackingInfo.trackingNumber}</p>
-      </div>
-      <div>
-        <p className="text-gray-500">Expected Delivery</p>
-        <p className="font-medium">{trackingInfo.expectedArrival}</p>
-      </div>
-      <div>
-        <p className="text-gray-500">Current Location</p>
-        <p className="font-medium">{trackingInfo.currentLocation}</p>
-      </div>
-    </div>
-  </div>
-)}
-
               <div className="mt-6">
                 <h3 className="text-lg font-semibold mb-3">Order Items:</h3>
-                {order.checkout_items && order.checkout_items.length > 0 ? (
+                {order.items && order.items.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
@@ -346,7 +332,7 @@ export default function OrderTracking() {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {order.checkout_items.map((item, index) => (
+                        {order.items.map((item, index) => (
                           <tr key={index}>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
