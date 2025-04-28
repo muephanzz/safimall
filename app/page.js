@@ -1,5 +1,4 @@
 "use client";
-import PaymentForm from "@/components/PaymentForm";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import ProductCard from "@/components/ProductCard";
@@ -72,11 +71,6 @@ export default function Home() {
   return (
     <div className="min-h-screen mt-0 sm:mt-0 lg:mt-0 bg-gradient-to-br from-white via-blue-50 to-slate-100 text-gray-900 flex flex-col">
       {/* HERO BANNER */}
-      <section className="bg-gray-100 max-w-400 h-screen flex justify-center items-center">
-        <PaymentForm />
-      </section>
-
-
      {/* <section className="relative w-full bg-gradient-to-r from-blue-100 to-indigo-100 overflow-hidden shadow-sm">
         <div className="max-w-7xl mx-auto flex flex-col-reverse md:flex-row items-center justify-between gap-8 px-4 sm:px-8 py-12 md:py-20">
           <div className="flex-1">
@@ -117,9 +111,97 @@ export default function Home() {
         </div>
       </section>   */}
 
-  
+      {/* FEATURED PRODUCTS */}
+      {featured && featured.length > 0 && (
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-8">
+          <motion.h2
+            className="text-xl md:text-2xl font-bold mb-4 text-gray-800"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            Featured Products
+          </motion.h2>
+          <section className="bg-white/80 backdrop-blur-md p-6 sm:p-0 lg:p-6 shadow-xl border border-gray-200">
+          <motion.div
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            {featured.map((product) => (
+              <motion.div
+                key={product.product_id}
+                whileHover={{ scale: 1.04, zIndex: 10 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="relative"
+              >
+                <ProductCard product={product} />
+              </motion.div>
+            ))}
+          </motion.div>
+        </section>
+      </div>
+      )}
 
- 
+      {/* MAIN PRODUCT GRID */}
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-8" id="products">
+        <motion.h2
+          className="text-xl md:text-2xl font-bold mb-4 text-gray-800"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          All Products
+        </motion.h2>
+        <section className="bg-white/80 backdrop-blur-md p-6 shadow-xl border border-gray-200">
+          {loading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+              {[...Array(itemsPerPage)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-gradient-to-tr from-gray-200 to-gray-100 p-4 shadow-lg animate-pulse flex flex-col"
+                >
+                  <div className="h-48 bg-gray-300 mb-4" />
+                  <div className="h-5 w-3/4 bg-gray-300 mb-3" />
+                  <div className="h-4 w-full bg-gray-200 mb-2" />
+                  <div className="h-6 w-1/2 bg-indigo-200" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <motion.div
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              {products.map((product) => (
+                <motion.div
+                  key={product.product_id}
+                  whileHover={{ scale: 1.04, zIndex: 10 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                  className="relative"
+                >
+                  <ProductCard product={product} />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </section>
+
+        {/* Pagination */}
+        <div className="flex justify-center my-10">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      </main>
+
+      <ChatView />
+      <Footer />   
     </div>
   );
 }
