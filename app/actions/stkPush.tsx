@@ -154,7 +154,7 @@ export const sendStkPush = async (body: Params) => {
         mpesa_checkout_request_id: checkoutRequestId,
         updated_at: new Date().toISOString(),
       })
-      .eq("order_id", orderData.order_id);
+      .eq("order_id", orderData.id);
 
     return { data: response.data };
   } catch (error) {
