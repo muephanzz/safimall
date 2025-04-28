@@ -115,6 +115,7 @@ export async function POST(request) {
       user_id,
       amount,
       status: "pending",
+      mpesa_checkout_request_id: checkoutRequestId,
       shipping_address,
       email,
       items: checkoutItems,
