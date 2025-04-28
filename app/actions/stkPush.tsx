@@ -61,7 +61,7 @@ export const sendStkPush = async (body: Params) => {
         PartyA: formattedPhone,
         PartyB: process.env.MPESA_SHORTCODE, //till number for tills
         PhoneNumber: formattedPhone,
-        CallBackURL: "https://mydomain.com/callback-url-path",
+        CallBackURL: process.env.MPESA_CALLBACK_URL,
         AccountReference: phoneNumber,
         TransactionDesc: "anything here",
       },
