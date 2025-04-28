@@ -84,24 +84,6 @@ export async function POST(request: NextRequest, { params }: Params) {
       throw new Error('Failed to update payment');
     }
 
-    // Update corresponding order
-    if (resultCode === '0') {
-      const { error: orderError } = await supabase
-        .from('orders')
-        .update({
-          status: 'paid',
-          updated_at: new Date().toISOString(),
-          mpesa_checkout_request_id: checkoutRequestId,
-          payment_id: paymentData.id
-        })
-        .eq('mpesa_checkout_request_id', checkoutRequestId);
-
-      if (orderError) {
-        console.error('Order update failed:', orderError);
-        throw new Error('Failed to update order');
-      }
-    }
-
     return NextResponse.json("ok", { status: 200 });
 
   } catch (error: any) {
