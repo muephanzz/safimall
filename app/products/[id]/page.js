@@ -293,20 +293,30 @@ export default function ProductDetails() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
+                  <thead>
+                    <tr className="bg-gradient-to-r from-blue-50 to-indigo-100">
+                      <th className="p-3 text-left font-semibold text-gray-800">Specification</th>
+                      <th className="p-3 text-left font-semibold text-gray-800">Details</th>
+                    </tr>
+                  </thead>
                   <tbody>
-                    {product.specification?.split("\n").filter((line) => line.includes(":")).map((line, index) => {
-                      const [key, value] = line.split(":").map((item) => item.trim());
-                      return (
-                        <motion.tr
-                          key={index}
-                          className="border border-gray-100 hover:bg-gray-50 transition duration-200"
-                          whileHover={{ backgroundColor: "#f9f9f9" }}
-                        >
-                          <td className="p-3 font-medium text-gray-700 bg-gray-50">{key}</td>
-                          <td className="p-3 text-gray-600">{value}</td>
-                        </motion.tr>
-                      );
-                    })}
+                  {Array.isArray(product.specification) && product.specification.length > 0 ? (
+                    product.specification.map((spec, idx) => (
+                      <tr
+                        key={idx}
+                        className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                      >
+                        <td className="p-3 font-medium text-gray-700">{spec.name}</td>
+                        <td className="p-3 text-gray-600">{spec.value}</td>
+                      </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={2} className="p-3 text-gray-500 text-center">
+                          No specifications available.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </motion.table>
               )}

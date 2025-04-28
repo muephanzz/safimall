@@ -1,5 +1,6 @@
 "use client";
 
+import "react-toastify/dist/ReactToastify.css";
 import React, { useState, useEffect } from "react";
 import { sendStkPush } from "@/actions/stkPush";
 import { stkPushQuery } from "@/actions/stkPushQuery";
@@ -132,7 +133,7 @@ export default function PaymentForm() {
 
     if (!shippingAddress) {
       setLoading(false);
-      alert("Please select a shipping address");
+      (toast as any).info("Please select a shipping address");
       return;
     }
 

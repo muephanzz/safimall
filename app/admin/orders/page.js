@@ -194,7 +194,7 @@ const ManageOrders = () => {
 
                     <div className="text-right">
                       <span className="font-semibold text-gray-800">
-                        Total: Ksh {order.total}
+                        Total: Ksh {order.amount}
                       </span>
                       <span
                         className={`inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium capitalize ml-2 ${statusColors[order.status]}`}
@@ -288,7 +288,7 @@ const ManageOrders = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="mt-6 pt-4 border-t border-gray-200 flex flex-wrap justify-end gap-2">
+                  <div className="mt-6 pt-4 border-t border-gray-200 flex flex-wrap justify-start gap-2">
                     {statusSteps.map((status) => (
                       <button
                         key={status}

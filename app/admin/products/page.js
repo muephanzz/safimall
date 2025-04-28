@@ -97,8 +97,8 @@ const ManageProducts = () => {
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         const { data, error } = await supabase
-          .from('products')
-          .select('*, categories!products_category_id_fkey(*)');
+        .from('products')
+        .select('*, categories!products_category_id_fkey(*), subcategories!products_subcategory_id_fkey(*)');      
           
         if (error) {
             console.error("Error fetching products:", error);
@@ -144,7 +144,12 @@ const ManageProducts = () => {
     const removeImage = (index) => {
         setPreviews((prev) => prev.filter((_, i) => i !== index));
         setFiles((prev) => prev.filter((_, i) => i !== index));
-    };
+        setNewProduct((prev) => ({
+          ...prev,
+          image_urls: prev.image_urls.filter((_, i) => i !== index),
+        }));
+      };
+           
 
     // Handle file change for image upload
     const handleFileChange = (e) => {
@@ -194,64 +199,56 @@ const ManageProducts = () => {
 
     // Handle form submission
     const handleSubmit = async (e) => {
-      e.preventDefault();
-  
-      const { name, stock, price, category_id, subcategory_id } = newProduct;
-  
-      if (!name || !stock || !price || !category_id || !subcategories) {
-          toast.error("Please fill in all required fields!");
-          return;
-      }
-  
-      setUploading(true);
-      try {
+        e.preventDefault();
+
+        setUploading(true);
+        try {
           let imageUrls = editingProduct?.image_urls || [];
-  
+      
           if (files.length > 0) {
-              imageUrls = await uploadImages();
+            imageUrls = await uploadImages();
           }
-  
+      
+          const filteredSpecs = specRows.filter(row => row.name.trim() !== "" && row.value.trim() !== "");
+      
           const productData = {
             ...newProduct,
             price: parseFloat(newProduct.price),
             stock: parseInt(newProduct.stock, 10),
             image_urls: imageUrls,
+            specification: filteredSpecs,
           };
-          
-          let productId;
-          
+      
           if (editingProduct) {
-              const { error } = await supabase
-                  .from("products")
-                  .update(productData) // <--- Sending the entire productData (including attributes)
-                  .eq("product_id", editingProduct.product_id);
-          
-              if (error) throw new Error(error.message);
-          
-              productId = editingProduct.product_id;
-              toast.success("Product updated successfully!");
+            const { error } = await supabase
+              .from("products")
+              .update(productData)
+              .eq("product_id", editingProduct.product_id);
+      
+            if (error) throw new Error(error.message);
+      
+            toast.success("Product updated successfully!");
           } else {
-              const { data, error } = await supabase
-                  .from("products")
-                  .insert([productData]) // <--- Sending the entire productData (including attributes)
-                  .select("product_id")
-                  .single();
-          
-              if (error) throw new Error(error.message);
-          
-              productId = data.product_id;
-              toast.success("Product added successfully!");
+            const { data, error } = await supabase
+              .from("products")
+              .insert([productData])
+              .select("product_id")
+              .single();
+      
+            if (error) throw new Error(error.message);
+      
+            toast.success("Product added successfully!");
           }
+      
           fetchProducts();
           resetForm();
-      } catch (error) {
-          console.error("Error saving product:", error);
+        } catch (error) {
           toast.error("Operation failed: " + error.message);
-      } finally {
+        } finally {
           setUploading(false);
-      }
-  };
-  
+        }
+      };
+      
     // Handle product deletion
     const handleDelete = async (productId) => {
         if (!window.confirm("Are you sure you want to delete this product?")) return;
@@ -272,34 +269,37 @@ const ManageProducts = () => {
 
     // Handle editing a product
     const handleEdit = (product) => {
-      setEditingProduct(product);
-      setNewProduct({
-        ...product,
-        category_id: product.categories?.id || "",    // add these
-        subcategory_id: product.subcategories?.subcategory_id || "", //add these
-      });
-      setFiles([]);
-      setPreviews(product.image_urls || []);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    };
+        setEditingProduct(product);
+        setNewProduct({
+          ...product,
+          category_id: product.category_id || "",
+          subcategory_id: product.subcategory_id || "",
+        });
+        setFiles([]);
+        setPreviews(product.image_urls || []);
+        setSpecRows(product.specification && product.specification.length > 0 ? product.specification : [{ name: "", value: "" }]);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+      
     
     // Reset the form
     const resetForm = () => {
-        setNewProduct({
-            name: "",
-            phone: "",
-            description: "",
-            specification: "",
-            stock: "",
-            price: "",
-            image_urls: [],
-            category_id: "",
-            subcategory_id: "",
-            attributes: {},
-        });
-        setFiles([]);
-        setPreviews([]);
-        setEditingProduct(null);
+    setNewProduct({
+        name: "",
+        phone: "",
+        description: "",
+        specification: "",
+        stock: "",
+        price: "",
+        image_urls: [],
+        category_id: "",
+        subcategory_id: "",
+        attributes: {},
+    });
+    setFiles([]);
+    setPreviews([]);
+    setEditingProduct(null);
+    setSpecRows([{ name: "", value: "" }]);
     };
 
     return (
@@ -354,15 +354,15 @@ const ManageProducts = () => {
                                 name="subcategory_id"
                                 onChange={handleChange}
                                 value={newProduct.subcategory_id}
-                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                            >
+                                className="..."
+                                >
                                 <option value="">Select Subcategory</option>
                                 {filteredSubcategories.map((sub) => (
                                     <option key={sub.subcategory_id} value={sub.subcategory_id}>
-                                        {sub.name}
+                                    {sub.subcategory}
                                     </option>
                                 ))}
-                            </select>
+                                </select>
                         </div>
                         <div className="space-y-2">
                             <label htmlFor="stock" className="block text-sm font-medium">
@@ -628,7 +628,7 @@ const ManageProducts = () => {
                                         </td>
                                         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                             <p className="text-gray-900 whitespace-no-wrap">
-                                                {product.subcategories?.name}
+                                                {product.subcategories?.subcategory}
                                             </p>
                                         </td>
                                         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
