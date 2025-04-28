@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Loader2, User } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface Item {
   price: number;
@@ -124,7 +125,8 @@ export default function PaymentForm() {
 
     if (!kenyanPhoneNumberRegex.test(dataFromForm.mpesa_phone)) {
       setLoading(false);
-      alert("Invalid M-Pesa number");
+      //alert("Invalid M-Pesa number");
+      toast.error("Invalid mpesa number");
       return;
     }
 
@@ -136,7 +138,8 @@ export default function PaymentForm() {
 
     if (checkoutItems.length === 0) {
       setLoading(false);
-      alert("No items found for checkout");
+      //alert("No items found for checkout");
+      toast.error("No items found for checkout");
       return;
     }
 
@@ -145,7 +148,8 @@ export default function PaymentForm() {
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError || !userData?.user) {
         setLoading(false);
-        alert("Please log in to purchase this item!");
+        //alert("Please log in to purchase this item!");
+        toast.error("Please log in to purchase items");
         return;
       }
 
@@ -161,20 +165,22 @@ export default function PaymentForm() {
 
       if (stkError) {
         setLoading(false);
-        alert(stkError);
+        //alert(stkError);
+        toast.error("Unknown error occured!");
         return;
       }
 
       //alert("STK push sent successfully");
       const checkoutRequestId = stkData.CheckoutRequestID;
-      console.log("CheckoutRequestID:", checkoutRequestId);
+      //console.log("CheckoutRequestID:", checkoutRequestId);
 
       setStkQueryLoading(true);
       stkPushQueryWithIntervals(checkoutRequestId);
     } catch (err) {
       setLoading(false);
-      alert("Error sending STK push");
-      console.error(err);
+      toast.error("Something went wrong!");
+      //alert("Error sending STK push");
+      //console.error(err);
     }
   };
 
