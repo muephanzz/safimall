@@ -80,8 +80,6 @@ export const sendStkPush = async (body: Params) => {
         amount,
         status: "pending",
         email,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       })
       .select()
       .single();
@@ -156,7 +154,7 @@ export const sendStkPush = async (body: Params) => {
         mpesa_checkout_request_id: checkoutRequestId,
         updated_at: new Date().toISOString(),
       })
-      .eq("order_id", orderData.id);
+      .eq("order_id", orderData.order_id);
 
     return { data: response.data };
   } catch (error) {
