@@ -94,6 +94,7 @@ export const sendStkPush = async (body: Params) => {
       .from("orders")
       .insert({
         user_id,
+        phone_number: formattedPhone,
         amount,
         status: "pending",
         shipping_address,
