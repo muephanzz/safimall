@@ -71,11 +71,12 @@ export default function Home() {
   return (
     <div className="min-h-screen mt-0 sm:mt-0 lg:mt-0 bg-gradient-to-br from-white via-blue-50 to-slate-100 text-gray-900 flex flex-col">
       {/* HERO BANNER */}
-     <section className="relative w-full bg-gradient-to-r from-blue-100 to-indigo-100 overflow-hidden shadow-sm">
+      <section className="relative w-full bg-gradient-to-r from-blue-100 to-indigo-100 overflow-hidden shadow-sm mt-12">
         <div className="max-w-7xl mx-auto flex flex-col-reverse md:flex-row items-center justify-between gap-8 px-4 sm:px-8 py-12 md:py-20">
-          <div className="flex-1">
+          {/* Left: Text */}
+          <div className="flex-1 w-full max-w-xl">
             <motion.h1
-              className="text-4xl md:text-5xl font-extrabold mb-4 text-indigo-900 tracking-tight"
+              className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 text-indigo-900 tracking-tight"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
@@ -83,7 +84,7 @@ export default function Home() {
               Discover Premium Products for Modern Living
             </motion.h1>
             <motion.p
-              className="text-lg md:text-xl text-gray-700 mb-8"
+              className="text-base sm:text-lg md:text-xl text-gray-700 mb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
@@ -100,6 +101,7 @@ export default function Home() {
               Shop Now
             </motion.a>
           </div>
+          {/* Right: Carousel */}
           <motion.div
             className="flex-1 w-full flex items-center justify-center"
             initial={{ opacity: 0, scale: 0.98 }}
@@ -110,6 +112,7 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
 
       {/* FEATURED PRODUCTS */}
       {featured && featured.length > 0 && (
@@ -122,7 +125,7 @@ export default function Home() {
           >
             Featured Products
           </motion.h2>
-          <section className="bg-white/80 backdrop-blur-md p-6 sm:p-0 lg:p-6 shadow-xl border border-gray-200">
+          <section className="//bg-white/80 backdrop-blur-md p-6 sm:p-0 lg:p-6 shadow-xl //border border-gray-200">
           <motion.div
             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6"
             initial={{ opacity: 0 }}
@@ -147,14 +150,14 @@ export default function Home() {
       {/* MAIN PRODUCT GRID */}
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-8" id="products">
         <motion.h2
-          className="text-xl md:text-2xl font-bold mb-4 text-gray-800"
+          className="text-xl md:text-2xl font-bold mt-2 mb-4 text-gray-800"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
           All Products
         </motion.h2>
-        <section className="bg-white/80 backdrop-blur-md p-6 shadow-xl border border-gray-200">
+        <section className="//bg-white/80 backdrop-blur-md p-6 shadow-xl //border border-gray-200">
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
               {[...Array(itemsPerPage)].map((_, i) => (
