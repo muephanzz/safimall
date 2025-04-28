@@ -1,7 +1,7 @@
 "use server";
 
 import axios from "axios";
-import { supabase } from "@/lib/supabaseClient"; // adjust import path as needed
+import { supabase } from "@/lib/supabaseClient"; 
 
 interface Item {
   price: number;

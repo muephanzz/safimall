@@ -165,7 +165,7 @@ export default function PaymentForm() {
         return;
       }
 
-      alert("STK push sent successfully");
+      //alert("STK push sent successfully");
       const checkoutRequestId = stkData.CheckoutRequestID;
       console.log("CheckoutRequestID:", checkoutRequestId);
 
