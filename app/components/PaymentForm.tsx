@@ -34,8 +34,6 @@ export default function PaymentForm() {
   const [email, setEmail] = useState("");
   const [dataFromForm, setDataFromForm] = useState({
     mpesa_phone: "",
-    name: "",
-    amount: 0,
   });
 
   const [loading, setLoading] = useState(false);
@@ -154,8 +152,7 @@ export default function PaymentForm() {
       // Send STK Push request with all necessary info
       const { data: stkData, error: stkError } = await sendStkPush({
         mpesa_number: dataFromForm.mpesa_phone.trim(),
-        name: dataFromForm.name.trim(),
-        amount: dataFromForm.amount,
+        amount,
         user_id: userData.user.id,
         checkoutItems,
         shipping_address: shippingAddress,
@@ -266,26 +263,6 @@ export default function PaymentForm() {
 
               <div>
                 <label
-                  htmlFor="name"
-                  className="text-sm font-medium mb-1 block"
-                >
-                  Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  required
-                  value={dataFromForm.name}
-                  onChange={(e) =>
-                    setDataFromForm({ ...dataFromForm, name: e.target.value })
-                  }
-                  placeholder="John Doe"
-                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
-                />
-              </div>
-
-              <div>
-                <label
                   htmlFor="mpesa_phone"
                   className="text-sm font-medium mb-1 block"
                 >
@@ -300,26 +277,6 @@ export default function PaymentForm() {
                     setDataFromForm({ ...dataFromForm, mpesa_phone: e.target.value })
                   }
                   placeholder="Enter M-Pesa phone number"
-                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="amount"
-                  className="text-sm font-medium mb-1 block"
-                >
-                  Amount (Ksh)
-                </label>
-                <input
-                  id="amount"
-                  type="number"
-                  required
-                  value={dataFromForm.amount}
-                  onChange={(e) =>
-                    setDataFromForm({ ...dataFromForm, amount: Number(e.target.value) })
-                  }
-                  placeholder="Enter amount"
                   className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
                 />
               </div>

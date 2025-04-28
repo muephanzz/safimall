@@ -28,7 +28,6 @@ export const sendStkPush = async (body: Params) => {
 
   const {
     mpesa_number: phoneNumber,
-    name,
     amount,
     user_id,
     checkoutItems,
