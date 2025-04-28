@@ -77,7 +77,7 @@ export default function Home() {
       </section>
 
 
-      <section className="relative w-full bg-gradient-to-r from-blue-100 to-indigo-100 overflow-hidden shadow-sm">
+     {/* <section className="relative w-full bg-gradient-to-r from-blue-100 to-indigo-100 overflow-hidden shadow-sm">
         <div className="max-w-7xl mx-auto flex flex-col-reverse md:flex-row items-center justify-between gap-8 px-4 sm:px-8 py-12 md:py-20">
           <div className="flex-1">
             <motion.h1
@@ -115,7 +115,7 @@ export default function Home() {
             <HeroCarousel />
           </motion.div>
         </div>
-      </section>
+      </section>   */}
 
       {/* FEATURED PRODUCTS */}
       {featured && featured.length > 0 && (
@@ -207,7 +207,7 @@ export default function Home() {
       </main>
 
       <ChatView />
-      <Footer />
+      <Footer />   
     </div>
   );
 }
