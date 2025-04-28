@@ -37,7 +37,7 @@ export default function ChatWindow({
       className={`fixed bg-white flex flex-col shadow-xl ${
         isMobile
           ? "inset-0 h-screen w-full"
-          : "bottom-6 right-8 h-[420px] w-[320px] rounded-3xl"
+          : "bottom-6 right-8 h-[440px] w-[340px] rounded-3xl"
       }`}
       style={{ maxHeight: isMobile ? "100vh" : "90vh" }}
     >
@@ -87,7 +87,7 @@ export default function ChatWindow({
                       : "bg-gradient-to-tr from-blue-700 to-indigo-600 text-white"
                   }`}
                 >
-                  <p>{msg.text}</p>
+                  <p>{msg.user_message}</p>
                   {msg.image_url && (
                     <img
                       src={msg.image_url}
@@ -132,10 +132,14 @@ export default function ChatWindow({
               boxShadow:
                 "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
               borderRadius: 16,
-              overflow: "hidden",
+              overflowy: "scroll",
             }}
           >
-            <EmojiPicker onEmojiClick={onEmojiClick} />
+          <EmojiPicker
+              onEmojiClick={onEmojiClick}
+              height={360} // Decrease height to 250px (default is 450)
+              width={320}
+            />
           </div>
         )}
 
