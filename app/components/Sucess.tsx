@@ -1,8 +1,14 @@
 export default function PaymentSuccess() {
-    return (
-      <div className="space-y-2 text-center text-black p-10 bg-gray-100">
-        <h1>Your Payment was processed succesfully</h1>
-        <h1>Thank You for your Donation</h1>
-      </div>
-    );
-  }
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-green-50">
+      <h1 className="text-4xl font-bold text-green-700 mb-4">Payment Successful!</h1>
+      <p className="text-lg text-green-800 mb-8">Thank you for your purchase. Your order is being processed.</p>
+      <a
+        href="/"
+        className="px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        Continue Shopping
+      </a>
+    </div>
+  );
+}

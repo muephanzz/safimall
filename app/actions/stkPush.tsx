@@ -11,7 +11,6 @@ interface Item {
 
 interface Params {
   mpesa_number: string;
-  name: string;
   amount: number;
   user_id: string;
   checkoutItems: Item[];
