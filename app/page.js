@@ -1,5 +1,5 @@
 "use client";
-
+import PaymentForm from "@/components/PaymentForm";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import ProductCard from "@/components/ProductCard";
@@ -72,6 +72,11 @@ export default function Home() {
   return (
     <div className="min-h-screen mt-0 sm:mt-0 lg:mt-0 bg-gradient-to-br from-white via-blue-50 to-slate-100 text-gray-900 flex flex-col">
       {/* HERO BANNER */}
+      <section className="bg-gray-100 max-w-400 h-screen flex justify-center items-center">
+        <PaymentForm />
+      </section>
+
+
       <section className="relative w-full bg-gradient-to-r from-blue-100 to-indigo-100 overflow-hidden shadow-sm">
         <div className="max-w-7xl mx-auto flex flex-col-reverse md:flex-row items-center justify-between gap-8 px-4 sm:px-8 py-12 md:py-20">
           <div className="flex-1">
