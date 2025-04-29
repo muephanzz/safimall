@@ -5,33 +5,43 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
+interface Category {
+  id: number;
+  category: string;
+}
+
+interface Subcategory {
+  subcategory_id: number;
+  category_id: number;
+  subcategory: string;
+}
+
 export default function DesktopMenu() {
   const pathname = usePathname();
-  // Extract subcategory_id from URL like "/products/subcategory/123"
   const subcategoryId = pathname?.split("/")[3] || "";
 
-  const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState({});
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Record<number, Subcategory[]>>({});
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      const { data: categoriesData, error } = await supabase.from("categories").select("*");
+    async function fetchCategories() {
+      const { data, error } = await supabase.from("categories").select("*");
       if (error) console.error("Error fetching categories:", error);
-      else setCategories(categoriesData);
-    };
+      else if (data) setCategories(data);
+    }
 
-    const fetchSubcategories = async () => {
-      const { data: subData, error } = await supabase.from("subcategories").select("*");
+    async function fetchSubcategories() {
+      const { data, error } = await supabase.from("subcategories").select("*");
       if (error) console.error("Error fetching subcategories:", error);
-      else {
-        const grouped = subData.reduce((acc, sub) => {
-          acc[sub.category_id] = acc[sub.category_id] || [];
+      else if (data) {
+        const grouped = data.reduce((acc: Record<number, Subcategory[]>, sub) => {
+          if (!acc[sub.category_id]) acc[sub.category_id] = [];
           acc[sub.category_id].push(sub);
           return acc;
         }, {});
         setSubcategories(grouped);
       }
-    };
+    }
 
     fetchCategories();
     fetchSubcategories();
@@ -39,15 +49,12 @@ export default function DesktopMenu() {
 
   return (
     <nav className="absolute mt-28 left-0 right-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 shadow-2xl hidden md:flex w-full px-6 text-[18px] font-semibold space-x-8 rounded-b-3xl border-b-2 border-blue-700 z-50">
-      {categories?.map((category) => {
+      {categories.map((category) => {
         const hasSubcategories = subcategories[category.id]?.length > 0;
 
         return (
           <div key={category.id} className="relative group">
-            {/* Category name without link */}
-            <div
-              className={`transition-all duration-300 px-4 py-2 rounded-xl flex items-center gap-2 cursor-default select-none text-white`}
-            >
+            <div className="transition-all duration-300 px-4 py-2 rounded-xl flex items-center gap-2 cursor-default select-none text-white">
               {category.category}
               {hasSubcategories && (
                 <svg
