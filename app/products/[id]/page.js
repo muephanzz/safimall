@@ -194,7 +194,7 @@ export default function ProductDetails() {
                         height={40} // Reduced height
                         alt="Thumbnail"
                         onClick={() => setMainImage(img)}
-                        className={`cursor-pointer block sm:hidden lg-block rounded-xl border-4 transition-all duration-300 ${mainImage === img ? "border-blue-500 shadow-md" : "border-transparent hover:border-blue-300"}`}
+                        className={`cursor-pointer block md:hidden rounded-xl border-4 transition-all duration-300 ${mainImage === img ? "border-blue-500 shadow-md" : "border-transparent hover:border-blue-300"}`}
                       />
                     </motion.div>
                   ))}

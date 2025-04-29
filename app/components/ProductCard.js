@@ -32,7 +32,7 @@ export default function ProductCard({ product, loading }) {
           />
           {product.attributes?.state && (
             <span className="absolute top-3 left-3 bg-gradient-to-r from-indigo-600 to-purple-700 text-white text-xs font-semibold px-3 py-1 rounded-xl shadow-lg z-20 select-none">
-              {product.attributes.state}
+              {product?.attributes?.state}
             </span>
           )}
         </div>
