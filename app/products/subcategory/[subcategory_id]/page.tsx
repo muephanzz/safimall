@@ -1,16 +1,13 @@
-// /app/products/subcategory/[subcategory_id]/page.tsx
 import { supabase } from "@/lib/supabaseClient";
 
 interface Props {
-  params: {
-    subcategory_id: string;
-  };
+  params: Promise<{ subcategory_id: string }>;
 }
 
 export default async function SubcategoryPage({ params }: Props) {
-  const { subcategory_id } = params;
+  // Await params before destructuring
+  const { subcategory_id } = await params;
 
-  // Fetch products for the given subcategory
   const { data: products, error } = await supabase
     .from("products")
     .select("*")
@@ -36,7 +33,6 @@ export default async function SubcategoryPage({ params }: Props) {
           {products.map((product) => (
             <div key={product.product_id} className="border rounded-lg p-4 shadow hover:shadow-lg transition">
               <h2 className="font-semibold text-lg mb-2">{product.name}</h2>
-              {/* Show product image if available */}
               {product.image_urls?.[0] && (
                 <img
                   src={product.image_urls[0]}
@@ -46,7 +42,6 @@ export default async function SubcategoryPage({ params }: Props) {
                 />
               )}
               <p className="mt-2 font-bold text-indigo-700">${product.price}</p>
-              {/* Add more product details or a link to product page */}
             </div>
           ))}
         </div>
