@@ -25,13 +25,13 @@ export default function MobileMenu() {
 
   useEffect(() => {
     async function fetchCategories() {
-      const { data, error } = await supabase.from<Category>("categories").select("*");
+      const { data, error } = await supabase.from("categories").select("*");
       if (error) console.error("Error fetching categories:", error);
       else if (data) setCategories(data);
     }
 
     async function fetchSubcategories() {
-      const { data, error } = await supabase.from<Subcategory>("subcategories").select("*");
+      const { data, error } = await supabase.from("subcategories").select("*");
       if (error) console.error("Error fetching subcategories:", error);
       else if (data) {
         const grouped = data.reduce((acc: Record<number, Subcategory[]>, sub) => {
@@ -53,8 +53,8 @@ export default function MobileMenu() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Handle category click: toggle expand + navigate
-  const handleCategoryClick = (categoryId: number) => {
+  // Toggle expand/collapse on category click
+  const toggleCategory = (categoryId: number) => {
     setExpandedCategoryId((prev) => (prev === categoryId ? null : categoryId));
   };
 
@@ -112,33 +112,25 @@ export default function MobileMenu() {
 
             return (
               <div key={category.id} className="flex flex-col">
-                <div className="flex items-center justify-between">
-                  <Link
-                    href={`/products/category?category_id=${category.id}`}
-                    onClick={() => {
-                      closeMenuAndScrollTop();
-                      setExpandedCategoryId(null); // collapse on navigation
-                    }}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-100 hover:text-indigo-700 font-semibold transition flex-grow"
-                  >
+                <button
+                  type="button"
+                  onClick={() => toggleCategory(category.id)}
+                  aria-expanded={isExpanded}
+                  aria-controls={`subcategory-list-${category.id}`}
+                  className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-100 hover:text-indigo-700 font-semibold transition w-full"
+                >
+                  <div className="flex items-center gap-3">
                     <Tag size={20} />
-                    {category.category}
-                  </Link>
-
-                  {hasSubs && (
-                    <button
-                      onClick={() => handleCategoryClick(category.id)}
-                      aria-label={isExpanded ? "Collapse subcategories" : "Expand subcategories"}
-                      className="p-2 text-gray-600 hover:text-indigo-600 focus:outline-none"
-                      type="button"
-                    >
-                      {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                    </button>
-                  )}
-                </div>
+                    <span>{category.category}</span>
+                  </div>
+                  {hasSubs && (isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />)}
+                </button>
 
                 {isExpanded && hasSubs && (
-                  <ul className="pl-10 mt-1 flex flex-col space-y-1 max-h-48 overflow-y-auto">
+                  <ul
+                    id={`subcategory-list-${category.id}`}
+                    className="pl-10 mt-1 flex flex-col space-y-1 max-h-48 overflow-y-auto"
+                  >
                     {subcategories[category.id].map((sub) => (
                       <li key={sub.subcategory_id}>
                         <Link

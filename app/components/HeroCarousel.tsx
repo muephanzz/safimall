@@ -19,7 +19,7 @@ export default function HeroCarousel() {
     async function fetchSlides() {
       const { data, error } = await supabase
         .from("products")
-        .select("image_urls, name")
+        .select("*")
         .order("created_at", { ascending: false })
         .limit(4);
       if (!error && data) {
