@@ -30,7 +30,7 @@ export default function BottomNav() {
     fetchCartCount();
   }, [user]);
 
-  if (!isMobile || pathname === "/chat") return null;
+  if (!isMobile) return null;
 
   const buttonStyle = (active: boolean) =>
     `flex flex-col items-center justify-center text-xs font-semibold transition-transform duration-300 ease-in-out ${

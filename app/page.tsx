@@ -1,20 +1,21 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import React, { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import ProductCard from "@/components/ProductCard";
+import ProductCard, { Product } from "@/components/ProductCard";
 import Pagination from "@/components/Pagination";
 import Footer from "@/components/Footer";
-import ChatView from "@/components/chat/ChatView";
+//import ChatView from "@/components/chat/ChatView";
 import { motion } from "framer-motion";
 import HeroCarousel from "@/components/HeroCarousel";
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
-  const [featured, setFeatured] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [featured, setFeatured] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 60;
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -26,7 +27,7 @@ export default function Home() {
         .select("*")
         .eq("featured", true);
 
-      let featuredList = featuredData || [];
+      let featuredList: Product[] = featuredData || [];
 
       if (featuredError) {
         console.error("Error fetching featured products:", featuredError);
@@ -47,19 +48,18 @@ export default function Home() {
       const start = (currentPage - 1) * itemsPerPage;
       const end = start + itemsPerPage - 1;
 
-        let query = supabase
+      let query = supabase
         .from("products")
         .select("*", { count: "exact" })
-        .neq("featured", true); // Only non-featured products
-      
+        .neq("featured", true);
 
       const { data, count, error } = await query.range(start, end);
 
       if (error) {
         console.error("Error fetching products:", error);
       } else {
-        setProducts(data);
-        setTotalPages(Math.ceil(count / itemsPerPage));
+        setProducts(data as Product[]);
+        setTotalPages(Math.ceil((count || 0) / itemsPerPage));
       }
 
       setLoading(false);
@@ -89,7 +89,8 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
-              Shop the latest trends, top brands, and exclusive deals. Fast delivery, secure checkout, and 24/7 support.
+              Shop the latest trends, top brands, and exclusive deals. Fast delivery,
+              secure checkout, and 24/7 support.
             </motion.p>
             <motion.a
               href="#products"
@@ -113,9 +114,8 @@ export default function Home() {
         </div>
       </section>
 
-
       {/* FEATURED PRODUCTS */}
-      {featured && featured.length > 0 && (
+      {featured.length > 0 && (
         <div className="max-w-7xl mx-auto w-full px-4 md:px-0 sm:px-8">
           <motion.h2
             className="text-xl md:text-2xl font-bold mb-4 text-gray-800"
@@ -125,26 +125,26 @@ export default function Home() {
           >
             Featured Products
           </motion.h2>
-          <section className="//bg-white/80 backdrop-blur-md p-6 sm:p-0 lg:p-6 shadow-xl //border border-gray-200">
-          <motion.div
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            {featured.map((product) => (
-              <motion.div
-                key={product.product_id}
-                whileHover={{ scale: 1.04, zIndex: 10 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="relative"
-              >
-                <ProductCard product={product} />
-              </motion.div>
-            ))}
-          </motion.div>
-        </section>
-      </div>
+          <section>
+            <motion.div
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              {featured.map((product) => (
+                <motion.div
+                  key={product.product_id}
+                  whileHover={{ scale: 1.04, zIndex: 10 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                  className="relative"
+                >
+                  <ProductCard product={product} loading={false} />
+                </motion.div>
+              ))}
+            </motion.div>
+          </section>
+        </div>
       )}
 
       {/* MAIN PRODUCT GRID */}
@@ -157,19 +157,11 @@ export default function Home() {
         >
           All Products
         </motion.h2>
-        <section className="//bg-white/80 backdrop-blur-md p-6 md:px-0 shadow-xl //border border-gray-200">
+        <section>
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
               {[...Array(itemsPerPage)].map((_, i) => (
-                <div
-                  key={i}
-                  className="bg-gradient-to-tr from-gray-200 to-gray-100 p-4 shadow-lg animate-pulse flex flex-col"
-                >
-                  <div className="h-48 bg-gray-300 mb-4" />
-                  <div className="h-5 w-3/4 bg-gray-300 mb-3" />
-                  <div className="h-4 w-full bg-gray-200 mb-2" />
-                  <div className="h-6 w-1/2 bg-indigo-200" />
-                </div>
+                <ProductCard key={i} product={{} as Product} loading={true} />
               ))}
             </div>
           ) : (
@@ -186,7 +178,7 @@ export default function Home() {
                   transition={{ type: "spring", stiffness: 300 }}
                   className="relative"
                 >
-                  <ProductCard product={product} />
+                  <ProductCard product={product} loading={false} />
                 </motion.div>
               ))}
             </motion.div>
@@ -203,8 +195,7 @@ export default function Home() {
         </div>
       </main>
 
-      <ChatView />
-      <Footer />   
+      <Footer />
     </div>
   );
 }

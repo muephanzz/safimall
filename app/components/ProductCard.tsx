@@ -2,7 +2,24 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
-export default function ProductCard({ product, loading }) {
+export interface Product {
+  product_id: number;
+  name: string;
+  price: number;
+  image_urls: string[];
+  description?: string;
+  attributes?: {
+    state?: string;
+    [key: string]: any;
+  };
+}
+
+interface ProductCardProps {
+  product: Product;
+  loading: boolean;
+}
+
+export default function ProductCard({ product, loading }: ProductCardProps) {
   if (loading) {
     return (
       <div className="animate-pulse bg-white border border-gray-200 rounded-2xl p-5 shadow-md">
@@ -15,7 +32,11 @@ export default function ProductCard({ product, loading }) {
   }
 
   return (
-    <Link href={`/products/${product.product_id}`} className="group block" aria-label={`View details for ${product.name}`}>
+    <Link
+      href={`/products/${product.product_id}`}
+      className="group block"
+      aria-label={`View details for ${product.name}`}
+    >
       <motion.div
         className="bg-white hover:shadow-md hover:rounded-md border border-transparent transition-al pb-2 px-1 overflow-hidden relative flex flex-col"
         whileHover={{ scale: 1.05 }}
@@ -32,17 +53,23 @@ export default function ProductCard({ product, loading }) {
           />
           {product.attributes?.state && (
             <span className="absolute top-3 left-3 bg-gradient-to-r from-indigo-600 to-purple-700 text-white text-xs font-semibold px-3 py-1 rounded-xl shadow-lg z-20 select-none">
-              {product?.attributes?.state}
+              {product.attributes.state}
             </span>
           )}
         </div>
 
         <div className="mt-1 flex flex-col flex-grow">
-          <h3 className="text-lg font-semibold text-gray-900 truncate" title={product.name}>
+          <h3
+            className="text-lg font-semibold text-gray-900 truncate"
+            title={product.name}
+          >
             {product.name}
           </h3>
 
-          <p className="text-sm text-gray-500 mt- line-clamp-2" title={product.description || "No description available"}>
+          <p
+            className="text-sm text-gray-500 mt- line-clamp-2"
+            title={product.description || "No description available"}
+          >
             {product.description || "No description available"}
           </p>
 

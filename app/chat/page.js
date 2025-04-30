@@ -1,6 +1,6 @@
 "use client";
 
-import { WhatsApp, Phone, MessageCircle, Mail } from "lucide-react";
+import WhatsApp, { Phone, MessageCircle, Mail } from "lucide-react";
 
 const contacts = [
   {

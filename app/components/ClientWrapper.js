@@ -17,7 +17,7 @@ function LayoutWrapper({ children }) {
   const hideNav = 
   ["/signin", "/signup", "/reset-password", 
   "/admin/dashboard", "/admin/products", "/admin/orders", 
-  "/admin/chat", "/access-denied", "/coming-soon"]
+  "/admin/chat", "/error", "/not-found", "/access-denied", "/coming-soon"]
   .includes(cleanPath);
   
   return (

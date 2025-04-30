@@ -1,6 +1,6 @@
 import { Inter, Roboto_Mono } from "next/font/google";
 import "@/styles/globals.css";
-import { Suspense } from "react";
+import React, { ReactNode, Suspense } from "react";
 import ClientWrapper from "@/components/ClientWrapper";
 import Loading from "./loading";
 import { AuthProvider } from "@/context/AuthContext";
@@ -20,7 +20,11 @@ export const metadata = {
   description: "online-shopping",
 };
 
-export default function RootLayout({ children }) {
+interface RootLayoutProps {
+  children: ReactNode;
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" className={`${inter.variable} ${mono.variable}`}>
       <body className="antialiased">
