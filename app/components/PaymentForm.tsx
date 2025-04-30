@@ -192,7 +192,7 @@ export default function PaymentForm() {
       ) : success ? (
         <PaymentSuccess />
       ) : (
-        <div className="mt-28 max-w-6xl mx-auto p-6 bg-gradient-to-br from-white to-slate-100 shadow-2xl rounded-3xl border border-gray-200">
+        <div className="mt-28 p-6 max-w-6xl mx-auto bg-gradient-to-br from-white to-slate-100 shadow-2xl rounded-3xl border border-gray-200">
           <div className="bg-white shadow-2xl rounded-3xl p-6 sm:p-10 max-w-lg mx-auto border border-blue-100 transition-all duration-500">
             <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-blue-800 mb-8 tracking-tight">
               Secure Checkout

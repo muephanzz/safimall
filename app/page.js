@@ -116,7 +116,7 @@ export default function Home() {
 
       {/* FEATURED PRODUCTS */}
       {featured && featured.length > 0 && (
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto w-full px-4 md:px-0 sm:px-8">
           <motion.h2
             className="text-xl md:text-2xl font-bold mb-4 text-gray-800"
             initial={{ opacity: 0, y: 20 }}
@@ -157,7 +157,7 @@ export default function Home() {
         >
           All Products
         </motion.h2>
-        <section className="//bg-white/80 backdrop-blur-md p-6 shadow-xl //border border-gray-200">
+        <section className="//bg-white/80 backdrop-blur-md p-6 md:px-0 shadow-xl //border border-gray-200">
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
               {[...Array(itemsPerPage)].map((_, i) => (

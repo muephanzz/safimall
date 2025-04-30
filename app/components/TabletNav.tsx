@@ -129,7 +129,7 @@ export default function MobileMenu() {
                 {isExpanded && hasSubs && (
                   <ul
                     id={`subcategory-list-${category.id}`}
-                    className="pl-10 mt-1 flex flex-col space-y-1 max-h-48 overflow-y-auto"
+                    className="pl-10 mt-1 flex flex-col space-y-1"
                   >
                     {subcategories[category.id].map((sub) => (
                       <li key={sub.subcategory_id}>
