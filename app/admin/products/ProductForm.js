@@ -189,9 +189,104 @@ export default function ProductForm({
       <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Product Details</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* ...inputs for name, phone, description, stock, price, category, subcategory */}
-          {/* Use handleChange for all */}
-        </div>
+          <div className="space-y-2">
+              <label htmlFor="name" className="block text-sm font-medium">
+                  Name
+              </label>
+              <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Product Name"
+                  value={newProduct.name}
+                  onChange={handleChange}
+                  required
+                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              />
+          </div>
+          <div className="space-y-2">
+              <label htmlFor="category" className="block text-sm font-medium">
+                  Category
+              </label>
+              <select
+                name="category_id"
+                onChange={handleChange}
+                value={newProduct.category_id}
+              >
+                <option value="">Select Category</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.category}</option>
+                ))}
+              </select>
+          </div>
+          <div className="space-y-2">
+              <label htmlFor="subcategory" className="block text-sm font-medium">
+                  Subcategory
+              </label>
+              <select
+                  id="subcategory"
+                  name="subcategory_id"
+                  onChange={handleChange}
+                  value={newProduct.subcategory_id}
+                  className="..."
+                  >
+                  <option value="">Select Subcategory</option>
+                  {filteredSubcategories.map((sub) => (
+                      <option key={sub.subcategory_id} value={sub.subcategory_id}>
+                      {sub.subcategory}
+                      </option>
+                  ))}
+                  </select>
+          </div>
+          <div className="space-y-2">
+              <label htmlFor="stock" className="block text-sm font-medium">
+                  Stock
+              </label>
+              <input
+                  type="number"
+                  id="stock"
+                  name="stock"
+                  min={1}
+                  placeholder="Stock"
+                  value={newProduct.stock}
+                  onChange={handleChange}
+                  required
+                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              />
+          </div>
+          <div className="space-y-2">
+              <label htmlFor="phone" className="block text-sm font-medium">
+                  Phone
+              </label>
+              <input
+                  type="text"
+                  id="phone"
+                  name="phone"
+                  maxLength={10}
+                  placeholder="Seller's Phone Number"
+                  value={newProduct.phone}
+                  onChange={handleChange}
+                  required
+                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              />
+          </div>
+          <div className="space-y-2">
+              <label htmlFor="price" className="block text-sm font-medium">
+                  Price
+              </label>
+              <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  min={1}
+                  placeholder="Price"
+                  value={newProduct.price}
+                  onChange={handleChange}
+                  required
+                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              />
+          </div>
+      </div>
       </section>
       {/* Attributes */}
       <AttributeSelector
