@@ -1,4 +1,3 @@
-// app/components/BottomNav.tsx
 "use client";
 
 import { Home, Menu, ShoppingCart, User, MessageSquare } from "lucide-react";

@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import ImageUploader from "./ImageUploader";
 import AttributeSelector from "./AttributeSelector";
 import SpecificationFields from "./SpecificationFields";
-import { Button } from "@/components/ui/Button"; // adjust path as needed
+import { Button } from "@/components/ui/button"; // adjust path as needed
 
 const defaultAttributes = [
   { id: 1, name: "Color" },
