@@ -1,6 +1,7 @@
+
 "use client";
-import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/lib/supabaseClient";
+
+import React, { useEffect, useState, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 
@@ -9,54 +10,40 @@ type Slide = {
   alt: string;
 };
 
+const staticSlides: Slide[] = [
+  { src: "/carousel/slide1.jpg", alt: "Modern Living Room" },
+  { src: "/carousel/slide2.jpg", alt: "Stylish Kitchen Design" },
+  { src: "/carousel/slide3.jpg", alt: "Cozy Bedroom Setup" },
+  { src: "/carousel/slide4.jpg", alt: "Outdoor Patio Ideas" },
+];
+
 export default function HeroCarousel() {
-  const [slides, setSlides] = useState<Slide[]>([]);
+  const [slides] = useState<Slide[]>(staticSlides);
   const [current, setCurrent] = useState(0);
   const timeoutRef = useRef<number | null>(null);
   const delay = 5000;
-
-  useEffect(() => {
-    async function fetchSlides() {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(4);
-      if (!error && data) {
-        const fetchedSlides = data
-          .map((p) =>
-            p.image_urls && p.image_urls.length
-              ? { src: p.image_urls[0], alt: p.name }
-              : null
-          )
-          .filter((slide): slide is Slide => !!slide);
-        setSlides(fetchedSlides);
-      }
-    }
-    fetchSlides();
-  }, []);
 
   const resetTimeout = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
   };
 
   useEffect(() => {
-    if (slides.length === 0) return;
     resetTimeout();
     timeoutRef.current = window.setTimeout(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
     }, delay);
-    return resetTimeout;
-  }, [current, slides]);
 
-  if (!slides.length) {
+    return resetTimeout;
+  }, [current, slides.length]);
+
+  if (slides.length === 0) {
     return (
       <div className="flex items-center justify-center w-full h-60 bg-gray-100 rounded-xl animate-pulse" />
     );
   }
 
   return (
-    <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl aspect-[4/5] rounded-xl overflow-hidden shadow-2xl border-4 border-white bg-gray-200 mx-auto">
+    <div className="relative w-full //max-w-xs //sm:max-w-sm //md:max-w-md //lg:max-w-lg //xl:max-w-xl aspect-[14/5] md:aspect-[10/5] lg:aspect-[10/5] rounded-xl overflow-hidden shadow-2xl border-4 border-white bg-gray-200 mx-auto">
       <AnimatePresence mode="wait">
         <motion.div
           key={slides[current].src}
@@ -81,18 +68,7 @@ export default function HeroCarousel() {
           </div>
         </motion.div>
       </AnimatePresence>
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-        {slides.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => setCurrent(idx)}
-            className={`w-3 h-3 rounded-full border-2 border-white transition-all duration-200 ${
-              idx === current ? "bg-indigo-500 scale-125" : "bg-white/70"
-            }`}
-            aria-label={`Go to slide ${idx + 1}`}
-          />
-        ))}
-      </div>
     </div>
   );
 }
+

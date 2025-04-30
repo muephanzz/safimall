@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Facebook, Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
 import { FaCcVisa, FaCcMastercard, FaPaypal } from "react-icons/fa";
 import Logo from "./Logo";
 
-export default function Footer() {
+const Footer: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -19,14 +19,14 @@ export default function Footer() {
   if (isMobile) return null;
 
   return (
-    <footer className="bg-gradient-to-tr from-indigo-900 via-blue-900 to-indigo-800 text-gray-200 px-4 py-12 md:px-12 shadow-inner select-none">
+    <footer className="bg-gradient-to-tr from-purple-900 via-gray-900 to-gray-800 text-gray-200 px-4 py-12 md:px-12 shadow-inner select-none">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
         {/* Logo & About */}
         <div className="md:col-span-1 flex flex-col gap-4">
           <Logo width={170} height={56} />
           <h2 className="text-xl font-bold text-blue-400 mt-2">About SafiMall</h2>
           <p className="text-gray-300 text-sm leading-relaxed">
-            <span className="font-semibold text-white">SafiMall</span> is your trusted destination for a clean, seamless, and premium shopping experience. Discover quality products, fast delivery, and genuine service — all in one place.
+            <span className="font-semibold text-white">SafiMall</span> is your trusted destination for a clean, seamless, and premium shopping experience. Discover quality products, fast delivery, and genuine service - all in one place.
           </p>
           <p className="mt-2 text-sm text-gray-300">
             Fresh finds. Secure payments. Reliable support. Shop with confidence at SafiMall.
@@ -179,4 +179,6 @@ export default function Footer() {
       </div>
     </footer>
   );
-}
+};
+
+export default Footer;
