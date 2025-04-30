@@ -161,7 +161,7 @@ export default function ProductDetails() {
             {/* Main image and thumbnails */}
             <div className="relative">
               <motion.div
-                className="relative rounded-2xl shadow-lg overflow-hidden bg-gradient-to-br from-gray-50 to-white border border-gray-200"
+                className="relative  lg:rounded-2xl shadow-lg overflow-hidden bg-gradient-to-br from-gray-50 to-white border border-gray-200"
                 whileHover={{ scale: 1.03 }}
                 transition={{ duration: 0.3 }}
                 onTouchStart={handleTouchStart}
@@ -194,7 +194,7 @@ export default function ProductDetails() {
                         height={40} // Reduced height
                         alt="Thumbnail"
                         onClick={() => setMainImage(img)}
-                        className={`cursor-pointer block md:hidden rounded-xl border-4 transition-all duration-300 ${mainImage === img ? "border-blue-500 shadow-md" : "border-transparent hover:border-blue-300"}`}
+                        className={`cursor-pointer  border-4 transition-all duration-300 ${mainImage === img ? "border-blue-500 shadow-md" : "border-transparent hover:border-blue-300"}`}
                       />
                     </motion.div>
                   ))}
@@ -240,7 +240,7 @@ export default function ProductDetails() {
                 <button
                   onClick={handleAddToCart}
                   disabled={adding}
-                  className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-md hover:shadow-lg transition duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-orange-600 to-purple-600 text-white rounded-xl shadow-md hover:shadow-lg transition duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {adding ? "Adding..." : "Add to Cart"}
                 </button>
@@ -259,7 +259,7 @@ export default function ProductDetails() {
                     router.push("/orders/checkout");
                   }}
                   disabled={checking}
-                  className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-blue-400 to-indigo-400 text-white rounded-xl shadow-md hover:shadow-lg transition duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-orange-400 to-purple-400 text-white rounded-xl shadow-md hover:shadow-lg transition duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   Buy Now
                 </button>
@@ -274,7 +274,7 @@ export default function ProductDetails() {
                 <motion.button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`text-lg font-semibold pb-2 capitalize transition duration-300 ${activeTab === tab ? "text-blue-700 border-b-2 border-blue-700" : "text-gray-500 hover:text-blue-500"
+                  className={`text-lg font-semibold pb-2 capitalize transition duration-300 ${activeTab === tab ? "text-orange-700 border-b-2 border-orange-700" : "text-gray-500 hover:text-orange-500"
                     }`}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}

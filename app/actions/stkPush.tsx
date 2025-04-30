@@ -1,7 +1,7 @@
 "use server";
 
 import axios from "axios";
-import { supabase } from "@/lib/supabaseClient"; 
+import { supabase } from "@/lib/supabaseClient";
 
 interface Item {
   price: number;
@@ -36,7 +36,6 @@ export const sendStkPush = async (body: Params) => {
   } = body;
 
   try {
-    // Generate authorization token
     const auth: string = Buffer.from(
       `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`
     ).toString("base64");
@@ -44,20 +43,16 @@ export const sendStkPush = async (body: Params) => {
     const resp = await axios.get(
       `${MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
       {
-        headers: {
-          authorization: `Basic ${auth}`,
-        },
-        timeout: 20000, // 20 seconds, adjust as needed
+        headers: { authorization: `Basic ${auth}` },
+        timeout: 20000,
       }
     );
 
     const token = resp.data.access_token;
 
-    // Clean and format phone number for M-Pesa
     const cleanedNumber = phoneNumber.replace(/\D/g, "");
     const formattedPhone = `254${cleanedNumber.slice(-9)}`;
 
-    // Timestamp and password for STK push
     const date = new Date();
     const timestamp =
       date.getFullYear().toString() +
@@ -71,7 +66,6 @@ export const sendStkPush = async (body: Params) => {
       process.env.MPESA_SHORTCODE! + process.env.MPESA_PASSKEY + timestamp
     ).toString("base64");
 
-    // Insert initial payment record with status 'pending'
     const { data: paymentData, error: paymentError } = await supabase
       .from("payments")
       .insert({
@@ -89,7 +83,6 @@ export const sendStkPush = async (body: Params) => {
       return { error: "Database error inserting payment" };
     }
 
-    // Insert initial order record with status 'pending'
     const { data: orderData, error: orderError } = await supabase
       .from("orders")
       .insert({
@@ -99,19 +92,20 @@ export const sendStkPush = async (body: Params) => {
         status: "pending",
         shipping_address,
         email,
-        items: checkoutItems, // store as JSON
+        items: checkoutItems,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
       .select()
       .single();
 
+    const orderId = orderData?.order_id;
+
     if (orderError) {
       console.error("Error inserting order:", orderError);
       return { error: "Database error inserting order" };
     }
 
-    // Build the STK Push request payload
     const stkPushPayload = {
       BusinessShortCode: process.env.MPESA_SHORTCODE,
       Password: password,
@@ -122,24 +116,20 @@ export const sendStkPush = async (body: Params) => {
       PartyB: process.env.MPESA_SHORTCODE,
       PhoneNumber: formattedPhone,
       CallBackURL: process.env.MPESA_CALLBACK_URL,
-      AccountReference: user_id, // Use user_id or any identifier you want
+      AccountReference: user_id.slice(0, 6),
       TransactionDesc: `Payment for order with ${checkoutItems.length} items, shipping to ${shipping_address}, email: ${email}`,
     };
 
-    // Call M-Pesa STK Push API
     const response = await axios.post(
       `${MPESA_BASE_URL}/mpesa/stkpush/v1/processrequest`,
       stkPushPayload,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
 
-    // Update payment record with CheckoutRequestID from M-Pesa response
     const checkoutRequestId = response.data.CheckoutRequestID;
-
+  
     await supabase
       .from("payments")
       .update({
@@ -148,7 +138,6 @@ export const sendStkPush = async (body: Params) => {
       })
       .eq("id", paymentData.id);
 
-    // Optionally update orders table with mpesa_checkout_request_id if you track it there
     await supabase
       .from("orders")
       .update({

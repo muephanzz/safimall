@@ -127,7 +127,7 @@ export default function Home() {
           </motion.h2>
           <section>
             <motion.div
-              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 lg:gap-4 sm:gap-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
@@ -159,14 +159,14 @@ export default function Home() {
         </motion.h2>
         <section>
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 lg:grid-cols-5 gap-2 lg:gap-4 sm:gap-3">
               {[...Array(itemsPerPage)].map((_, i) => (
                 <ProductCard key={i} product={{} as Product} loading={true} />
               ))}
             </div>
           ) : (
             <motion.div
-              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 lg:gap-4 sm:gap-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}

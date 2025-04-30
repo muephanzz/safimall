@@ -43,7 +43,7 @@ export default function HeroCarousel() {
   }
 
   return (
-    <div className="relative w-full //max-w-xs //sm:max-w-sm //md:max-w-md //lg:max-w-lg //xl:max-w-xl aspect-[14/5] md:aspect-[10/5] lg:aspect-[10/5] rounded-xl overflow-hidden shadow-2xl border-4 border-white bg-gray-200 mx-auto">
+    <div className="relative w-full //max-w-xs //sm:max-w-sm //md:max-w-md //lg:max-w-lg //xl:max-w-xl aspect-[9/5] md:aspect-[9/5] lg:aspect-[10/5] overflow-hidden shadow-2xl border-4 border-white bg-gray-200 mx-auto">
       <AnimatePresence mode="wait">
         <motion.div
           key={slides[current].src}
