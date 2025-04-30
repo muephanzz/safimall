@@ -77,8 +77,8 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-white to-gray-200 p-6 sm:p-0 lg:p-6">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl px-8 py-10">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-white to-gray-200">
+      <div className="w-full max-w-md bg-white shadow-2xl px-8 py-14 rounded">
         <div className="flex flex-col items-center mb-8">
           <Logo width={160} height={54} />
           <h2 className="mt-4 text-2xl font-bold text-blue-800 tracking-tight">
@@ -87,21 +87,6 @@ export default function SignInPage() {
           <p className="text-gray-500 mt-1 text-sm">
             Sign in to your SafiMall account
           </p>
-        </div>
-
-        <button
-          onClick={handleGoogle}
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-gray-50 border border-gray-200 text-gray-700 py-2.5 rounded-xl font-medium shadow-sm hover:bg-gray-100 transition mb-6"
-        >
-          <FcGoogle size={22} />
-          <span>Continue with Google</span>
-        </button>
-
-        <div className="flex items-center mb-6">
-          <div className="flex-grow border-t border-gray-200" />
-          <span className="mx-3 text-gray-400 text-xs">or sign in with email</span>
-          <div className="flex-grow border-t border-gray-200" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -154,6 +139,21 @@ export default function SignInPage() {
             Create account
           </a>
         </div>
+
+        <div className="flex items-center my-6">
+          <div className="flex-grow border-t border-gray-200" />
+          <span className="mx-3 text-gray-400 text-xs">or sign in with google</span>
+          <div className="flex-grow border-t border-gray-200" />
+        </div>
+
+        <button
+          onClick={handleGoogle}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 bg-gray-50 border border-gray-200 text-gray-700 py-2.5 rounded-xl font-medium shadow-sm hover:bg-gray-100 transition mb-6"
+        >
+          <FcGoogle size={22} />
+          <span>Continue with Google</span>
+        </button>
       </div>
     </div>
   );
