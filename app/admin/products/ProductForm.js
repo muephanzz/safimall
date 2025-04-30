@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import ImageUploader from "./ImageUploader";
 import AttributeSelector from "./AttributeSelector";
 import SpecificationFields from "./SpecificationFields";
+import { Button } from "@/components/ui/Button"; // adjust path as needed
 
 const defaultAttributes = [
   { id: 1, name: "Color" },
@@ -308,13 +309,13 @@ export default function ProductForm({
         onAddSpecRow={addSpecRow}
       />
       <div className="flex gap-3">
-        <button type="submit" className="btn-primary" disabled={uploading}>
+        <Button type="submit" variant="default" disabled={uploading}>
           {uploading ? "Saving..." : editingProduct ? "Update Product" : "Add Product"}
-        </button>
+        </Button>
         {editingProduct && (
-          <button type="button" className="btn-secondary" onClick={resetEditing}>
+          <Button type="button" variant="outline" onClick={resetEditing}>
             Cancel
-          </button>
+          </Button>
         )}
       </div>
     </form>

@@ -1,4 +1,5 @@
 import { Edit, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/Button"
 
 export default function ProductCard({ product, onEdit, onDelete }) {
   return (
@@ -14,12 +15,24 @@ export default function ProductCard({ product, onEdit, onDelete }) {
         <p className="font-bold text-indigo-700">Ksh {product.price}</p>
       </div>
       <div className="flex gap-2 mt-3">
-        <button onClick={() => onEdit(product)} className="btn-secondary flex items-center gap-1">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1"
+          onClick={() => onEdit(product)}
+        >
           <Edit size={16} /> Edit
-        </button>
-        <button onClick={() => onDelete(product.product_id)} className="btn-danger flex items-center gap-1">
-          <Trash2 size={16} /> Delete
-        </button>
+        </Button>
+      <Button
+        type="button"
+        variant="destructive"
+        size="sm"
+        className="flex items-center gap-1"
+        onClick={() => onDelete(product.product_id)}
+      >
+        <Trash2 size={16} /> Delete
+      </Button>
       </div>
     </div>
   );

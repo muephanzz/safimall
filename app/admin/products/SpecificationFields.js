@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+
 export default function SpecificationFields({ specRows, onSpecChange, onAddSpecRow }) {
     return (
       <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
@@ -20,9 +22,9 @@ export default function SpecificationFields({ specRows, onSpecChange, onAddSpecR
             />
           </div>
         ))}
-        <button type="button" onClick={onAddSpecRow} className="btn-secondary mt-2">
+        <Button type="button" variant="outline" size="sm" className="mt-2" onClick={onAddSpecRow}>
           Add Row
-        </button>
+        </Button>
       </section>
     );
   }
