@@ -7,6 +7,7 @@ import Pagination from "@/components/Pagination";
 import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
 import { motion } from "framer-motion";
+import ChatPage from "@/components/ChatModel";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -198,7 +199,7 @@ export default function Home() {
           />
         </div>
       </main>
-
+      <ChatPage/>
       <Footer />
     </div>
   );
