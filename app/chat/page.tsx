@@ -1,12 +1,26 @@
 "use client";
 
-import { WhatsApp, Phone, MessageCircle, Mail } from "lucide-react";
+import {Phone, MessageCircle, Mail } from "lucide-react";
+
+const whatsappIcon = (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="text-green-500"
+    width="28"
+    height="28"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+  >
+    <path d="M20.52 3.48a11.78 11.78 0 0 0-16.65 0 11.78 11.78 0 0 0-3.48 8.34 11.78 11.78 0 0 0 3.48 8.34l-1.5 4.5 4.5-1.5a11.78 11.78 0 0 0 8.34 3.48 11.78 11.78 0 0 0 8.34-3.48 11.78 11.78 0 0 0 0-16.65zm-8.34 14.1a6.15 6.15 0 0 1-3.3-1.02l-.24-.18-2.1.6.6-2.1-.18-.24a6.15 6.15 0 1 1 5.22 2.94z" />
+  </svg>
+);
+
 
 const contacts = [
   {
     id: 1,
     name: "WhatsApp Support",
-    icon: <WhatsApp className="text-green-500" size={28} />,
+    icon: whatsappIcon,
     url: "https://wa.me/1234567890",
     description: "Chat with us on WhatsApp",
   },
