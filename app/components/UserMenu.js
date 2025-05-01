@@ -182,7 +182,7 @@ export default function UserMenu({ onSignIn }) {
       ) : (
         <Menu as="div" className="relative inline-block text-left">
           <Menu.Button
-            className="inline-flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 p-2 transition"
+            className="inline-flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 p-2 transition"
             aria-label="User menu"
           >
             <User2 className="w-6 h-6 text-white" />

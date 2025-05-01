@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "react-toastify";
 import { FcGoogle } from "react-icons/fc";
+import { Button } from "@/components/ui/button"; // import your Button here
 
-// Logo component (as provided)
-function Logo({ width = 180, height = 60 }) {
+interface FormState {
+  email: string;
+  password: string;
+}
+
+function Logo({ width = 180, height = 60 }: { width?: number; height?: number }) {
   return (
     <svg
       width={width}
@@ -49,12 +54,13 @@ function Logo({ width = 180, height = 60 }) {
 }
 
 export default function SignInPage() {
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState<FormState>({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -62,7 +68,7 @@ export default function SignInPage() {
       if (error) throw error;
       toast.success("Signed in Successfully!");
       window.location.href = "/";
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.message);
     } finally {
       setLoading(false);
@@ -103,7 +109,7 @@ export default function SignInPage() {
               required
               autoComplete="email"
               placeholder="you@example.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 transition"
+              className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 text-gray-900 transition"
             />
           </div>
           <div>
@@ -119,16 +125,18 @@ export default function SignInPage() {
               required
               autoComplete="current-password"
               placeholder="Password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 transition"
+              className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 text-gray-900 transition"
             />
           </div>
-          <button
+          <Button
             type="submit"
+            variant="orange"
+            size="default"
             disabled={loading}
-            className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold shadow-md transition text-lg"
+            aria-label="Sign In"
           >
             {loading ? "Signing in..." : "Sign In"}
-          </button>
+          </Button>
         </form>
 
         <div className="flex justify-between items-center mt-6 text-sm">
@@ -146,14 +154,17 @@ export default function SignInPage() {
           <div className="flex-grow border-t border-gray-200" />
         </div>
 
-        <button
+        <Button
           onClick={handleGoogle}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-gray-50 border border-gray-200 text-gray-700 py-2.5 rounded-xl font-medium shadow-sm hover:bg-gray-100 transition mb-6"
+          variant="outline" // or create a custom "google" variant if you want
+          size="default"
+          className="w-full mb-6 flex items-center justify-center gap-2"
+          aria-label="Continue with Google"
         >
           <FcGoogle size={22} />
           <span>Continue with Google</span>
-        </button>
+        </Button>
       </div>
     </div>
   );
