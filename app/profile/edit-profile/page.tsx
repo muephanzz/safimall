@@ -175,12 +175,12 @@ const EditProfile = () => {
   };
 
   return (
-    <div className="mt-28 p-6 max-w-4xl mx-auto bg-gradient-to-br from-white to-slate-100 shadow-2xl rounded-3xl border border-gray-200">
+    <div className="min-h-screen md:w-3/4 w-full bg-gradient-to-br from-slate-50 to-blue-50 py-14 lg:py-24 px-0 sm:px-0 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-xl mx-auto"
+        className="bg-white rounded-2xl shadow-2xl p-8 mb-8"
       >
         <h2 className="text-3xl font-bold text-center mb-6 flex items-center justify-center gap-2">
           <FaUserEdit className="text-orange-500" /> Edit Profile
@@ -202,7 +202,7 @@ const EditProfile = () => {
                 <img
                   src={profile.avatar_url || "/default-avatar.png"}
                   alt="Avatar Preview"
-                  className="w-28 h-28 rounded-full object-cover ring-2 ring-orange-400 transition-shadow"
+                  className="w-28 h-28 rounded-full object-cover ring-2 ring-gray-400 transition-shadow"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = "/default-avatar.png";
                   }}
@@ -210,7 +210,7 @@ const EditProfile = () => {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-0 right-0 bg-white border border-orange-400 rounded-full p-2 shadow group-hover:scale-110 transition"
+                  className="absolute bottom-0 right-0 bg-white border border-gray-400 rounded-full p-2 shadow group-hover:scale-110 transition"
                   aria-label="Change avatar"
                 >
                   <FiCamera className="text-orange-500" />
@@ -233,7 +233,7 @@ const EditProfile = () => {
                 type="text"
                 value={profile.first_name}
                 onChange={(e) => setProfile({ ...profile, first_name: e.target.value })}
-                className="w-full p-3 border border-orange-400 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full p-3 border border-gray-400 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-orange-400"
                 placeholder="John"
               />
             </label>
@@ -245,7 +245,7 @@ const EditProfile = () => {
                 type="text"
                 value={profile.last_name}
                 onChange={(e) => setProfile({ ...profile, last_name: e.target.value })}
-                className="w-full p-3 border border-orange-400 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full p-3 border border-gray-400 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-orange-400"
                 placeholder="Doe"
               />
             </label>
@@ -257,12 +257,14 @@ const EditProfile = () => {
                 type="tel"
                 value={profile.phone}
                 onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                className="w-full p-3 border border-orange-400 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                placeholder="+1234567890"
-                pattern="^\+?[1-9]\d{1,14}$"
+                className="w-full p-3 border border-gray-400 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                placeholder="07XXXXXXXX"
+                pattern="^\[1-9]\d{1,10}$"
+                max={10}
+                min={10}
                 title="Phone number should be in international format, e.g. +1234567890"
               />
-              <small className="text-gray-500">Include country code, e.g. +1</small>
+              <small className="text-gray-500">Start with 07XXXXXXXX or 011XXXXXX </small>
             </label>
 
             {/* Recent Activity */}

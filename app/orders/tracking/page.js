@@ -254,8 +254,8 @@ export default function OrderTracking() {
   };
 
   return (
-    <div className="min-h-screen mt-20 sm:mt-20 lg:mt-24 bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-0 sm:px-0 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen md:w-3/4 w-full bg-gradient-to-br from-slate-50 to-blue-50 py-14 lg:py-24 px-0 sm:px-0 lg:px-8">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
         <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
           <h1 className="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
             <span className="bg-blue-600 text-white p-2 rounded-lg">📦</span>

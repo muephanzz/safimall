@@ -181,8 +181,8 @@ const CompletedOrders = () => {
   };
 
   return (
-    <div className="mt-28 p-6 max-w-6xl mx-auto bg-gradient-to-br from-white to-slate-100 shadow-2xl rounded-3xl border border-gray-200">
-      <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
+    <div className="min-h-screen md:w-3/4 w-full bg-gradient-to-br from-slate-50 to-blue-50 py-14 lg:py-24 px-0 sm:px-0 lg:px-8">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
         <div className="bg-gray-50 border-b border-gray-200 px-4 py-5 sm:px-6">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
             Completed Orders Management

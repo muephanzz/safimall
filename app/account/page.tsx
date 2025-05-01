@@ -114,8 +114,8 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-white to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
-      <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 relative">
+    <div className="min-h-screen md:w-3/4 w-full bg-gradient-to-br from-slate-50 to-blue-50 py-14 lg:py-24 px-0 sm:px-0 lg:px-8">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
         {/* User Info */}
         <div className="flex items-center gap-4 mb-6">
           {avatarUrl ? (

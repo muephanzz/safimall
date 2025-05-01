@@ -120,12 +120,12 @@ const Profiles = () => {
   const profileCompletion = Math.round((filledFields.length / completionFields.length) * 100);
 
   return (
-    <div className="mt-28 p-6 max-w-6xl mx-auto bg-gradient-to-br from-white to-slate-100 shadow-2xl rounded-3xl border border-gray-200">
+    <div className="min-h-screen md:w-3/4 w-full bg-gradient-to-br from-slate-50 to-blue-50 py-14 lg:py-24 px-0 sm:px-0 lg:px-8">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative bg-white/70 backdrop-blur-lg shadow-2xl rounded-3xl p-10 max-w-md w-full border border-blue-200"
+        className="bg-white rounded-2xl shadow-2xl p-8 mb-8"
       >
         {!loading && profile ? (
           <>
