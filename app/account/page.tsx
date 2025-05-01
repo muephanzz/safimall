@@ -172,21 +172,6 @@ export default function AccountPage() {
                 <LogOut className="w-5 h-5 text-red-500" />
                 Logout
               </Button>
-              <Button
-                variant="ghost"
-                className="w-full flex items-center gap-2 text-gray-700 dark:text-gray-200"
-                onClick={toggleDarkMode}
-              >
-                {darkMode ? (
-                  <>
-                    <Sun className="w-5 h-5" /> Light Mode
-                  </>
-                ) : (
-                  <>
-                    <Moon className="w-5 h-5" /> Dark Mode
-                  </>
-                )}
-              </Button>
             </div>
           )}
         </div>
