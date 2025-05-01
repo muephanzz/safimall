@@ -6,7 +6,6 @@ import toast from "react-hot-toast";
 import imageCompression from "browser-image-compression";
 import { motion } from "framer-motion";
 import { FaUserEdit } from "react-icons/fa";
-import { MdOutlineCancel } from "react-icons/md";
 import { FiCamera } from "react-icons/fi";
 
 const ProfileCompletionBar = ({ percent }: { percent: number }) => (
@@ -175,12 +174,6 @@ const EditProfile = () => {
     setLoading(false);
   };
 
-  const handleReset = () => {
-    setProfile(originalProfile);
-    setAvatarFile(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
   return (
     <div className="mt-28 p-6 max-w-4xl mx-auto bg-gradient-to-br from-white to-slate-100 shadow-2xl rounded-3xl border border-gray-200">
       <motion.div
@@ -294,12 +287,6 @@ const EditProfile = () => {
                 disabled={loading}
               >
                 {loading ? "Updating..." : "Save Changes"}
-              </button>
-              <button
-                onClick={handleReset}
-                className="w-full sm:w-auto px-6 py-2 border border-gray-400 rounded-lg text-gray-700 hover:bg-gray-100 flex items-center justify-center gap-1"
-              >
-                <MdOutlineCancel /> Revert Changes
               </button>
             </div>
           </>

@@ -5,7 +5,6 @@ import { supabase } from "@/lib/supabaseClient";
 import ProductCard, { Product } from "@/components/ProductCard";
 import Pagination from "@/components/Pagination";
 import Footer from "@/components/Footer";
-//import ChatView from "@/components/chat/ChatView";
 import { motion } from "framer-motion";
 import HeroCarousel from "@/components/HeroCarousel";
 

@@ -41,18 +41,6 @@ const AdminDashboard = () => {
             </div>
           </div>
         </Link>
-
-        {/* Manage Chat */}
-        <Link href="/admin/chat" className="group">
-          <div className={cardBaseStyles}>
-            <div className="flex items-center gap-4">
-              <FaComments className={`${iconStyles} text-purple-600 group-hover:text-purple-700`} />
-              <span className={`${textStyles} group-hover:text-purple-700`}>
-                Manage Chat
-              </span>
-            </div>
-          </div>
-        </Link>
       </div>
     </AdminLayout>
   );
