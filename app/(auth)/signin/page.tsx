@@ -132,6 +132,7 @@ export default function SignInPage() {
             type="submit"
             variant="orange"
             size="default"
+            className="w-full flex items-center justify-center gap-2"
             disabled={loading}
             aria-label="Sign In"
           >
