@@ -6,7 +6,6 @@ import ProductCard, { Product } from "@/components/ProductCard";
 import Pagination from "@/components/Pagination";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
-import HeroCarousel from "@/components/HeroCarousel";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -71,9 +70,7 @@ export default function Home() {
     <div className="min-h-screen mt-0 sm:mt-0 lg:mt-0 bg-gradient-to-br from-white via-blue-50 to-slate-100 text-gray-900 flex flex-col">
       {/* HERO BANNER */}
       <section className="relative w-full bg-gradient-to-r from-blue-100 to-indigo-100 overflow-hidden shadow-sm mt-10">
-        <div className="max-w-7xl mx-auto flex flex-col-reverse md:flex-row items-center justify-between gap-2 px-4 sm:px-4 py-6 md:pt-20 mb:pb-8">
-          {/* Left: Text */}
-          <div className="flex-1 w-full px-2">
+          <div className="flex-1 w-full px-4 lg:px-16 pb-8 pt-10 lg:pt-24 lg:pb-8">
             <motion.h1
               className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 text-indigo-900 tracking-tight"
               initial={{ opacity: 0, y: 30 }}
@@ -101,16 +98,6 @@ export default function Home() {
               Shop Now
             </motion.a>
           </div>
-          {/* Right: Carousel */}
-          <motion.div
-            className="flex-1 w-full flex items-center justify-center"
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-          >
-            <HeroCarousel />
-          </motion.div>
-        </div>
       </section>
 
       {/* FEATURED PRODUCTS */}
