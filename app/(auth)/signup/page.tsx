@@ -116,7 +116,7 @@ export default function SignUpPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="flex gap-3">
-            <div className="flex-1">
+            <div>
               <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-1">
                 First Name
               </label>
@@ -132,7 +132,7 @@ export default function SignUpPage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 text-gray-900 transition"
               />
             </div>
-            <div className="flex-1">
+            <div>
               <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-1">
                 Last Name
               </label>

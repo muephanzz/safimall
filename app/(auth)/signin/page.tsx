@@ -141,7 +141,7 @@ export default function SignInPage() {
         </form>
 
         <div className="flex justify-between items-center mt-6 text-sm">
-          <a href="/reset-password" className="text-blue-700 hover:underline transition">
+          <a href="/forgot-password" className="text-blue-700 hover:underline transition">
             Forgot password?
           </a>
           <a href="/signup" className="text-blue-700 hover:underline transition">

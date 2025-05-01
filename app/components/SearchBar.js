@@ -65,7 +65,7 @@ export default function SearchBar() {
           placeholder="Search products..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full rounded-full border border-gray-300 bg-white py-2 pl-12 pr-4 text-gray-900 placeholder-gray-400 shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+          className="w-full rounded-full border border-gray-300 bg-white py-2 pl-12 pr-4 text-gray-900 placeholder-gray-400 shadow-sm transition focus:border-orange-500 focus:ring-2 focus:ring-orange-400 focus:outline-none"
           spellCheck={false}
           autoComplete="off"
         />
