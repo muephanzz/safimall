@@ -119,13 +119,13 @@ export default function AccountPage() {
 
         {/* Premium/Quick Actions */}
         <div className="flex gap-3 mb-8">
-          <Button variant="outline" className="flex-1 flex gap-2" asChild>
+          <Button variant="outline" className="flex-1 flex gap-2">
             <Link href="/support">
               <HelpCircle className="w-5 h-5" />
               Support
             </Link>
           </Button>
-          <Button variant="outline" className="flex-1 flex gap-2" asChild>
+          <Button variant="outline" className="flex-1 flex gap-2">
             <Link href="/refer">
               <Gift className="w-5 h-5" />
               Refer a Friend
@@ -139,7 +139,7 @@ export default function AccountPage() {
             <Button
               variant="default"
               className="w-full flex items-center gap-3"
-              asChild
+              
             >
               <Link href="/admin/dashboard">
                 <LayoutDashboard className="w-5 h-5" />
@@ -147,19 +147,19 @@ export default function AccountPage() {
               </Link>
             </Button>
           )}
-          <Button variant="outline" className="w-full flex items-center gap-3" asChild>
+          <Button variant="outline" className="w-full flex items-center gap-3">
             <Link href="/profile/see-profile">
               <UserIcon className="w-5 h-5" />
               Profile
             </Link>
           </Button>
-          <Button variant="outline" className="w-full flex items-center gap-3" asChild>
+          <Button variant="outline" className="w-full flex items-center gap-3">
             <Link href="/orders/tracking">
               <PackageSearch className="w-5 h-5" />
               Order Tracking
             </Link>
           </Button>
-          <Button variant="outline" className="w-full flex items-center gap-3" asChild>
+          <Button variant="outline" className="w-full flex items-center gap-3">
             <Link href="/orders/completed">
               <PackageCheck className="w-5 h-5" />
               Completed Orders
