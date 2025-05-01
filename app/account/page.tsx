@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
@@ -16,15 +17,30 @@ import {
   Gift,
 } from "lucide-react";
 
+interface ProfileData {
+  first_name?: string;
+  avatar_url?: string | null;
+  profile_completion?: number;
+}
+
 export default function AccountPage() {
   const { user, setUser } = useAuth();
   const [userName, setUserName] = useState("User");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [profileCompletion, setProfileCompletion] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [recentActivity, setRecentActivity] = useState<string[]>([]);
 
   useEffect(() => {
     fetchUserData();
+    // Load dark mode preference from localStorage
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      setDarkMode(true);
+      document.documentElement.classList.add("dark");
+    }
   }, []);
 
   const fetchUserData = async () => {
@@ -33,17 +49,48 @@ export default function AccountPage() {
     if (userError || !currentUser) return;
     setUser(currentUser);
 
+    // Check admin status
     const { data: isAdminData } = await supabase.rpc("check_is_admin", {
       uid: currentUser.id,
     });
     setIsAdmin(isAdminData || false);
 
-    const { data: profileData } = await supabase
+    // Fetch profile data
+    const { data: profileData, error: profileError } = await supabase
       .from("profiles")
-      .select("first_name")
+      .select("first_name, avatar_url, profile_completion")
       .eq("user_id", currentUser.id)
       .maybeSingle();
+
+    if (profileError) {
+      console.error("Error fetching profile data:", profileError);
+    }
+
     setUserName(profileData?.first_name || "User");
+    setAvatarUrl(profileData?.avatar_url || null);
+    setProfileCompletion(profileData?.profile_completion ?? 0);
+
+    // Mock recent activity (replace with real fetch if available)
+    setRecentActivity([
+      "Order #1234 delivered",
+      "Profile updated",
+      "Referred a friend",
+      "Completed order #5678",
+    ]);
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode((d) => {
+      const next = !d;
+      if (next) {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+      return next;
+    });
   };
 
   const handleLogout = async () => {
@@ -67,18 +114,44 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-white to-gray-200">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8 relative">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-white to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+      <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 relative">
         {/* User Info */}
-        <div className="flex items-center gap-4 mb-8">
-          <UserIcon className="w-12 h-12 text-orange-500 bg-orange-100 rounded-full p-2" />
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">
+        <div className="flex items-center gap-4 mb-6">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={userName}
+              className="w-16 h-16 rounded-full object-cover border-2 border-orange-400 shadow"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src =
+                  "/default-avatar.png"; // fallback image path
+              }}
+            />
+          ) : (
+            <UserIcon className="w-16 h-16 text-orange-500 bg-orange-100 rounded-full p-3" />
+          )}
+          <div className="flex-1">
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
               Hello, <span className="text-orange-600">{userName}</span>
             </h2>
-            <p className="text-gray-500 text-sm">Welcome back to your account</p>
+            <p className="text-gray-500 dark:text-gray-300 text-sm mt-1">
+              Welcome back to your account
+            </p>
+
+            {/* Profile Completion Meter */}
+            <div className="mt-3 w-48 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div
+                className="h-3 bg-orange-500 rounded-full transition-all duration-500"
+                style={{ width: `${profileCompletion}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-400 dark:text-gray-400 mt-1">
+              Profile {profileCompletion}% complete
+            </p>
           </div>
-          {/* Menu toggle for logout/settings */}
+
+          {/* Settings Menu Toggle */}
           <Button
             variant="ghost"
             size="icon"
@@ -88,11 +161,12 @@ export default function AccountPage() {
           >
             <UserIcon />
           </Button>
+
           {showMenu && (
-            <div className="absolute top-20 right-8 bg-white border rounded-xl shadow-lg z-10 p-2 w-48">
+            <div className="absolute top-20 right-8 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl shadow-lg z-20 p-2 w-48">
               <Button
                 variant="ghost"
-                className="w-full flex items-center gap-2 text-gray-700"
+                className="w-full flex items-center gap-2 text-gray-700 dark:text-gray-200"
                 onClick={handleLogout}
               >
                 <LogOut className="w-5 h-5 text-red-500" />
@@ -100,8 +174,8 @@ export default function AccountPage() {
               </Button>
               <Button
                 variant="ghost"
-                className="w-full flex items-center gap-2 text-gray-700"
-                onClick={() => setDarkMode((d) => !d)}
+                className="w-full flex items-center gap-2 text-gray-700 dark:text-gray-200"
+                onClick={toggleDarkMode}
               >
                 {darkMode ? (
                   <>
@@ -117,54 +191,66 @@ export default function AccountPage() {
           )}
         </div>
 
-        {/* Premium/Quick Actions */}
+        {/* Quick Actions */}
         <div className="flex gap-3 mb-8">
-          <Button variant="outline" className="flex-1 flex gap-2">
-            <Link href="/support">
+          <Link href="/support" className="flex-1">
+            <Button variant="outline" className="w-full flex items-center gap-2 justify-center">
               <HelpCircle className="w-5 h-5" />
               Support
-            </Link>
-          </Button>
-          <Button variant="outline" className="flex-1 flex gap-2">
-            <Link href="/refer">
+            </Button>
+          </Link>
+          <Link href="/refer" className="flex-1">
+            <Button variant="outline" className="w-full flex items-center gap-2 justify-center">
               <Gift className="w-5 h-5" />
               Refer a Friend
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
 
         {/* Navigation */}
         <div className="space-y-4">
           {isAdmin && (
-            <Button
-              variant="default"
-              className="w-full flex items-center gap-3"
-              
-            >
-              <Link href="/admin/dashboard">
+            <Link href="/admin/dashboard">
+              <Button variant="default" className="w-full flex items-center gap-3 justify-center">
                 <LayoutDashboard className="w-5 h-5" />
                 Admin Panel
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           )}
-          <Button variant="outline" className="w-full flex items-center gap-3">
-            <Link href="/profile/see-profile">
+          <Link href="/profile/see-profile">
+            <Button variant="outline" className="w-full flex items-center gap-3 justify-center">
               <UserIcon className="w-5 h-5" />
               Profile
-            </Link>
-          </Button>
-          <Button variant="outline" className="w-full flex items-center gap-3">
-            <Link href="/orders/tracking">
+            </Button>
+          </Link>
+          <Link href="/orders/tracking">
+            <Button variant="outline" className="w-full flex items-center gap-3 justify-center">
               <PackageSearch className="w-5 h-5" />
               Order Tracking
-            </Link>
-          </Button>
-          <Button variant="outline" className="w-full flex items-center gap-3">
-            <Link href="/orders/completed">
+            </Button>
+          </Link>
+          <Link href="/orders/completed">
+            <Button variant="outline" className="w-full flex items-center gap-3 justify-center">
               <PackageCheck className="w-5 h-5" />
               Completed Orders
-            </Link>
-          </Button>
+            </Button>
+          </Link>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="mt-10">
+          <h3 className="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-100">
+            Recent Activity
+          </h3>
+          {recentActivity.length === 0 ? (
+            <p className="text-gray-500 dark:text-gray-400 text-sm">No recent activity.</p>
+          ) : (
+            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+              {recentActivity.map((item, idx) => (
+                <li key={idx}>{item}</li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>
