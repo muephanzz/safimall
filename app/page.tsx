@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import ProductCard, { Product } from "@/components/ProductCard";
 import Pagination from "@/components/Pagination";
 import Footer from "@/components/Footer";
+import SearchBar from "@/components/SearchBar";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -14,6 +15,16 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 34;
   const [totalPages, setTotalPages] = useState<number>(1);
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Detect mobile device based on user agent
+    const checkMobile = () => {
+      setIsMobile(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+    };
+    checkMobile();
+  }, []);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -32,7 +43,7 @@ export default function Home() {
         featuredList = [];
       }
 
-      // If no featured products, fallback to latest 4 products
+      // If no featured products, fallback to latest 8 products
       if (featuredList.length === 0) {
         const { data: fallback } = await supabase
           .from("products")
@@ -68,36 +79,43 @@ export default function Home() {
 
   return (
     <div className="min-h-screen mt-0 sm:mt-0 lg:mt-0 bg-gradient-to-br from-white via-blue-50 to-slate-100 text-gray-900 flex flex-col">
+      {/* Show SearchBar only on mobile */}
+      {isMobile && (
+        <div className="px-4 py-3 bg-white shadow-md sticky top-0 z-30">
+          <SearchBar />
+        </div>
+      )}
+
       {/* HERO BANNER */}
       <section className="relative w-full bg-gradient-to-r from-blue-100 to-indigo-100 overflow-hidden shadow-sm mt-10">
-          <div className="flex-1 w-full px-4 lg:px-16 pb-8 pt-10 lg:pt-24 lg:pb-8">
-            <motion.h1
-              className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 text-indigo-900 tracking-tight"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-            >
-              Discover Premium Products for Modern Living
-            </motion.h1>
-            <motion.p
-              className="text-base sm:text-lg md:text-xl text-gray-700 mb-10"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-            >
-              Shop the latest trends, top brands, and exclusive deals. Fast delivery,
-              secure checkout, and 24/7 support.
-            </motion.p>
-            <motion.a
-              href="#products"
-              className="inline-block px-8 py-3 bg-gradient-to-r from-indigo-600 to-blue-500 text-white text-lg font-semibold rounded-full shadow-lg hover:scale-105 transition"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.4 }}
-            >
-              Shop Now
-            </motion.a>
-          </div>
+        <div className="flex-1 w-full px-4 lg:px-16 pb-8 pt-10 lg:pt-24 lg:pb-8">
+          <motion.h1
+            className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 text-indigo-900 tracking-tight"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
+            Discover Premium Products for Modern Living
+          </motion.h1>
+          <motion.p
+            className="text-base sm:text-lg md:text-xl text-gray-700 mb-10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+          >
+            Shop the latest trends, top brands, and exclusive deals. Fast delivery,
+            secure checkout, and 24/7 support.
+          </motion.p>
+          <motion.a
+            href="#products"
+            className="inline-block px-8 py-3 bg-gradient-to-r from-indigo-600 to-blue-500 text-white text-lg font-semibold rounded-full shadow-lg hover:scale-105 transition"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+          >
+            Shop Now
+          </motion.a>
+        </div>
       </section>
 
       {/* FEATURED PRODUCTS */}
