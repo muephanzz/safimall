@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabaseClient";
 import { motion } from "framer-motion";
-import ProductCard, { Product } from "@/components/ProductCard";
+import ProductCard from "@/components/ProductCard";
 
 interface Props {
   params: Promise<{ subcategory_id: string }>;
@@ -26,11 +26,10 @@ export default async function SubcategoryPage({ params }: Props) {
 
   return (
     <main className="max-w-7xl mx-auto p-8">
-      {products.map((sub) => (
       <h1 className="text-3xl font-bold mb-6">
-        Products in Subcategory {sub.subcategories?.subcategory}
+        Products in Subcategory
       </h1>
-      ))};
+
 
       {products?.length ? (
         <motion.div

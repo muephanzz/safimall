@@ -57,12 +57,12 @@ export default function MobileMenu() {
   };
 
   return (
-    <div className="md:hidden block">
+    <div className="md:hidden block z-900">
       {/* Menu Button */}
       <button
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label={menuOpen ? "Close menu" : "Open menu"}
-        className="relative z-50 p-2 rounded-full bg-white/80 shadow-lg ring-1 ring-gray-200 hover:bg-white transition-all"
+        className="relative z-50 p-2 rounded-full shadow-lg ring-1 ring-gray-200 hover:bg-white transition-all"
       >
         {menuOpen ? <X size={24} className="text-gray-800" /> : <Menu size={24} className="text-gray-800" />}
       </button>
@@ -150,16 +150,6 @@ export default function MobileMenu() {
             );
           })}
         </nav>
-        {/* Optional: Add a subtle divider and a call to action at the bottom */}
-        <div className="mt-auto pt-6 border-t border-gray-100">
-          <Link
-            href="/contact"
-            onClick={closeMenuAndScrollTop}
-            className="block text-center w-full py-3 rounded-lg bg-indigo-600 text-white font-bold shadow-md hover:bg-indigo-700 transition"
-          >
-            Contact Us
-          </Link>
-        </div>
       </aside>
     </div>
   );

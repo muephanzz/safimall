@@ -67,7 +67,7 @@ export default function UserMenu({ onSignIn }) {
     if (!error) {
       toast.success("Logged out successfully!");
       setUser(null);
-      router.push("/"); // smoother navigation without full reload
+      window.location.href = "/";
     } else {
       toast.error("Logout failed. Please try again.");
     }
