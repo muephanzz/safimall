@@ -65,7 +65,7 @@ const EditProfile = () => {
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("first_name, last_name, avatar_url, phone")
+      .select("*")
       .eq("user_id", user.id)
       .maybeSingle();
 

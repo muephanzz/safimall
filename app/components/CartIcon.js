@@ -6,7 +6,7 @@ export default function CartIcon({ cartCount }) {
     <Link
       href="/cart"
       aria-label={`Cart with ${cartCount} item${cartCount !== 1 ? "s" : ""}`}
-      className="relative z-50 p-2 text-white hover:bg-gray-800 transition"
+      className="relative p-2 text-white hover:bg-gray-800 transition"
     >
       <ShoppingCart size={24} />
       {cartCount > 0 && (
