@@ -78,9 +78,9 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <section className="bg-gray-100 flex justify-center items-center">
-      <div className="min-h-screen md:w-3/4 w-full bg-gradient-to-br from-slate-50 to-blue-50 py-14 lg:py-24 px-0 sm:px-0 lg:px-8">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
+  <section className="flex items-center justify-center min-h-screen w-full bg-gray-100">
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="w-full max-w-md bg-white shadow-2xl px-8 py-14 rounded">
           <div className="flex flex-col items-center mb-8">
             <Logo width={160} height={54} />
             <h2 className="mt-4 text-2xl font-bold text-blue-800 tracking-tight">

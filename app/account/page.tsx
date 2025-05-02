@@ -35,12 +35,6 @@ export default function AccountPage() {
 
   useEffect(() => {
     fetchUserData();
-    // Load dark mode preference from localStorage
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
   }, []);
 
   const fetchUserData = async () => {
@@ -58,7 +52,7 @@ export default function AccountPage() {
     // Fetch profile data
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
-      .select("first_name, avatar_url, profile_completion")
+      .select("*")
       .eq("user_id", currentUser.id)
       .maybeSingle();
 
@@ -77,20 +71,6 @@ export default function AccountPage() {
       "Referred a friend",
       "Completed order #5678",
     ]);
-  };
-
-  const toggleDarkMode = () => {
-    setDarkMode((d) => {
-      const next = !d;
-      if (next) {
-        document.documentElement.classList.add("dark");
-        localStorage.setItem("theme", "dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-        localStorage.setItem("theme", "light");
-      }
-      return next;
-    });
   };
 
   const handleLogout = async () => {
@@ -114,7 +94,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen md:w-3/4 w-full bg-gradient-to-br from-slate-50 to-blue-50 py-14 lg:py-24 px-0 sm:px-0 lg:px-8">
+    <div className="min-h-screen md:w-3/4 w-full bg-gradient-to-br from-slate-50 to-blue-50 pb-10 lg:py-24 px-0 sm:px-0 lg:px-8">
       <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
         {/* User Info */}
         <div className="flex items-center gap-4 mb-6">

@@ -115,39 +115,37 @@ export default function SignUpPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="flex gap-3">
-            <div>
-              <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-1">
-                First Name
-              </label>
-              <input
-                id="firstName"
-                type="text"
-                name="firstName"
-                value={form.firstName}
-                onChange={handleChange}
-                required
-                autoComplete="given-name"
-                placeholder="John"
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 text-gray-900 transition"
-              />
-            </div>
-            <div>
-              <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-1">
-                Last Name
-              </label>
-              <input
-                id="lastName"
-                type="text"
-                name="lastName"
-                value={form.lastName}
-                onChange={handleChange}
-                required
-                autoComplete="family-name"
-                placeholder="Doe"
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 text-gray-900 transition"
-              />
-            </div>
+          <div>
+            <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-1">
+              First Name
+            </label>
+            <input
+              id="firstName"
+              type="text"
+              name="firstName"
+              value={form.firstName}
+              onChange={handleChange}
+              required
+              autoComplete="given-name"
+              placeholder="John"
+              className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 text-gray-900 transition"
+            />
+          </div>
+          <div>
+            <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-1">
+              Last Name
+            </label>
+            <input
+              id="lastName"
+              type="text"
+              name="lastName"
+              value={form.lastName}
+              onChange={handleChange}
+              required
+              autoComplete="family-name"
+              placeholder="Doe"
+              className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 text-gray-900 transition"
+            />
           </div>
           <div>
             <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">
