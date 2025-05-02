@@ -181,95 +181,97 @@ const CompletedOrders = () => {
   };
 
   return (
-    <div className="min-h-screen md:w-3/4 w-full bg-gradient-to-br from-slate-50 to-blue-50 py-14 lg:py-24 px-0 sm:px-0 lg:px-8">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
-        <div className="bg-gray-50 border-b border-gray-200 px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Completed Orders Management
-          </h3>
-          <p className="mt-1 max-w-2xl text-sm text-gray-500">
-            Overview of all completed orders.
-          </p>
-        </div>
-
-        <div className="p-6">
-          {/* Date Range and View All Toggle */}
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-            {isAdmin &&(
-            <>
-              <div className="flex items-center space-x-3">
-                <label htmlFor="from" className="block text-sm font-medium text-gray-700">From:</label>
-                <input
-                  type="date"
-                  id="from"
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  value={dateRange.from}
-                  onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-                />
-
-                <label htmlFor="to" className="block text-sm font-medium text-gray-700">To:</label>
-                <input
-                  type="date"
-                  id="to"
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  value={dateRange.to}
-                  onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-                />
-              </div>
-  
-              <div className="flex items-center">
-                <label htmlFor="viewAll" className="mr-2 text-sm font-medium text-gray-700">View All Orders:</label>
-                <input
-                  type="checkbox"
-                  id="viewAll"
-                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  checked={viewAll}
-                  onChange={() => setViewAll(!viewAll)}
-                />
-              </div>
-            </>
-            )}
-            </div>
-
-          {/* Orders List */}
-          {loading ? (
-            <div className="text-center">Loading orders...</div>
-          ) : orders.length > 0 ? (
-            <ul className="divide-y divide-gray-200">
-              {orders.map((order) => (
-                <li key={order.order_id} className="py-4">
-                  <div className="flex justify-between items-center">
-                    <div className="text-sm font-medium text-gray-900">
-                      Order ID: {order.order_id}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      Placed on: {format(new Date(order.created_at), "dd MMM yyyy")}
-                    </div>
-                  </div>
-                  <div className="mt-2">
-                    <OrderItems order={order} />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="text-center">No completed orders found.</div>
-          )}
-
-          {/* Export Buttons */}
-          {isAdmin &&(
-            <div className="mt-6 flex justify-end space-x-3">
-            <Button onClick={() => downloadExcel(orders)}>
-              Export to Excel
-            </Button>
-            <Button onClick={() => downloadPDF(orders)}>
-              Export to PDF
-            </Button>
+    <section className="bg-gray-100 flex justify-center items-center">
+      <div className="min-h-screen md:w-3/4 w-full bg-gradient-to-br from-slate-50 to-blue-50 py-14 lg:py-24 px-0 sm:px-0 lg:px-8">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
+          <div className="bg-gray-50 border-b border-gray-200 px-4 py-5 sm:px-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
+              Completed Orders Management
+            </h3>
+            <p className="mt-1 max-w-2xl text-sm text-gray-500">
+              Overview of all completed orders.
+            </p>
           </div>
-          )}
+
+          <div className="p-6">
+            {/* Date Range and View All Toggle */}
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+              {isAdmin &&(
+              <>
+                <div className="flex items-center space-x-3">
+                  <label htmlFor="from" className="block text-sm font-medium text-gray-700">From:</label>
+                  <input
+                    type="date"
+                    id="from"
+                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                    value={dateRange.from}
+                    onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+                  />
+
+                  <label htmlFor="to" className="block text-sm font-medium text-gray-700">To:</label>
+                  <input
+                    type="date"
+                    id="to"
+                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                    value={dateRange.to}
+                    onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+                  />
+                </div>
+    
+                <div className="flex items-center">
+                  <label htmlFor="viewAll" className="mr-2 text-sm font-medium text-gray-700">View All Orders:</label>
+                  <input
+                    type="checkbox"
+                    id="viewAll"
+                    className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    checked={viewAll}
+                    onChange={() => setViewAll(!viewAll)}
+                  />
+                </div>
+              </>
+              )}
+              </div>
+
+            {/* Orders List */}
+            {loading ? (
+              <div className="text-center">Loading orders...</div>
+            ) : orders.length > 0 ? (
+              <ul className="divide-y divide-gray-200">
+                {orders.map((order) => (
+                  <li key={order.order_id} className="py-4">
+                    <div className="flex justify-between items-center">
+                      <div className="text-sm font-medium text-gray-900">
+                        Order ID: {order.order_id}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Placed on: {format(new Date(order.created_at), "dd MMM yyyy")}
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <OrderItems order={order} />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center">No completed orders found.</div>
+            )}
+
+            {/* Export Buttons */}
+            {isAdmin &&(
+              <div className="mt-6 flex justify-end space-x-3">
+              <Button onClick={() => downloadExcel(orders)}>
+                Export to Excel
+              </Button>
+              <Button onClick={() => downloadPDF(orders)}>
+                Export to PDF
+              </Button>
+            </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

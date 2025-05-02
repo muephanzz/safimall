@@ -88,6 +88,7 @@ export default function ProductDetails() {
               product_id: product.product_id,
               name: product.name,
               price: product.price,
+              description: product.description,
               image_url: mainImage,
               quantity,
             }
@@ -252,6 +253,7 @@ export default function ProductDetails() {
                       product_id: product.product_id,
                       image_url: mainImage,
                       name: product.name,
+                      description: product.description,
                       price: product.price,
                       quantity: 1,
                     };

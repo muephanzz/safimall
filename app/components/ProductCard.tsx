@@ -9,7 +9,7 @@ export interface Product {
   image_urls: string[];
   description?: string;
   attributes?: {
-    state?: string;
+    State?: string;
     [key: string]: any;
   };
 }
@@ -51,9 +51,9 @@ export default function ProductCard({ product, loading }: ProductCardProps) {
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             priority={false}
           />
-          {product.attributes?.state && (
+          {product.attributes?.State && (
             <span className="absolute top-3 left-3 bg-gradient-to-r from-indigo-600 to-purple-700 text-white text-xs font-semibold px-3 py-1 rounded-xl shadow-lg z-20 select-none">
-              {product.attributes.state}
+              {product.attributes?.State}
             </span>
           )}
         </div>

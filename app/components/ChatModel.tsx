@@ -109,7 +109,7 @@ export default function ChatPage() {
       {/* Mobile Contact Page */}
       {isMobile && (
         <main className="max-w-xl mx-auto p-6">
-          <h1 className="text-3xl font-bold mb-6 text-center text-indigo-700">Contact Support</h1>
+          <h1 className="text-3xl font-bold mb-6 text-center text-orange-700">Contact Support</h1>
           <ul className="space-y-4">
             {contacts.map(({ id, name, icon, url, description }) => (
               <li key={id}>
@@ -117,7 +117,7 @@ export default function ChatPage() {
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:shadow-lg hover:border-indigo-500 transition"
+                  className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:shadow-lg hover:border-orange-500 transition"
                 >
                   <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100">
                     {icon}

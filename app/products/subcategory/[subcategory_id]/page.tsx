@@ -1,4 +1,6 @@
 import { supabase } from "@/lib/supabaseClient";
+import { motion } from "framer-motion";
+import ProductCard, { Product } from "@/components/ProductCard";
 
 interface Props {
   params: Promise<{ subcategory_id: string }>;
@@ -24,27 +26,30 @@ export default async function SubcategoryPage({ params }: Props) {
 
   return (
     <main className="max-w-7xl mx-auto p-8">
+      {products.map((sub) => (
       <h1 className="text-3xl font-bold mb-6">
-        Products in Subcategory {subcategory_id}
+        Products in Subcategory {sub.subcategories?.subcategory}
       </h1>
+      ))};
 
       {products?.length ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <motion.div
+          className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 lg:gap-4 sm:gap-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           {products.map((product) => (
-            <div key={product.product_id} className="border rounded-lg p-4 shadow hover:shadow-lg transition">
-              <h2 className="font-semibold text-lg mb-2">{product.name}</h2>
-              {product.image_urls?.[0] && (
-                <img
-                  src={product.image_urls[0]}
-                  alt={product.name}
-                  className="w-full h-48 object-cover rounded"
-                  loading="lazy"
-                />
-              )}
-              <p className="mt-2 font-bold text-indigo-700">${product.price}</p>
-            </div>
+            <motion.div
+              key={product.product_id}
+              whileHover={{ scale: 1.04, zIndex: 10 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="relative"
+            >
+              <ProductCard product={product} loading={false} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       ) : (
         <p>No products found in this subcategory.</p>
       )}
