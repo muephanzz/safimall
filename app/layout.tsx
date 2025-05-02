@@ -20,6 +20,14 @@ export const metadata = {
   description: "online-shopping",
 };
 
+// Disable zooming on mobile devices
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 interface RootLayoutProps {
   children: ReactNode;
 }
