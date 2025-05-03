@@ -12,9 +12,12 @@ import {
   LayoutDashboard,
   LogOut,
   HelpCircle,
-  Sun,
-  Moon,
   Gift,
+  Settings,
+  BadgeDollarSign,
+  Truck,
+  Box,
+  ClipboardCheck
 } from "lucide-react";
 
 interface ProfileData {
@@ -30,7 +33,6 @@ export default function AccountPage() {
   const [profileCompletion, setProfileCompletion] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [recentActivity, setRecentActivity] = useState<string[]>([]);
 
   useEffect(() => {
@@ -94,128 +96,147 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen md:w-3/4 w-full bg-gradient-to-br from-slate-50 to-blue-50 pb-10 lg:py-24 px-0 sm:px-0 lg:px-8">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
-        {/* User Info */}
-        <div className="flex items-center gap-4 mb-6">
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt={userName}
-              className="w-16 h-16 rounded-full object-cover border-2 border-orange-400 shadow"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src =
-                  "/default-avatar.png"; // fallback image path
-              }}
-            />
-          ) : (
-            <UserIcon className="w-16 h-16 text-orange-500 bg-orange-100 rounded-full p-3" />
-          )}
-          <div className="flex-1">
-            <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
-              Hello, <span className="text-orange-600">{userName}</span>
-            </h2>
-            <p className="text-gray-500 dark:text-gray-300 text-sm mt-1">
-              Welcome back to your account
-            </p>
-
-            {/* Profile Completion Meter */}
-            <div className="mt-3 w-48 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div
-                className="h-3 bg-orange-500 rounded-full transition-all duration-500"
-                style={{ width: `${profileCompletion}%` }}
-              />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 pb-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto py-8">
+        {/* User Header Section */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={userName}
+                  className="w-14 h-14 rounded-full object-cover border-2 border-orange-300 shadow-sm"
+                />
+              ) : (
+                <div className="p-3 bg-orange-100 rounded-full">
+                  <UserIcon className="w-8 h-8 text-orange-600" />
+                </div>
+              )}
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {userName}
+                  <span className="text-orange-600 ml-2 text-lg">👋</span>
+                </h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="h-2 w-32 bg-gray-200 rounded-full">
+                    <div 
+                      className="h-full bg-orange-500 rounded-full transition-all duration-500" 
+                      style={{ width: `${profileCompletion}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm text-gray-500">
+                    {profileCompletion}% Complete
+                  </span>
+                </div>
+              </div>
             </div>
-            <p className="text-xs text-gray-400 dark:text-gray-400 mt-1">
-              Profile {profileCompletion}% complete
-            </p>
-          </div>
 
-          {/* Settings Menu Toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowMenu((v) => !v)}
-            className="ml-auto"
-            aria-label="Open settings"
-          >
-            <UserIcon />
-          </Button>
-
-          {showMenu && (
-            <div className="absolute top-20 right-8 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl shadow-lg z-20 p-2 w-48">
-              <Button
-                variant="ghost"
-                className="w-full flex items-center gap-2 text-gray-700 dark:text-gray-200"
-                onClick={handleLogout}
+            <div className="flex items-center gap-3">
+              <Link href="/support">
+                <Button variant="ghost" size="icon" className="text-gray-600 hover:bg-gray-50">
+                  <HelpCircle className="w-5 h-5" />
+                </Button>
+              </Link>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setShowMenu(!showMenu)}
+                className="relative text-gray-600 hover:bg-gray-50"
               >
-                <LogOut className="w-5 h-5 text-red-500" />
-                Logout
+                <Settings className="w-5 h-5" />
+                {showMenu && (
+                  <div className="absolute top-12 right-0 bg-white border border-gray-200 rounded-lg shadow-xl w-48 py-2">
+                    <Button
+                      variant="ghost"
+                      className="w-full flex items-center gap-3 justify-start px-4 py-3 text-gray-700 hover:bg-gray-50"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="w-4 h-4 text-red-500" />
+                      Sign Out
+                    </Button>
+                  </div>
+                )}
               </Button>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="flex gap-3 mb-8">
-          <Link href="/support" className="flex-1">
-            <Button variant="outline" className="w-full flex items-center gap-2 justify-center">
-              <HelpCircle className="w-5 h-5" />
-              Support
-            </Button>
-          </Link>
-          <Link href="/refer" className="flex-1">
-            <Button variant="outline" className="w-full flex items-center gap-2 justify-center">
-              <Gift className="w-5 h-5" />
-              Refer a Friend
-            </Button>
-          </Link>
-        </div>
-
-        {/* Navigation */}
-        <div className="space-y-4">
+        {/* Dashboard Tiles */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {isAdmin && (
-            <Link href="/admin/dashboard">
-              <Button variant="default" className="w-full flex items-center gap-3 justify-center">
-                <LayoutDashboard className="w-5 h-5" />
-                Admin Panel
-              </Button>
+            <Link href="/admin/dashboard" className="group">
+              <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <LayoutDashboard className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Admin Dashboard</h3>
+                    <p className="text-sm text-gray-500">System management</p>
+                  </div>
+                </div>
+              </div>
             </Link>
           )}
-          <Link href="/profile/see-profile">
-            <Button variant="outline" className="w-full flex items-center gap-3 justify-center">
-              <UserIcon className="w-5 h-5" />
-              Profile
-            </Button>
+
+          <Link href="/orders/tracking" className="group">
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-green-100 rounded-lg">
+                  <Truck className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Order Tracking</h3>
+                  <p className="text-sm text-gray-500">Monitor shipments</p>
+                </div>
+              </div>
+            </div>
           </Link>
-          <Link href="/orders/tracking">
-            <Button variant="outline" className="w-full flex items-center gap-3 justify-center">
-              <PackageSearch className="w-5 h-5" />
-              Order Tracking
-            </Button>
+
+          <Link href="/orders/completed" className="group">
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-purple-100 rounded-lg">
+                  <ClipboardCheck className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Order History</h3>
+                  <p className="text-sm text-gray-500">Past purchases</p>
+                </div>
+              </div>
+            </div>
           </Link>
-          <Link href="/orders/completed">
-            <Button variant="outline" className="w-full flex items-center gap-3 justify-center">
-              <PackageCheck className="w-5 h-5" />
-              Completed Orders
-            </Button>
+
+          <Link href="/refer" className="group">
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-pink-100 rounded-lg">
+                  <Gift className="w-6 h-6 text-pink-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Refer Friends</h3>
+                  <p className="text-sm text-gray-500">Earn rewards</p>
+                </div>
+              </div>
+            </div>
           </Link>
         </div>
 
         {/* Recent Activity */}
-        <div className="mt-10">
-          <h3 className="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-100">
-            Recent Activity
-          </h3>
-          {recentActivity.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400 text-sm">No recent activity.</p>
-          ) : (
-            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
-              {recentActivity.map((item, idx) => (
-                <li key={idx}>{item}</li>
-              ))}
-            </ul>
-          )}
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+          <div className="space-y-4">
+            {recentActivity.map((item, idx) => (
+              <div key={idx} className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                <div className="p-2 bg-gray-100 rounded-full">
+                  <Box className="w-4 h-4 text-gray-600" />
+                </div>
+                <span className="text-gray-700">{item}</span>
+                <span className="ml-auto text-sm text-gray-500">2h ago</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
