@@ -141,7 +141,7 @@ export default function Cart() {
   if (!isAuthenticated) {
     return (
       <section className="bg-gray-100 flex justify-center items-center">
-        <div className="min-h-screen md:w-3/4 w-full bg-gradient-to-br from-slate-50 to-blue-50 py-14 lg:py-24 px-0 sm:px-0 lg:px-8">
+        <div className="min-h-screen md:w-3/4 w-full bg-gradient-to-br from-slate-50 to-blue-50 mb-20 lg:py-24 px-0 sm:px-0 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}

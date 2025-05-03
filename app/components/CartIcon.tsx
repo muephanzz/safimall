@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 
-export default function CartIcon({ cartCount }) {
+interface CartIconProps {
+  cartCount: number;
+}
+
+export default function CartIcon({ cartCount }: CartIconProps) {
   return (
     <Link
       href="/cart"

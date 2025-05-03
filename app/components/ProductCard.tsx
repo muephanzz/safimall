@@ -3,7 +3,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 
 export interface Product {
-  product_id: number;
+  product_id: string;
   name: string;
   price: number;
   image_urls: string[];

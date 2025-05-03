@@ -1,14 +1,20 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, FormEvent, KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 
+// Define the type for a product suggestion
+interface Suggestion {
+  name: string;
+  product_id: string | number;
+}
+
 export default function SearchBar() {
-  const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
+  const [query, setQuery] = useState<string>("");
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const router = useRouter();
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -23,14 +29,14 @@ export default function SearchBar() {
         .ilike("name", `%${query}%`)
         .limit(5);
 
-      if (!error) setSuggestions(data);
+      if (!error && data) setSuggestions(data as Suggestion[]);
     };
 
     const timeoutId = setTimeout(fetchSuggestions, 300); // debounce
     return () => clearTimeout(timeoutId);
   }, [query]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (query.trim()) {
       router.push(`/products/search?query=${encodeURIComponent(query.trim())}`);
@@ -39,7 +45,7 @@ export default function SearchBar() {
     }
   };
 
-  const handleSuggestionClick = (name) => {
+  const handleSuggestionClick = (name: string) => {
     router.push(`/products/search?query=${encodeURIComponent(name)}`);
     setQuery("");
     setSuggestions([]);
@@ -47,8 +53,11 @@ export default function SearchBar() {
 
   // Close suggestions on click outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setSuggestions([]);
       }
     };
@@ -84,7 +93,7 @@ export default function SearchBar() {
               className="cursor-pointer px-5 py-3 text-gray-800 transition hover:bg-blue-50 hover:text-blue-700"
               role="option"
               tabIndex={0}
-              onKeyDown={(e) => {
+              onKeyDown={(e: KeyboardEvent<HTMLLIElement>) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   handleSuggestionClick(item.name);

@@ -1,12 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, ComponentType } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
-const withAdminAuth = (WrappedComponent) => {
-  return function ProtectedComponent(props) {
-    const [loading, setLoading] = useState(true);
-    const [isAdmin, setIsAdmin] = useState(false);
+// Generic type for props
+const withAdminAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
+  const ProtectedComponent = (props: P) => {
+    const [loading, setLoading] = useState<boolean>(true);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -18,11 +19,11 @@ const withAdminAuth = (WrappedComponent) => {
           return;
         }
 
-        const { data: isAdmin } = await supabase.rpc("check_is_admin", {
+        const { data: isAdminResult } = await supabase.rpc("check_is_admin", {
           uid: user.id,
         });
 
-        if (!isAdmin) {
+        if (!isAdminResult) {
           router.replace("/access-denied");
           return;
         }
@@ -32,11 +33,13 @@ const withAdminAuth = (WrappedComponent) => {
       };
 
       checkAdmin();
-    }, []);
+    }, [router]);
 
     if (loading) return <p className="text-center mt-10">Verifying admin...</p>;
     return isAdmin ? <WrappedComponent {...props} /> : null;
   };
+
+  return ProtectedComponent;
 };
 
 export default withAdminAuth;

@@ -1,6 +1,18 @@
-export default function OrderSummary({ subtotal, shippingFee }) {
+import React from "react";
+
+interface OrderSummaryProps {
+  subtotal: number;
+  shippingFee: number;
+  // Optionally add quantity as a prop if you want to display it dynamically
+  quantity?: number | string;
+}
+
+export default function OrderSummary({
+  subtotal,
+  shippingFee,
+  quantity = "",
+}: OrderSummaryProps) {
   const totalAmount = subtotal + shippingFee;
-  const quantity = '';
 
   return (
     <div className="p-4 border-t mt-4">

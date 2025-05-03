@@ -82,13 +82,13 @@ export default function Home() {
     <div className="min-h-screen mt-0 sm:mt-0 lg:mt-0 bg-gradient-to-br from-white via-blue-50 to-slate-100 text-gray-900 flex flex-col">
       {/* Show SearchBar only on mobile */}
       {isMobile && (
-        <div className="px-4 py-3 bg-white shadow-md sticky top-0 z-30">
+        <div className="px-4 py-3 bg-gray-900 shadow-md sticky top-0 z-30">
           <SearchBar />
         </div>
       )}
 
       {/* HERO BANNER */}
-      <section className="relative w-full bg-gradient-to-r from-blue-100 to-indigo-100 overflow-hidden shadow-sm mt-10">
+      <section className="relative w-full bg-gradient-to-r from-blue-100 to-indigo-100 overflow-hidden shadow-sm">
         <div className="flex-1 w-full px-4 lg:px-16 pb-8 pt-10 lg:pt-24 lg:pb-8">
           <motion.h1
             className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 text-indigo-900 tracking-tight"

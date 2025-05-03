@@ -18,15 +18,21 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
-export default function UserMenu({ onSignIn }) {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [userName, setUserName] = useState("User");
+// Define the prop type for UserMenu
+interface UserMenuProps {
+  onSignIn: () => void;
+}
+
+export default function UserMenu({ onSignIn }: UserMenuProps) {
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>("User");
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const { user, setUser } = useAuth();
 
   useEffect(() => {
     fetchUserData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchUserData = async () => {
@@ -34,7 +40,6 @@ export default function UserMenu({ onSignIn }) {
 
     const { data, error: userError } = await supabase.auth.getUser();
     const currentUser = data?.user;
-
     if (userError || !currentUser) {
       console.error("Error fetching user or user not logged in:", userError);
       setLoading(false);
@@ -54,10 +59,10 @@ export default function UserMenu({ onSignIn }) {
       .maybeSingle();
 
     if (adminError) console.error("Error checking admin status:", adminError);
-    setIsAdmin(isAdminData || false);
+    setIsAdmin(!!isAdminData);
 
     if (profileError) console.error("Error fetching profile data:", profileError);
-    setUserName(profileData?.first_name || "User");
+    setUserName(profileData?.first_name ?? "User");
 
     setLoading(false);
   };
@@ -104,7 +109,7 @@ export default function UserMenu({ onSignIn }) {
               <div className="py-1">
                 {isAdmin && (
                   <Menu.Item>
-                    {({ active }) => (
+                    {({ active }: { active: boolean }) => (
                       <Link
                         href="/admin/dashboard"
                         className={`flex items-center px-4 py-2 text-sm font-medium ${
@@ -119,7 +124,7 @@ export default function UserMenu({ onSignIn }) {
                 )}
 
                 <Menu.Item>
-                  {({ active }) => (
+                  {({ active }: { active: boolean }) => (
                     <Link
                       href="/profile/see-profile"
                       className={`flex items-center px-4 py-2 text-sm font-medium ${
@@ -133,7 +138,7 @@ export default function UserMenu({ onSignIn }) {
                 </Menu.Item>
 
                 <Menu.Item>
-                  {({ active }) => (
+                  {({ active }: { active: boolean }) => (
                     <Link
                       href="/orders/tracking"
                       className={`flex items-center px-4 py-2 text-sm font-medium ${
@@ -147,7 +152,7 @@ export default function UserMenu({ onSignIn }) {
                 </Menu.Item>
 
                 <Menu.Item>
-                  {({ active }) => (
+                  {({ active }: { active: boolean }) => (
                     <Link
                       href="/orders/completed"
                       className={`flex items-center px-4 py-2 text-sm font-medium ${
@@ -163,7 +168,7 @@ export default function UserMenu({ onSignIn }) {
 
               <div className="py-1 border-t border-gray-200">
                 <Menu.Item>
-                  {({ active }) => (
+                  {({ active }: { active: boolean }) => (
                     <button
                       onClick={handleLogout}
                       className={`flex w-full items-center px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 focus:outline-none focus:bg-red-100 rounded-b-md ${
@@ -200,7 +205,7 @@ export default function UserMenu({ onSignIn }) {
           >
             <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-white z-50">
               <Menu.Item>
-                {({ active }) => (
+                {({ active }: { active: boolean }) => (
                   <Link
                     href="/signin"
                     className="block px-4 py-2 text-sm font-medium text-gray-700"

@@ -55,83 +55,75 @@ export default function ChatPage() {
     setIsMobile(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
   }, []);
 
-  return (
-    <>
-      {/* Floating Action Button (Desktop Only) */}
-      {!isMobile && (
-        <div className="fixed bottom-8 right-8 z-50">
-          <div className="relative">
-            <motion.button
-              onClick={() => setIsOpen(!isOpen)}
-              className="bg-indigo-600 text-white p-4 rounded-full shadow-xl hover:bg-indigo-700 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div className="flex items-center gap-2">
-                <MessageCircle size={24} />
-                {isOpen ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
-              </div>
-            </motion.button>
-
-            <AnimatePresence>
-              {isOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ type: "spring", damping: 25 }}
-                  className="absolute right-0 bottom-full mb-4 w-64 bg-white rounded-xl shadow-2xl overflow-hidden"
-                >
-                  {contacts.map((contact) => (
-                    <a
-                      key={contact.id}
-                      href={contact.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
-                    >
-                      <div className="p-2 rounded-lg bg-gray-100">
-                        {contact.icon}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">{contact.name}</p>
-                        <p className="text-sm text-gray-500">{contact.description}</p>
-                      </div>
-                    </a>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+  return !isMobile ? (
+    <div className="fixed bottom-8 right-8 z-50">
+      <div className="relative">
+        <motion.button
+          onClick={() => setIsOpen(!isOpen)}
+          className="bg-indigo-600 text-white p-4 rounded-full shadow-xl hover:bg-indigo-700 transition-colors"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <div className="flex items-center gap-2">
+            <MessageCircle size={24} />
+            {isOpen ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
           </div>
-        </div>
-      )}
+        </motion.button>
 
-      {/* Mobile Contact Page */}
-      {isMobile && (
-        <main className="max-w-xl mx-auto p-6">
-          <h1 className="text-3xl font-bold mb-6 text-center text-orange-700">Contact Support</h1>
-          <ul className="space-y-4">
-            {contacts.map(({ id, name, icon, url, description }) => (
-              <li key={id}>
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25 }}
+              className="absolute right-0 bottom-full mb-4 w-64 bg-white rounded-xl shadow-2xl overflow-hidden"
+            >
+              {contacts.map((contact) => (
                 <a
-                  href={url}
+                  key={contact.id}
+                  href={contact.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:shadow-lg hover:border-orange-500 transition"
+                  className="flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
                 >
-                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100">
-                    {icon}
+                  <div className="p-2 rounded-lg bg-gray-100">
+                    {contact.icon}
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900">{name}</h2>
-                    <p className="text-sm text-gray-600">{description}</p>
+                    <p className="font-medium text-gray-900">{contact.name}</p>
+                    <p className="text-sm text-gray-500">{contact.description}</p>
                   </div>
                 </a>
-              </li>
-            ))}
-          </ul>
-        </main>
-      )}
-    </>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+    ) : (
+    <main className="max-w-xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6 text-center text-orange-700">Contact Support</h1>
+      <ul className="space-y-4">
+        {contacts.map(({ id, name, icon, url, description }) => (
+          <li key={id}>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:shadow-lg hover:border-orange-500 transition"
+            >
+              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100">
+                {icon}
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">{name}</h2>
+                <p className="text-sm text-gray-600">{description}</p>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </main>
   );
 }

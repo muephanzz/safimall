@@ -3,12 +3,11 @@ import { motion } from "framer-motion";
 import ProductCard from "@/components/ProductCard";
 
 interface Props {
-  params: Promise<{ subcategory_id: string }>;
+  params: { subcategory_id: string };
 }
 
 export default async function SubcategoryPage({ params }: Props) {
-  // Await params before destructuring
-  const { subcategory_id } = await params;
+  const { subcategory_id } = params; // No await needed
 
   const { data: products, error } = await supabase
     .from("products")
@@ -29,8 +28,6 @@ export default async function SubcategoryPage({ params }: Props) {
       <h1 className="text-3xl font-bold mb-6">
         Products in Subcategory
       </h1>
-
-
       {products?.length ? (
         <motion.div
           className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 lg:gap-4 sm:gap-3"
