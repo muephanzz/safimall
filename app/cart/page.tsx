@@ -146,7 +146,7 @@ export default function Cart() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="bg-white rounded-2xl shadow-2xl p-8 mb-8"
+            className="bg-white rounded-2xl shadow-2xl lg:p-8 mb-8"
           >
             <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8">
               <div className="bg-blue-100 p-6 rounded-full">

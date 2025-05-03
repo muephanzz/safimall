@@ -137,7 +137,7 @@ export default function ProductDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-0 sm:px-0 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 mb-20 lg:py-8 px-0 sm:px-0 lg:px-8">
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
         <div className="p-6 sm:p-10">
           <div className="mb-6">
