@@ -70,12 +70,11 @@ export default function ProductDetails() {
 
   // Mobile detection
   useEffect(() => {
+    // Detect mobile device based on user agent
     const checkMobile = () => {
       setIsMobile(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
     };
     checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Fetch product, reviews, recommendations
