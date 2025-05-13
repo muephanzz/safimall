@@ -1,32 +1,5 @@
 "use client";
 
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "SmartKenya | Kenya's Leading Online Shopping Platform",
-  description: "Shop electronics, fashion, home goods & more on SmartKenya. Best prices in Kenya, fast delivery & secure payments. Your trusted online shopping destination!",
-  keywords: ["online shopping Kenya", "SmartKenya", "buy electronics Kenya", "fashion Kenya", "ecommerce Kenya"],
-  openGraph: {
-    title: "SmartKenya | Kenya's #1 Online Marketplace",
-    description: "Best online shopping platform in Kenya with daily deals on electronics, fashion, home appliances & more.",
-    url: "https://www.smartkenya.co.ke",
-    siteName: "SmartKenya",
-    images: [{
-      url: "/og-image.jpg", // Add actual OG image URL
-      width: 1200,
-      height: 630,
-    }],
-    locale: "en_KE",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "SmartKenya | Kenya's Online Shopping Leader",
-    description: "Your one-stop shop for all needs in Kenya - Best prices & fastest delivery!",
-    images: ["/twitter-image.jpg"], // Add actual Twitter image URL
-  },
-};
-
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import ProductCard, { Product } from "@/components/ProductCard";
