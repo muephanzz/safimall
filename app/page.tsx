@@ -89,9 +89,9 @@ export default function Home() {
 
       {/* HERO BANNER */}
       <section className="relative w-full bg-gradient-to-r from-blue-100 to-indigo-100 overflow-hidden shadow-sm">
-        <div className="flex-1 w-full px-4 lg:px-16 pb-8 pt-10 lg:pt-24 lg:pb-8">
+        <div className="flex-1 w-full px-4 lg:px-16 pb-8 pt-10 sm:pt-20 lg:pt-28 lg:pb-8">
           <motion.h1
-            className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 text-indigo-900 tracking-tight"
+            className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 text-indigo-900 tracking-tight"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
@@ -99,7 +99,7 @@ export default function Home() {
             Discover Premium Products for Modern Living
           </motion.h1>
           <motion.p
-            className="text-base sm:text-lg md:text-xl text-gray-700 mb-10"
+            className="text-base  sm:text-lg md:text-xl text-gray-700 mb-10"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
@@ -109,7 +109,7 @@ export default function Home() {
           </motion.p>
           <motion.a
             href="#products"
-            className="inline-block px-8 py-3 bg-gradient-to-r from-indigo-600 to-blue-500 text-white text-lg font-semibold rounded-full shadow-lg hover:scale-105 transition"
+            className="inline-block px-4 py-1 bg-gradient-to-r from-indigo-600 to-blue-500 text-white text-lg font-semibold rounded-full shadow-lg hover:scale-105 transition"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.4 }}
@@ -132,7 +132,7 @@ export default function Home() {
           </motion.h2>
           <section>
             <motion.div
-              className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 lg:gap-4 sm:gap-3"
+              className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-1"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
@@ -164,14 +164,14 @@ export default function Home() {
         </motion.h2>
         <section>
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 lg:grid-cols-5 gap-2 lg:gap-4 sm:gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 lg:grid-cols-5 gap-1 lg:gap-2 sm:gap-1">
               {[...Array(itemsPerPage)].map((_, i) => (
                 <ProductCard key={i} product={{} as Product} loading={true} />
               ))}
             </div>
           ) : (
             <motion.div
-              className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 lg:gap-4 sm:gap-3"
+              className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-1"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
@@ -199,7 +199,9 @@ export default function Home() {
           />
         </div>
       </main>
-      <ChatPage/>
+      {!isMobile && (
+        <ChatPage/>
+      )};
       <Footer />
     </div>
   );

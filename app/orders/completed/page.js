@@ -26,7 +26,7 @@ const CompletedOrders = () => {
       <ul className="grid gap-4 mt-2">
         {items?.length > 0 ? (
           items.map((item, index) => (
-            <li key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 border-b pb-4">
+            <li key={index} className="flex flex-1 //flex-col //sm:flex-row items-start sm:items-center gap-4 border-b pb-4">
               <Image
                 src={item.image_url}
                 width={80}

@@ -48,13 +48,13 @@ export default function DesktopMenu() {
   }, []);
 
   return (
-    <nav className="absolute mt-28 left-0 right-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 shadow-2xl hidden md:flex w-full px-6 text-[18px] font-semibold space-x-8 rounded-b-3xl border-b-2 border-blue-700 z-50">
+    <nav className="absolute mt-24 left-0 right-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 shadow-2xl hidden md:flex w-full px-6 text-[18px] font-semibold space-x-8 rounded-b-3xl border-b-2 border-blue-700 z-50">
       {categories.map((category) => {
         const hasSubcategories = subcategories[category.id]?.length > 0;
 
         return (
           <div key={category.id} className="relative group">
-            <div className="transition-all duration-300 px-4 py-2 rounded-xl flex items-center gap-2 cursor-default select-none text-white">
+            <div className="transition-all duration-300 px-4 py-1 rounded-xl flex items-center gap-2 cursor-default select-none text-white">
               {category.category}
               {hasSubcategories && (
                 <svg
@@ -70,7 +70,7 @@ export default function DesktopMenu() {
             </div>
 
             {hasSubcategories && (
-              <div className="absolute left-0 top-full min-w-[220px] bg-white/95 rounded-2xl shadow-2xl border border-indigo-100 opacity-0 group-hover:opacity-100 group-hover:visible invisible pointer-events-none group-hover:pointer-events-auto transition-all duration-300 backdrop-blur-xl z-50">
+              <div className="absolute left-0 top-full min-w-[220px] bg-white/95 shadow-2xl border border-indigo-100 opacity-0 group-hover:opacity-100 group-hover:visible invisible pointer-events-none group-hover:pointer-events-auto transition-all duration-300 backdrop-blur-xl z-50">
                 <ul className="py-3">
                   {subcategories[category.id].map((sub) => {
                     const isActive = subcategoryId === sub.subcategory_id.toString();
@@ -79,7 +79,7 @@ export default function DesktopMenu() {
                       <li key={sub.subcategory_id}>
                         <Link
                           href={`/products/subcategory/${sub.subcategory_id}`}
-                          className={`flex items-center gap-2 px-6 py-2 text-gray-700 font-medium rounded-lg hover:bg-gradient-to-r hover:from-indigo-100 hover:to-blue-100 hover:text-indigo-700 transition-all duration-200 ${
+                          className={`flex items-center gap-2 px-4 py-1 text-gray-700 font-medium hover:bg-gradient-to-r hover:from-indigo-100 hover:to-blue-100 hover:text-indigo-700 transition-all duration-200 ${
                             isActive ? "bg-indigo-100 text-indigo-700 font-bold" : ""
                           }`}
                         >

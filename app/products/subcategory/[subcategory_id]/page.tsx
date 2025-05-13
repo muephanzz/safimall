@@ -7,7 +7,7 @@ interface Props {
 }
 
 export default async function SubcategoryPage({ params }: Props) {
-  const { subcategory_id } = params; // No await needed
+  const { subcategory_id } = await params; // Await params here
 
   const { data: products, error } = await supabase
     .from("products")

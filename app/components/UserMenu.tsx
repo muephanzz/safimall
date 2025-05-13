@@ -87,7 +87,7 @@ export default function UserMenu({ onSignIn }: UserMenuProps) {
             aria-label="User menu"
           >
             <User2 className="w-6 h-6 text-white" />
-            <ChevronDown className="w-4 h-4 ml-1 text-gray-300" aria-hidden="true" />
+            <ChevronDown className="w-4 h-4 text-gray-300" aria-hidden="true" />
           </Menu.Button>
 
           <Transition

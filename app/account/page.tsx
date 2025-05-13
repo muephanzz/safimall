@@ -118,17 +118,6 @@ export default function AccountPage() {
                   {userName}
                   <span className="text-orange-600 ml-2 text-lg">👋</span>
                 </h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="h-2 w-32 bg-gray-200 rounded-full">
-                    <div 
-                      className="h-full bg-orange-500 rounded-full transition-all duration-500" 
-                      style={{ width: `${profileCompletion}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm text-gray-500">
-                    {profileCompletion}% Complete
-                  </span>
-                </div>
               </div>
             </div>
 

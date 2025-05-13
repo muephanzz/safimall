@@ -62,9 +62,9 @@ export default function MobileMenu() {
       <button
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label={menuOpen ? "Close menu" : "Open menu"}
-        className="relative ml-2 z-50 p-2 rounded-full shadow-lg ring-1 ring-gray-200 hover:bg-white hover:text-black transition-all"
+        className="relative mr-2 z-50 p-2 shadow-lg text-white transition-all"
       >
-        {menuOpen ? <X size={24} className="text-white" /> : <Menu size={24} className="text-gray-800" />}
+        {menuOpen ? <X size={24} className="text-white" /> : <Menu size={24} />}
       </button>
 
       {/* Overlay */}

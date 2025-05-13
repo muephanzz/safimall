@@ -38,11 +38,11 @@ export default function ProductCard({ product, loading }: ProductCardProps) {
       aria-label={`View details for ${product.name}`}
     >
       <motion.div
-        className="bg-white hover:shadow-md hover:rounded-md border border-transparent transition-al pb-2 px-1 overflow-hidden relative flex flex-col"
+        className="hover:shadow-md hover:rounded-md border border-transparent transition-al pb-2 px-1 overflow-hidden relative flex flex-col"
         whileHover={{ scale: 1.05 }}
         transition={{ type: "spring", stiffness: 250, damping: 20 }}
       >
-        <div className="relative w-full h-56 overflow-hidden shadow-sm">
+        <div className="bg-white relative w-full h-36 overflow-hidden shadow-sm">
           <Image
             src={product.image_urls?.[0] || "/placeholder.jpg"}
             alt={product.name || "Product Image"}
@@ -52,7 +52,7 @@ export default function ProductCard({ product, loading }: ProductCardProps) {
             priority={false}
           />
           {product.attributes?.State && (
-            <span className="absolute top-3 left-3 bg-gradient-to-r from-indigo-600 to-purple-700 text-white text-xs font-semibold px-3 py-1 rounded-xl shadow-lg z-20 select-none">
+            <span className="absolute top-1 bg-gradient-to-r from-indigo-600 to-purple-700 text-white text-xs font-semibold px-1 shadow-lg z-20 select-none">
               {product.attributes?.State}
             </span>
           )}
@@ -60,7 +60,7 @@ export default function ProductCard({ product, loading }: ProductCardProps) {
 
         <div className="mt-1 flex flex-col flex-grow">
           <h3
-            className="text-lg font-semibold text-gray-900 truncate"
+            className="font-semibold text-gray-900 truncate"
             title={product.name}
           >
             {product.name}
@@ -73,7 +73,7 @@ export default function ProductCard({ product, loading }: ProductCardProps) {
             {product.description || "No description available"}
           </p>
 
-          <p className="mt-auto font-extrabold text-red-500 text-lg sm:text-xl tracking-tight">
+          <p className="mt-auto font-extrabold text-red-500 tracking-tight">
             Ksh {Number(product.price).toLocaleString()}
           </p>
         </div>
