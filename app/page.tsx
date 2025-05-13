@@ -1,5 +1,32 @@
 "use client";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "SmartKenya | Kenya's Leading Online Shopping Platform",
+  description: "Shop electronics, fashion, home goods & more on SmartKenya. Best prices in Kenya, fast delivery & secure payments. Your trusted online shopping destination!",
+  keywords: ["online shopping Kenya", "SmartKenya", "buy electronics Kenya", "fashion Kenya", "ecommerce Kenya"],
+  openGraph: {
+    title: "SmartKenya | Kenya's #1 Online Marketplace",
+    description: "Best online shopping platform in Kenya with daily deals on electronics, fashion, home appliances & more.",
+    url: "https://www.smartkenya.co.ke",
+    siteName: "SmartKenya",
+    images: [{
+      url: "/og-image.jpg", // Add actual OG image URL
+      width: 1200,
+      height: 630,
+    }],
+    locale: "en_KE",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SmartKenya | Kenya's Online Shopping Leader",
+    description: "Your one-stop shop for all needs in Kenya - Best prices & fastest delivery!",
+    images: ["/twitter-image.jpg"], // Add actual Twitter image URL
+  },
+};
+
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import ProductCard, { Product } from "@/components/ProductCard";
@@ -96,17 +123,19 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            Discover Premium Products for Modern Living
+            SmartKenya - Your Premier Online Shopping Destination in Kenya
           </motion.h1>
           <motion.p
-            className="text-base  sm:text-lg md:text-xl text-gray-700 mb-10"
+            className="text-base sm:text-lg md:text-xl text-gray-700 mb-10"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
           >
-            Shop the latest trends, top brands, and exclusive deals. Fast delivery,
-            secure checkout, and 24/7 support.
+            Kenya's largest online marketplace offering electronics, fashion, home goods, 
+            and daily essentials. Enjoy competitive prices, same-day delivery in Nairobi, 
+            and 24/7 customer support. Secure payments via M-Pesa and credit cards.
           </motion.p>
+
           <motion.a
             href="#products"
             className="inline-block px-4 py-1 bg-gradient-to-r from-indigo-600 to-blue-500 text-white text-lg font-semibold rounded-full shadow-lg hover:scale-105 transition"
