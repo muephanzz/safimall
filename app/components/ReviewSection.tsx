@@ -1,16 +1,54 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import moment from "moment";
 import Image from "next/image";
 
-export default function ReviewSection({ reviews }) {
-  const [selectedImages, setSelectedImages] = useState([]);
+interface Review {
+  review_id: string;
+  rating: number;
+  comment: string;
+  media_urls?: string[];
+  created_at: string;
+  username: string;
+  profiles?: {
+    avatar_url?: string;
+  };
+}
+
+interface ReviewSectionProps {
+  reviews: Review[];
+  sortOrder?: string; // optional if you want to handle sorting inside
+}
+
+export default function ReviewSection({ reviews, sortOrder }: ReviewSectionProps) {
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
-  const openViewer = (imgs, index) => {
+  // If you want to sort reviews here based on sortOrder, you can do:
+  const sortedReviews = React.useMemo(() => {
+    if (!sortOrder) return reviews;
+    switch (sortOrder) {
+      case "newest":
+        return [...reviews].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      case "oldest":
+        return [...reviews].sort(
+          (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      case "highest":
+        return [...reviews].sort((a, b) => b.rating - a.rating);
+      case "lowest":
+        return [...reviews].sort((a, b) => a.rating - b.rating);
+      default:
+        return reviews;
+    }
+  }, [reviews, sortOrder]);
+
+  const openViewer = (imgs: string[], index: number) => {
     setSelectedImages(imgs);
     setCurrentIndex(index);
     setShowModal(true);
@@ -34,12 +72,12 @@ export default function ReviewSection({ reviews }) {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      {reviews.length === 0 ? (
+      {sortedReviews.length === 0 ? (
         <p className="text-gray-500 mb-20 text-center text-lg italic">
           No reviews yet. Be the first to review!
         </p>
       ) : (
-        reviews.map((review) => (
+        sortedReviews.map((review) => (
           <div
             key={review.review_id}
             className="mb-10 border-b border-gray-300 pb-6 last:border-none"
@@ -95,12 +133,12 @@ export default function ReviewSection({ reviews }) {
 
               <p className="text-lg leading-relaxed">{review.comment}</p>
 
-              {review.media_urls?.length > 0 && (
+              {review.media_urls?.length ? (
                 <div className="ml-0 mt-4 flex space-x-4 overflow-x-auto scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-gray-200 rounded-lg py-2">
                   {review.media_urls.map((img, idx) => (
                     <button
                       key={idx}
-                      onClick={() => openViewer(review.media_urls, idx)}
+                      onClick={() => openViewer(review.media_urls!, idx)}
                       className="flex-shrink-0 rounded-lg overflow-hidden shadow-lg ring-2 ring-indigo-400 hover:ring-indigo-600 transition"
                       aria-label={`Open image ${idx + 1} of review media`}
                       type="button"
@@ -116,7 +154,7 @@ export default function ReviewSection({ reviews }) {
                     </button>
                   ))}
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         ))
