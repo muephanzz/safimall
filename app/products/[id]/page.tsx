@@ -11,7 +11,7 @@ import ReviewSection from "@/components/ReviewSection";
 import { motion, AnimatePresence } from "framer-motion";
 import Head from "next/head";
 
-// Skeleton Loader Component
+// Skeleton Loader
 function ProductSkeleton() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center py-20">
@@ -40,7 +40,6 @@ function ProductSkeleton() {
   );
 }
 
-// Match the Product type with ProductCard
 interface Product extends ProductCardType {
   specification: { name: string; value: string }[];
   image_urls: string[];
@@ -247,237 +246,163 @@ export default function ProductDetails() {
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 mb-20 lg:py-8 px-0 sm:px-0 lg:px-8">
-        <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div className="p-6 sm:p-10">
-            <div className="mb-6">
-              <Link
-                href="/"
-                className="text-sm text-blue-500 hover:text-indigo-700 transition duration-300 flex items-center gap-2"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                  <path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" />
-                </svg>
-                Back to Products
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-              {/* Main image and thumbnails */}
-              <div className="relative">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-0 px-0">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 bg-white rounded-2xl shadow-2xl overflow-hidden mt-4">
+          {/* Left: Image Gallery */}
+          <div className="w-full lg:w-2/5 p-6 pt-10 flex flex-col items-center">
+            <motion.div
+              className="w-full aspect-square bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl shadow-lg relative"
+              whileHover={{ scale: 1.03 }}
+              transition={{ duration: 0.3 }}
+              onTouchStart={isMobile ? handleTouchStart : undefined}
+              onTouchEnd={isMobile ? handleTouchEnd : undefined}
+            >
+              <AnimatePresence mode="wait">
                 <motion.div
-                  className={`relative ${isMobile ? "rounded-none shadow-none" : "rounded-2xl shadow-lg"} overflow-hidden bg-gradient-to-br from-gray-50 to-white border border-gray-200`}
-                  whileHover={{ scale: isMobile ? 1 : 1.03 }}
-                  transition={{ duration: 0.3 }}
-                  onTouchStart={isMobile ? handleTouchStart : undefined}
-                  onTouchEnd={isMobile ? handleTouchEnd : undefined}
+                  key={mainImage}
+                  initial={{ opacity: 0, scale: 0.99 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.01 }}
+                  transition={{ duration: 0.25, ease: "easeInOut" }}
                 >
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={mainImage}
-                      initial={{ opacity: 0, scale: 0.99 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 1.01 }}
-                      transition={{ duration: 0.25, ease: "easeInOut" }}
-                    >
-                      <Image
-                        src={mainImage}
-                        width={isMobile ? 800 : 500}
-                        height={isMobile ? 800 : 500}
-                        alt={product.name}
-                        priority
-                        className={`object-contain w-full ${isMobile ? "h-[60vw] max-h-[70vw]" : "max-h-[400px]"} transition-all duration-300`}
-                      />
-                    </motion.div>
-                  </AnimatePresence>
+                  <Image
+                    src={mainImage}
+                    width={600}
+                    height={600}
+                    alt={product.name}
+                    priority
+                    className="object-contain w-full h-full transition-all duration-300"
+                  />
                 </motion.div>
-
-                {/* Thumbnails: Hide on mobile */}
-                {!isMobile && (
-                  <div className="absolute left-0 bottom-0 w-full">
-                    <div
-                      ref={imageGalleryRef}
-                      className="flex gap-2 overflow-x-auto scroll-smooth scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-gray-100 py-2"
-                    >
-                      {product.image_urls?.map((img, index) => (
-                        <motion.div
-                          key={index}
-                          whileHover={{ scale: 1.1 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <Image
-                            src={img}
-                            width={48}
-                            height={48}
-                            alt="Thumbnail"
-                            onClick={() => setMainImage(img)}
-                            className={`cursor-pointer border-4 rounded-lg transition-all duration-300 ${mainImage === img ? "border-blue-500 shadow-md" : "border-transparent hover:border-blue-300"}`}
-                          />
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Product Info */}
-              <div className="space-y-7">
-                <motion.h1
-                  className="text-3xl font-extrabold text-gray-900 tracking-tight"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  {product.name}
-                </motion.h1>
-
-                <motion.p
-                  className="text-gray-700 leading-relaxed text-base"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  {product.description || "No description available."}
-                </motion.p>
-
-                <motion.div
-                  className="text-2xl font-bold text-red-700"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                >
-                  Ksh {product.price.toLocaleString()}
-                </motion.div>
-
-                <motion.div
-                  className="flex flex-col sm:flex-row gap-4 pt-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.6 }}
-                >
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={adding}
-                    className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-orange-600 to-purple-600 text-white rounded-xl shadow-md hover:shadow-lg transition duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed font-semibold"
-                  >
-                    {adding ? "Adding..." : "Add to Cart"}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (!product) return toast.error("Product details are missing!");
-                      const item = {
-                        product_id: product.product_id,
-                        image_url: mainImage,
-                        name: product.name,
-                        description: product.description,
-                        price: product.price,
-                        quantity: 1,
-                      };
-                      localStorage.setItem("checkoutItems", JSON.stringify([item]));
-                      router.push("/orders/checkout");
-                    }}
-                    disabled={checking}
-                    className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-orange-400 to-purple-400 text-white rounded-xl shadow-md hover:shadow-lg transition duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed font-semibold"
-                  >
-                    Buy Now
-                  </button>
-                </motion.div>
-              </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="mt-12">
-              <div className="flex gap-6 border-b border-gray-300 pb-2">
-                {["specifications", "recommended", "reviews"].map((tab) => (
-                  <motion.button
-                    key={tab}
-                    onClick={() => scrollToSection(tab)}
-                    className={`text-lg font-semibold pb-2 capitalize transition duration-300 ${activeTab === tab ? "text-orange-700 border-b-2 border-orange-700" : "text-gray-500 hover:text-orange-500"}`}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {tab}
-                  </motion.button>
+              </AnimatePresence>
+            </motion.div>
+            {/* Thumbnails */}
+            {product.image_urls?.length > 1 && (
+              <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-thin">
+                {product.image_urls.map((img, idx) => (
+                  <Image
+                    key={idx}
+                    src={img}
+                    width={64}
+                    height={64}
+                    alt={`Thumbnail ${idx + 1}`}
+                    onClick={() => setMainImage(img)}
+                    className={`cursor-pointer border-2 rounded-lg ${mainImage === img ? "border-orange-500" : "border-gray-200"}`}
+                  />
                 ))}
               </div>
+            )}
+          </div>
+          {/* Right: Product Info */}
+          <div className="w-full lg:w-3/5 p-6 pt-10 flex flex-col gap-4 sticky top-0 self-start">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded font-bold">In Stock</span>
+              {/* Add more badges as needed */}
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{product.name}</h1>
+            <p className="text-gray-700 text-base mb-2">{product.description}</p>
+            <div className="flex items-center gap-4 mb-4">
+              <span className="text-3xl font-bold text-red-600">Ksh {product.price.toLocaleString()}</span>
+              {/* You can add old price or discount badge here */}
+            </div>
+            <div className="flex gap-4 mb-4">
+              <button
+                onClick={handleAddToCart}
+                disabled={adding}
+                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg shadow transition"
+              >
+                {adding ? "Adding..." : "Add to Cart"}
+              </button>
+              <button
+                onClick={() => {
+                  if (!product) return toast.error("Product details are missing!");
+                  const item = {
+                    product_id: product.product_id,
+                    image_url: mainImage,
+                    name: product.name,
+                    description: product.description,
+                    price: product.price,
+                    quantity: 1,
+                  };
+                  localStorage.setItem("checkoutItems", JSON.stringify([item]));
+                  router.push("/orders/checkout");
+                }}
+                disabled={checking}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg shadow transition"
+              >
+                Buy Now
+              </button>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+              <span>✓ Free Delivery in Nairobi</span>
+              <span>•</span>
+              <span>✓ 7 Days Return</span>
+            </div>
+            <div className="text-xs text-gray-400">Sold by: SmartKenya Official Store</div>
+          </div>
+        </div>
 
-              {/* Tab Content */}
-              <div className="mt-8">
-                {/* Specifications */}
-                <div ref={specRef} className="scroll-mt-28 mb-12">
-                  {activeTab === "specifications" && (
-                    <motion.table
-                      className="w-full border-collapse border border-gray-200 text-sm rounded-lg shadow-md"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <thead>
-                        <tr className="bg-gradient-to-r from-blue-50 to-indigo-100">
-                          <th className="p-3 text-left font-semibold text-gray-800">Specification</th>
-                          <th className="p-3 text-left font-semibold text-gray-800">Details</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {Array.isArray(product.specification) && product.specification.length > 0 ? (
-                          product.specification.map((spec, idx) => (
-                            <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                              <td className="p-3 font-medium text-gray-700">{spec.name}</td>
-                              <td className="p-3 text-gray-600">{spec.value}</td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={2} className="p-3 text-gray-500 text-center">
-                              No specifications available.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </motion.table>
+        {/* Tabs */}
+        <div className="max-w-7xl mx-auto mt-8 px-4">
+          <div className="flex gap-6 border-b border-gray-200 pb-2 sticky top-0 bg-white z-10">
+            {["specifications", "reviews", "recommended"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => scrollToSection(tab)}
+                className={`text-lg font-semibold pb-2 capitalize transition duration-300 ${
+                  activeTab === tab ? "text-orange-600 border-b-2 border-orange-600" : "text-gray-500 hover:text-orange-500"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+          {/* Tab Content */}
+          <div className="mt-8">
+            {/* Specifications */}
+            <div ref={specRef} className="scroll-mt-28 mb-12">
+              <h2 className="text-xl font-bold mb-4 text-gray-800">Product Specifications</h2>
+              <table className="w-full border border-gray-200 rounded-lg overflow-hidden mb-4">
+                <tbody>
+                  {Array.isArray(product.specification) && product.specification.length > 0 ? (
+                    product.specification.map((spec, idx) => (
+                      <tr key={idx} className={idx % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+                        <td className="p-3 font-medium text-gray-700 w-1/3">{spec.name}</td>
+                        <td className="p-3 text-gray-600">{spec.value}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={2} className="p-3 text-gray-500 text-center">
+                        No specifications available.
+                      </td>
+                    </tr>
                   )}
-                </div>
-
-                {/* Recommended */}
-                <div ref={recoRef} className="scroll-mt-28 mb-12">
-                  {activeTab === "recommended" && (
-                    <motion.div
-                      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      {recommended.map((product) => (
-                        <ProductCard key={product.product_id} product={product} loading={false} />
-                      ))}
-                    </motion.div>
-                  )}
-                </div>
-
-                {/* Reviews */}
-                <div ref={reviewRef} className="scroll-mt-28">
-                  {activeTab === "reviews" && (
-                    <motion.div
-                      className="mt-6"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <h2 className="text-2xl font-bold mb-4 text-gray-800">Customer Reviews ({reviews.length})</h2>
-                      <select
-                        onChange={(e) => setSortOrder(e.target.value)}
-                        value={sortOrder}
-                        className="mb-4 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="newest">Newest First</option>
-                        <option value="oldest">Oldest First</option>
-                        <option value="highest">Highest Rated</option>
-                        <option value="lowest">Lowest Rated</option>
-                      </select>
-                      <ReviewSection reviews={reviews} sortOrder={sortOrder} />
-                    </motion.div>
-                  )}
-                </div>
+                </tbody>
+              </table>
+            </div>
+            {/* Reviews */}
+            <div ref={reviewRef} className="scroll-mt-28 mb-12">
+              <h2 className="text-xl font-bold mb-4 text-gray-800">Customer Reviews ({reviews.length})</h2>
+              <select
+                onChange={(e) => setSortOrder(e.target.value)}
+                value={sortOrder}
+                className="mb-4 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="highest">Highest Rated</option>
+                <option value="lowest">Lowest Rated</option>
+              </select>
+              <ReviewSection reviews={reviews} sortOrder={sortOrder} />
+            </div>
+            {/* Recommendations */}
+            <div ref={recoRef} className="scroll-mt-28">
+              <h2 className="text-xl font-bold mb-4 text-gray-800">Recommended Products</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {recommended.map((product) => (
+                  <ProductCard key={product.product_id} product={product} loading={false} />
+                ))}
               </div>
             </div>
           </div>
