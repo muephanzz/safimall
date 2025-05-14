@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Facebook, Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
 import { FaCcVisa, FaCcMastercard, FaPaypal } from "react-icons/fa";
-import Logo from "./Logo";
 
 const Footer: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -23,7 +22,6 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
         {/* Logo & About */}
         <div className="md:col-span-1 flex flex-col gap-4">
-          <Logo width={170} height={56} />
           <h2 className="text-xl font-bold text-blue-400 mt-2">About SmartKenya</h2>
           <p className="text-gray-300 text-sm leading-relaxed">
             <span className="font-semibold text-white">SmartKenya</span> is your trusted destination for a clean, seamless, and premium shopping experience. Discover quality products, fast delivery, and genuine service - all in one place.

@@ -1,372 +1,395 @@
-"use client";
+// app/products/[id]/page.tsx
 
-import { useEffect, useState, useRef, TouchEvent } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import { supabase } from "@/lib/supabaseClient";
-import Image from "next/image";
-import toast from "react-hot-toast";
-import ProductCard, { Product as ProductCardType } from "@/components/ProductCard";
-import ReviewSection from "@/components/ReviewSection";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef, useEffect } from 'react';
+import Head from 'next/head';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { ChevronLeftIcon, ChevronRightIcon, StarIcon } from '@heroicons/react/24/solid';
 
-// Match the Product type with ProductCard
-interface Product extends ProductCardType {
-  specification: { name: string; value: string }[];
-  image_urls: string[];
+interface Review {
+  user: string;
+  rating: number;
+  comment: string;
 }
 
-export default function ProductDetails() {
-  const { id } = useParams();
-  const router = useRouter();
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  specifications: Record<string, string>;
+  reviews: Review[];
+  image_urls: string[];
+  recommended_products?: Product[]; // Optional recommended products
+}
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [quantity] = useState<number>(1);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [adding, setAdding] = useState<boolean>(false);
-  const [checking, setChecking] = useState<boolean>(false);
-  const [mainImage, setMainImage] = useState<string>("");
-  const [sortOrder, setSortOrder] = useState<string>("newest");
-  const [recommended, setRecommended] = useState<Product[]>([]);
-  const [activeTab, setActiveTab] = useState<string>("specifications");
+interface ProductPageProps {
+  product: Product;
+}
+
+export default function ProductPage({ product }: ProductPageProps) {
+  const [mainImage, setMainImage] = useState(product.image_urls[0]);
+  const [activeTab, setActiveTab] = useState('specifications');
+  const [isMobile, setIsMobile] = useState(false);
   const imageGalleryRef = useRef<HTMLDivElement>(null);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const specRef = useRef<HTMLDivElement>(null);
+  const reviewRef = useRef<HTMLDivElement>(null);
+  const recoRef = useRef<HTMLDivElement>(null);
 
+  // Calculate average rating for structured data
+  const averageRating =
+    product.reviews.length > 0
+      ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
+      : 0;
+
+  // Structured data JSON-LD for SEO
+  const structuredData = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    name: product.name,
+    image: product.image_urls,
+    description: product.description,
+    brand: { "@type": "Brand", name: "SmartKenya Online Shopping" },
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "KES",
+      price: product.price.toFixed(2),
+      availability: "https://schema.org/InStock",
+      url: `https://smartkenya.co.ke/products/${product.id}`,
+    },
+    aggregateRating: product.reviews.length > 0 && {
+      "@type": "AggregateRating",
+      ratingValue: averageRating.toFixed(1),
+      reviewCount: product.reviews.length,
+    },
+  };
+
+  // Handle window resize to detect mobile
   useEffect(() => {
-    // Detect mobile device based on user agent
-    const checkMobile = () => {
-      setIsMobile(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    if (!id) return;
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [{ data: productData }, { data: reviewsData }, { data: recommendedData }] = await Promise.all([
-          supabase.from("products").select("*").eq("product_id", id).single(),
-          supabase.from("reviews").select("review_id, rating, comment, media_urls, created_at, username, user_id, profiles(avatar_url)").eq("product_id", id),
-          supabase.from("products").select("*").neq("product_id", id).limit(4),
-        ]);
-        if (productData) {
-          setProduct(productData);
-          setMainImage(productData.image_urls?.[0] || "");
-        }
-        setReviews(reviewsData || []);
-        setRecommended(recommendedData || []);
-      } catch (err: any) {
-        console.error("Error fetching data:", err.message);
-        toast.error("Failed to load product details.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [id]);
-
-  const handleAddToCart = async () => {
-    if (!product || quantity < 1) return toast.error("Please select a valid quantity.");
-    setAdding(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return toast.error("Please log in to add items to the cart.");
-      const { data: existingCartItem } = await supabase
-        .from("cart")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .eq("product_id", product.product_id)
-        .single();
-      if (existingCartItem) {
-        const newQty = existingCartItem.items.quantity + quantity;
-        await supabase.from("cart").update({
-          items: {
-            ...existingCartItem.items,
-            quantity: newQty,
-          }
-        }).eq("cart_id", existingCartItem.cart_id);
-      } else {
-        await supabase.from("cart").insert([
-          {
-            product_id: product.product_id,
-            user_id: session.user.id,
-            items: {
-              product_id: product.product_id,
-              name: product.name,
-              price: product.price,
-              description: product.description,
-              image_url: mainImage,
-              quantity,
-            }
-          }
-        ]);
-      }
-      toast.success("Item added to cart!");
-      window.location.reload();
-    } catch (err: any) {
-      console.error("Error adding to cart:", err.message);
-      toast.error("Failed to add item to cart.");
-    } finally {
-      setAdding(false);
-      setChecking(false);
+  // Smooth scroll thumbnails left or right
+  const scrollThumbnails = (direction: 'left' | 'right') => {
+    if (imageGalleryRef.current) {
+      const scrollAmount = direction === 'right' ? 300 : -300;
+      imageGalleryRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
 
-  if (loading) return <p className="text-center">Loading product...</p>;
-  if (!product) return <p className="text-center">Product not found!</p>;
+  // Intersection Observer to switch tabs on scroll
+  useEffect(() => {
+    const sections = [
+      { ref: specRef, id: 'specifications' },
+      { ref: reviewRef, id: 'reviews' },
+      { ref: recoRef, id: 'recommended' },
+    ];
 
-  // Touch handlers for mobile swipe
-  const handleTouchStart = (e: TouchEvent) => setTouchStartX(e.touches[0].clientX);
-  const handleTouchEnd = (e: TouchEvent) => {
-    if (touchStartX === null) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const touchDiff = touchStartX - touchEndX;
-    if (Math.abs(touchDiff) > 50 && product.image_urls.length > 1) {
-      const currentIndex = product.image_urls.indexOf(mainImage);
-      const nextIndex = touchDiff > 0
-        ? (currentIndex + 1) % product.image_urls.length
-        : (currentIndex - 1 + product.image_urls.length) % product.image_urls.length;
-      setMainImage(product.image_urls[nextIndex]);
-    }
-    setTouchStartX(null);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+            const sectionId = entry.target.getAttribute('data-section');
+            if (sectionId) setActiveTab(sectionId);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    sections.forEach(({ ref, id }) => {
+      if (ref.current) {
+        ref.current.setAttribute('data-section', id);
+        observer.observe(ref.current);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Scroll to section on tab click
+  const scrollToSection = (section: string) => {
+    const target =
+      section === 'specifications'
+        ? specRef.current
+        : section === 'reviews'
+        ? reviewRef.current
+        : recoRef.current;
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 mb-20 lg:py-8 px-0 sm:px-0 lg:px-8">
-      <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <div className="p-6 sm:p-10">
-          <div className="mb-6">
-            <Link
-              href="/"
-              className="text-sm text-blue-500 hover:text-indigo-700 transition duration-300 flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                <path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" />
-              </svg>
-              Back to Products
-            </Link>
-          </div>
+    <>
+      <Head>
+        <title>{`${product.name} | SmartKenya Online Shopping`}</title>
+        <meta name="description" content={product.description} />
+        <meta property="og:title" content={product.name} />
+        <meta property="og:description" content={product.description} />
+        <meta property="og:image" content={mainImage} />
+        <link rel="canonical" href={`https://smartkenya.co.ke/products/${product.id}`} />
+        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+      </Head>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-            {/* Main image and thumbnails */}
-            <div className="relative">
-              <motion.div
-                className={`relative ${isMobile ? "rounded-none shadow-none" : "rounded-2xl shadow-lg"} overflow-hidden bg-gradient-to-br from-gray-50 to-white border border-gray-200`}
-                whileHover={{ scale: isMobile ? 1 : 1.03 }}
-                transition={{ duration: 0.3 }}
-                onTouchStart={isMobile ? handleTouchStart : undefined}
-                onTouchEnd={isMobile ? handleTouchEnd : undefined}
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Product Title and Price */}
+        <section className="mb-8">
+          <h1 className="text-4xl font-extrabold text-gray-900">{product.name}</h1>
+          <p className="text-3xl text-primary mt-2 font-semibold">
+            KSh {product.price.toLocaleString('en-KE')}
+          </p>
+          <p className="mt-2 text-gray-700 max-w-3xl">{product.description}</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Pay easily with M-PESA, Airtel Money, PayPal, and credit cards.
+          </p>
+        </section>
+
+        <section className="grid md:grid-cols-2 gap-10">
+          {/* Left: Image Gallery */}
+          <div className="relative">
+            <div className="relative w-full aspect-square rounded-lg overflow-hidden shadow-lg">
+              <Image
+                src={mainImage}
+                alt={`${product.name} main image`}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+                className="object-cover"
+              />
+            </div>
+
+            {/* Desktop thumbnails with scroll buttons */}
+            {!isMobile && product.image_urls.length > 1 && (
+              <div className="relative mt-6">
+                <button
+                  aria-label="Scroll thumbnails left"
+                  onClick={() => scrollThumbnails('left')}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 p-2 rounded-full shadow-md hover:bg-primary hover:text-white transition"
+                >
+                  <ChevronLeftIcon className="w-6 h-6" />
+                </button>
+
+                <div
+                  ref={imageGalleryRef}
+                  className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory px-12"
+                  style={{ scrollBehavior: 'smooth' }}
+                >
+                  {product.image_urls.map((img, idx) => (
+                    <motion.button
+                      key={idx}
+                      onClick={() => setMainImage(img)}
+                      className={`snap-center flex-shrink-0 rounded-lg overflow-hidden border-2 ${
+                        img === mainImage ? 'border-primary' : 'border-transparent'
+                      }`}
+                      whileHover={{ scale: 1.05 }}
+                      aria-label={`View image ${idx + 1}`}
+                    >
+                      <Image
+                        src={img}
+                        alt={`${product.name} thumbnail ${idx + 1}`}
+                        width={100}
+                        height={100}
+                        className="object-cover aspect-square"
+                        loading="lazy"
+                      />
+                    </motion.button>
+                  ))}
+                </div>
+
+                <button
+                  aria-label="Scroll thumbnails right"
+                  onClick={() => scrollThumbnails('right')}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 p-2 rounded-full shadow-md hover:bg-primary hover:text-white transition"
+                >
+                  <ChevronRightIcon className="w-6 h-6" />
+                </button>
+              </div>
+            )}
+
+            {/* Mobile thumbnails as simple scroll */}
+            {isMobile && product.image_urls.length > 1 && (
+              <div
+                ref={imageGalleryRef}
+                className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory mt-4"
+                style={{ scrollBehavior: 'smooth' }}
               >
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={mainImage}
-                    initial={{ opacity: 0, scale: 0.99 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 1.01 }}
-                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                {product.image_urls.map((img, idx) => (
+                  <motion.button
+                    key={idx}
+                    onClick={() => setMainImage(img)}
+                    className={`snap-center flex-shrink-0 rounded-lg overflow-hidden border-2 ${
+                      img === mainImage ? 'border-primary' : 'border-transparent'
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    aria-label={`View image ${idx + 1}`}
                   >
                     <Image
-                      src={mainImage}
-                      width={isMobile ? 800 : 500}
-                      height={isMobile ? 800 : 500}
-                      alt={product.name}
-                      priority
-                      className={`object-contain w-full ${isMobile ? "h-[60vw] max-h-[70vw]" : "max-h-[400px]"} transition-all duration-300`}
+                      src={img}
+                      alt={`${product.name} thumbnail ${idx + 1}`}
+                      width={80}
+                      height={80}
+                      className="object-cover aspect-square"
+                      loading="lazy"
                     />
-                  </motion.div>
-                </AnimatePresence>
-              </motion.div>
-
-              {/* Thumbnails: Hide on mobile */}
-              {!isMobile && (
-                <div className="absolute left-0 bottom-0 w-full">
-                  <div
-                    ref={imageGalleryRef}
-                    className="flex gap-2 overflow-x-auto scroll-smooth scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-gray-100 py-2"
-                  >
-                    {product.image_urls?.map((img, index) => (
-                      <motion.div
-                        key={index}
-                        whileHover={{ scale: 1.1 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Image
-                          src={img}
-                          width={48}
-                          height={48}
-                          alt="Thumbnail"
-                          onClick={() => setMainImage(img)}
-                          className={`cursor-pointer border-4 rounded-lg transition-all duration-300 ${mainImage === img ? "border-blue-500 shadow-md" : "border-transparent hover:border-blue-300"}`}
-                        />
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Product Info */}
-            <div className="space-y-7">
-              <motion.h1
-                className="text-3xl font-extrabold text-gray-900 tracking-tight"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                {product.name}
-              </motion.h1>
-
-              <motion.p
-                className="text-gray-700 leading-relaxed text-base"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                {product.description || "No description available."}
-              </motion.p>
-
-              <motion.div
-                className="text-2xl font-bold text-red-700"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
-                Ksh {product.price.toLocaleString()}
-              </motion.div>
-
-              <motion.div
-                className="flex flex-col sm:flex-row gap-4 pt-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-              >
-                <button
-                  onClick={handleAddToCart}
-                  disabled={adding}
-                  className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-orange-600 to-purple-600 text-white rounded-xl shadow-md hover:shadow-lg transition duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed font-semibold"
-                >
-                  {adding ? "Adding..." : "Add to Cart"}
-                </button>
-                <button
-                  onClick={() => {
-                    if (!product) return toast.error("Product details are missing!");
-                    const item = {
-                      product_id: product.product_id,
-                      image_url: mainImage,
-                      name: product.name,
-                      description: product.description,
-                      price: product.price,
-                      quantity: 1,
-                    };
-                    localStorage.setItem("checkoutItems", JSON.stringify([item]));
-                    router.push("/orders/checkout");
-                  }}
-                  disabled={checking}
-                  className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-orange-400 to-purple-400 text-white rounded-xl shadow-md hover:shadow-lg transition duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed font-semibold"
-                >
-                  Buy Now
-                </button>
-              </motion.div>
-            </div>
+                  </motion.button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Tabs */}
-          <div className="mt-12">
-            <div className="flex gap-6 border-b border-gray-300 pb-2">
-              {["specifications", "recommended", "reviews"].map((tab) => (
-                <motion.button
+          {/* Right: Tabs and Content */}
+          <div className="sticky top-20 self-start">
+            {/* Tabs */}
+            <nav className="flex gap-4 mb-6" aria-label="Product sections">
+              {['specifications', 'reviews', 'recommended'].map((tab) => (
+                <button
                   key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`text-lg font-semibold pb-2 capitalize transition duration-300 ${activeTab === tab ? "text-orange-700 border-b-2 border-orange-700" : "text-gray-500 hover:text-orange-500"}`}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
+                  onClick={() => scrollToSection(tab)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition ${
+                    activeTab === tab
+                      ? 'bg-primary text-white shadow-lg'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                  }`}
+                  aria-current={activeTab === tab ? 'true' : undefined}
                 >
-                  {tab}
-                </motion.button>
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
               ))}
-            </div>
+            </nav>
 
-            {/* Tab Content */}
-            <div className="mt-8">
-              {activeTab === "specifications" && (
-                <motion.table
-                  className="w-full border-collapse border border-gray-200 text-sm rounded-lg shadow-md"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <thead>
-                    <tr className="bg-gradient-to-r from-blue-50 to-indigo-100">
-                      <th className="p-3 text-left font-semibold text-gray-800">Specification</th>
-                      <th className="p-3 text-left font-semibold text-gray-800">Details</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Array.isArray(product.specification) && product.specification.length > 0 ? (
-                      product.specification.map((spec, idx) => (
-                        <tr
-                          key={idx}
-                          className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                        >
-                          <td className="p-3 font-medium text-gray-700">{spec.name}</td>
-                          <td className="p-3 text-gray-600">{spec.value}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={2} className="p-3 text-gray-500 text-center">
-                          No specifications available.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </motion.table>
+            {/* Specifications Section */}
+            <section
+              ref={specRef}
+              data-section="specifications"
+              className="scroll-mt-28 mb-12"
+              tabIndex={-1}
+              aria-labelledby="specifications-heading"
+            >
+              <h2 id="specifications-heading" className="text-2xl font-semibold mb-4">
+                Specifications
+              </h2>
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-gray-700">
+                {Object.entries(product.specifications).map(([key, value]) => (
+                  <div key={key} className="flex justify-between border-b border-gray-200 pb-2">
+                    <dt className="font-medium">{key}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+
+            {/* Reviews Section */}
+            <section
+              ref={reviewRef}
+              data-section="reviews"
+              className="scroll-mt-28 mb-12"
+              tabIndex={-1}
+              aria-labelledby="reviews-heading"
+            >
+              <h2 id="reviews-heading" className="text-2xl font-semibold mb-6">
+                Customer Reviews ({product.reviews.length})
+              </h2>
+
+              {product.reviews.length === 0 && (
+                <p className="text-gray-600">No reviews yet. Be the first to review this product!</p>
               )}
 
-              {activeTab === "recommended" && (
-                <motion.div
-                  className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                    {recommended.map((product) => (
-                    <ProductCard key={product.product_id} product={product} loading={false} />
-                    ))}
+              <ul className="space-y-6">
+                {product.reviews.map((review, idx) => (
+                  <li key={idx} className="bg-gray-50 p-4 rounded-lg shadow-sm">
+                    <div className="flex items-center mb-2">
+                      <div className="flex text-yellow-400">
+                        {[...Array(5)].map((_, i) => (
+                          <StarIcon
+                            key={i}
+                            className={`w-5 h-5 ${
+                              i < review.rating ? 'text-yellow-400' : 'text-gray-300'
+                            }`}
+                            aria-hidden="true"
+                          />
+                        ))}
+                      </div>
+                      <p className="ml-3 font-semibold text-gray-800">{review.user}</p>
+                    </div>
+                    <p className="text-gray-700">{review.comment}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
 
-                </motion.div>
-              )}
+            {/* Recommended Products Section */}
+            <section
+              ref={recoRef}
+              data-section="recommended"
+              className="scroll-mt-28"
+              tabIndex={-1}
+              aria-labelledby="recommended-heading"
+            >
+              <h2 id="recommended-heading" className="text-2xl font-semibold mb-6">
+                Recommended Products
+              </h2>
 
-              {activeTab === "reviews" && (
-                <motion.div
-                  className="mt-6"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <h2 className="text-2xl font-bold mb-4 text-gray-800">Customer Reviews ({reviews.length})</h2>
-                  <select
-                    onChange={(e) => setSortOrder(e.target.value)}
-                    value={sortOrder}
-                    className="mb-4 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                    <option value="highest">Highest Rated</option>
-                    <option value="lowest">Lowest Rated</option>
-                  </select>
-                  <ReviewSection reviews={reviews} />
-                </motion.div>
+              {product.recommended_products && product.recommended_products.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                  {product.recommended_products.map((rec) => (
+                    <a
+                      key={rec.id}
+                      href={`/products/${rec.id}`}
+                      className="block border rounded-lg overflow-hidden shadow hover:shadow-lg transition"
+                      aria-label={`View recommended product ${rec.name}`}
+                    >
+                      <div className="relative w-full aspect-square">
+                        <Image
+                          src={rec.image_urls[0]}
+                          alt={rec.name}
+                          fill
+                          className="object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="p-3">
+                        <h3 className="text-sm font-semibold text-gray-900 truncate">{rec.name}</h3>
+                        <p className="text-primary font-semibold mt-1">
+                          KSh {rec.price.toLocaleString('en-KE')}
+                        </p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-600">No recommendations available at this time.</p>
               )}
-            </div>
+            </section>
           </div>
-        </div>
-      </div>
-    </div>
+        </section>
+      </main>
+
+      <style jsx global>{`
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .scrollbar-hide {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
+        }
+        /* Primary color for your brand */
+        :root {
+          --primary: #1e40af; /* Customize to your brand color */
+        }
+        .text-primary {
+          color: var(--primary);
+        }
+        .bg-primary {
+          background-color: var(--primary);
+        }
+        .hover\\:bg-primary:hover {
+          background-color: var(--primary);
+        }
+      `}</style>
+    </>
   );
 }
