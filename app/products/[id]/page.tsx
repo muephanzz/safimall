@@ -99,7 +99,7 @@ export default function ProductDetails() {
           // Parse colours from attribute field (JSON)
           try {
             const attr = typeof productData.attribute === "string" ? JSON.parse(productData.attribute) : productData.attribute;
-            setColours(attr?.Colours || []);
+            setColours(attr?.Colour || []);
           } catch {
             setColours([]);
           }
