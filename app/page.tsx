@@ -203,7 +203,7 @@ export default function Home() {
       </main>
       {!isMobile && (
         <ChatPage/>
-      )};
+      )}
       <Footer />
     </div>
   );

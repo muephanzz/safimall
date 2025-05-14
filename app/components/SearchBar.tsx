@@ -15,6 +15,15 @@ export default function SearchBar() {
   const [showMobileOverlay, setShowMobileOverlay] = useState(false);
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Detect mobile device based on user agent
+    const checkMobile = () => {
+      setIsMobile(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+    };
+    checkMobile();
+  }, []);
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -66,9 +75,6 @@ export default function SearchBar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showMobileOverlay]);
-
-  // Overlay for mobile
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 
   // Main search bar (desktop)
   const searchInput = (

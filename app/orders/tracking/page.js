@@ -182,13 +182,13 @@ export default function OrderTracking() {
     // Header Section
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.text("SafiMall Online Shopping", pageWidth / 2, yPos, { align: "center" });
+    doc.text("SmartKenya Online Shopping", pageWidth / 2, yPos, { align: "center" });
     yPos += 6;
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text("P.O Box 068-60100, Embu", pageWidth / 2, yPos, { align: "center" });
     yPos += 4;
-    doc.text("www.safimall.com, 0798229783", pageWidth / 2, yPos, { align: "center" });
+    doc.text("www.smartkenya.co.ke", pageWidth / 2, yPos, { align: "center" });
     yPos += 4;
     doc.text("VAT No: P051XXXXXXXX", pageWidth / 2, yPos, { align: "center" });
     yPos += 8;

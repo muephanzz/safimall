@@ -24,12 +24,12 @@ const Footer: React.FC = () => {
         {/* Logo & About */}
         <div className="md:col-span-1 flex flex-col gap-4">
           <Logo width={170} height={56} />
-          <h2 className="text-xl font-bold text-blue-400 mt-2">About SafiMall</h2>
+          <h2 className="text-xl font-bold text-blue-400 mt-2">About SmartKenya</h2>
           <p className="text-gray-300 text-sm leading-relaxed">
-            <span className="font-semibold text-white">SafiMall</span> is your trusted destination for a clean, seamless, and premium shopping experience. Discover quality products, fast delivery, and genuine service - all in one place.
+            <span className="font-semibold text-white">SmartKenya</span> is your trusted destination for a clean, seamless, and premium shopping experience. Discover quality products, fast delivery, and genuine service - all in one place.
           </p>
           <p className="mt-2 text-sm text-gray-300">
-            Fresh finds. Secure payments. Reliable support. Shop with confidence at SafiMall.
+            Fresh finds. Secure payments. Reliable support. Shop with confidence at SmartKenya.
           </p>
         </div>
 
@@ -110,20 +110,20 @@ const Footer: React.FC = () => {
           <div className="mb-3 text-sm text-gray-300">
             <div className="flex items-center gap-2">
               <span role="img" aria-label="email">📧</span>
-              <Link href="mailto:support@safimall.co.ke" className="hover:text-blue-300 transition-colors duration-300">
-                support@safimall.co.ke
+              <Link href="mailto:support@smartkenya.co.ke" className="hover:text-blue-300 transition-colors duration-300">
+                support@smartkenya.co.ke
               </Link>
             </div>
             <div className="flex items-center gap-2 mt-2">
               <span role="img" aria-label="phone">📞</span>
-              <Link href="tel:+254712345678" className="hover:text-blue-300 transition-colors duration-300">
-                +254 712 345 678
+              <Link href="tel:+254798229783" className="hover:text-blue-300 transition-colors duration-300">
+                +254 798 229 783
               </Link>
             </div>
           </div>
           <div className="flex space-x-4 mt-4">
             <Link
-              href="https://facebook.com/safimall"
+              href="https://facebook.com/smartkenya"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-blue-500 transition-colors duration-300"
@@ -132,7 +132,7 @@ const Footer: React.FC = () => {
               <Facebook size={24} />
             </Link>
             <Link
-              href="https://twitter.com/safimall"
+              href="https://twitter.com/smartkenya"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-blue-400 transition-colors duration-300"
@@ -141,7 +141,7 @@ const Footer: React.FC = () => {
               <Twitter size={24} />
             </Link>
             <Link
-              href="https://instagram.com/safimall"
+              href="https://instagram.com/smartkenya"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-pink-500 transition-colors duration-300"
@@ -150,7 +150,7 @@ const Footer: React.FC = () => {
               <Instagram size={24} />
             </Link>
             <Link
-              href="https://linkedin.com/company/safimall"
+              href="https://linkedin.com/company/smartkenya"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-blue-300 transition-colors duration-300"
@@ -159,7 +159,7 @@ const Footer: React.FC = () => {
               <Linkedin size={24} />
             </Link>
             <Link
-              href="https://youtube.com/@safimall"
+              href="https://youtube.com/@smartkenya"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-red-500 transition-colors duration-300"
@@ -174,7 +174,7 @@ const Footer: React.FC = () => {
       {/* Copyright */}
       <div className="text-center mt-10 border-t border-gray-700 pt-5">
         <p className="text-sm text-gray-400 select-text">
-          &copy; {new Date().getFullYear()} SafiMall. All rights reserved.
+          &copy; {new Date().getFullYear()} smartkenya. All rights reserved.
         </p>
       </div>
     </footer>
