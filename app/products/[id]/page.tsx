@@ -1,4 +1,4 @@
-// app/products/[id]/page.tsx
+"use client";
 
 import { useState, useRef, useEffect } from 'react';
 import Head from 'next/head';
