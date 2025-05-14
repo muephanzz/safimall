@@ -48,7 +48,6 @@ interface Product extends ProductCardType {
 export default function ProductDetails() {
   const { id } = useParams();
   const router = useRouter();
-
   const [product, setProduct] = useState<Product | null>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [quantity] = useState<number>(1);
@@ -59,9 +58,15 @@ export default function ProductDetails() {
   const [sortOrder, setSortOrder] = useState<string>("newest");
   const [recommended, setRecommended] = useState<Product[]>([]);
   const [activeTab, setActiveTab] = useState<string>("specifications");
-  const imageGalleryRef = useRef<HTMLDivElement>(null);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  // New: Modal state for options
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [showOptions, setShowOptions] = useState<null | "cart" | "buy">(null);
+  const [colours, setColours] = useState<string[]>([]);
+  const [selectedColour, setSelectedColour] = useState<string>("");
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<string>("");
 
   // Refs for scroll-based tab switching
   const specRef = useRef<HTMLDivElement>(null);
@@ -77,7 +82,7 @@ export default function ProductDetails() {
     checkMobile();
   }, []);
 
-  // Fetch product, reviews, recommendations
+  // Fetch product, reviews, recommendations, and colours
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -91,6 +96,13 @@ export default function ProductDetails() {
         if (productData) {
           setProduct(productData);
           setMainImage(productData.image_urls?.[0] || "");
+          // Parse colours from attribute field (JSON)
+          try {
+            const attr = typeof productData.attribute === "string" ? JSON.parse(productData.attribute) : productData.attribute;
+            setColours(attr?.colours || []);
+          } catch {
+            setColours([]);
+          }
         }
         setReviews(reviewsData || []);
         setRecommended(recommendedData || []);
@@ -103,6 +115,21 @@ export default function ProductDetails() {
     };
     fetchData();
   }, [id]);
+
+  // Fetch user's shipping addresses
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+      const { data, error } = await supabase
+        .from("shipping_addresses")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false });
+      if (!error) setAddresses(data || []);
+    };
+    fetchAddresses();
+  }, []);
 
   // Intersection Observer for scroll-based tab switching
   useEffect(() => {
@@ -131,8 +158,16 @@ export default function ProductDetails() {
     return () => observer.disconnect();
   }, [loading]);
 
-  // Add to cart handler
-  const handleAddToCart = async () => {
+  // Add to cart handler: now opens modal
+  const handleAddToCart = () => setShowOptions("cart");
+  const handleBuyNow = () => setShowOptions("buy");
+
+  // Confirm modal selection
+  const handleConfirmOptions = async () => {
+    if (!selectedColour || !selectedAddress) {
+      toast.error("Please select both colour and delivery address.");
+      return;
+    }
     if (!product || quantity < 1) return toast.error("Please select a valid quantity.");
     setAdding(true);
     try {
@@ -150,6 +185,8 @@ export default function ProductDetails() {
           items: {
             ...existingCartItem.items,
             quantity: newQty,
+            colour: selectedColour,
+            address: selectedAddress,
           }
         }).eq("cart_id", existingCartItem.cart_id);
       } else {
@@ -164,12 +201,16 @@ export default function ProductDetails() {
               description: product.description,
               image_url: mainImage,
               quantity,
+              colour: selectedColour,
+              address: selectedAddress,
             }
           }
         ]);
       }
       toast.success("Item added to cart!");
-      window.location.reload();
+      setShowOptions(null);
+      if (showOptions === "cart") window.location.reload();
+      if (showOptions === "buy") router.push("/orders/checkout");
     } catch (err: any) {
       console.error("Error adding to cart:", err.message);
       toast.error("Failed to add item to cart.");
@@ -274,10 +315,16 @@ export default function ProductDetails() {
                   />
                 </motion.div>
               </AnimatePresence>
+              {/* Show image count on mobile */}
+              {isMobile && product.image_urls?.length > 1 && (
+                <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                  {product.image_urls.indexOf(mainImage) + 1} / {product.image_urls.length}
+                </div>
+              )}
             </motion.div>
-            {/* Thumbnails */}
+            {/* Thumbnails: hide on mobile */}
             {product.image_urls?.length > 1 && (
-              <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-thin">
+              <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-thin hidden md:flex">
                 {product.image_urls.map((img, idx) => (
                   <Image
                     key={idx}
@@ -304,7 +351,7 @@ export default function ProductDetails() {
               <span className="text-3xl font-bold text-red-600">Ksh {product.price.toLocaleString()}</span>
               {/* You can add old price or discount badge here */}
             </div>
-            <div className="flex gap-4 mb-4">
+            <div className="flex gap-4 mb-4 hidden md:flex">
               <button
                 onClick={handleAddToCart}
                 disabled={adding}
@@ -313,19 +360,7 @@ export default function ProductDetails() {
                 {adding ? "Adding..." : "Add to Cart"}
               </button>
               <button
-                onClick={() => {
-                  if (!product) return toast.error("Product details are missing!");
-                  const item = {
-                    product_id: product.product_id,
-                    image_url: mainImage,
-                    name: product.name,
-                    description: product.description,
-                    price: product.price,
-                    quantity: 1,
-                  };
-                  localStorage.setItem("checkoutItems", JSON.stringify([item]));
-                  router.push("/orders/checkout");
-                }}
+                onClick={handleBuyNow}
                 disabled={checking}
                 className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg shadow transition"
               >
@@ -405,6 +440,82 @@ export default function ProductDetails() {
               </div>
             </div>
           </div>
+
+ {/* Mobile Fixed Bottom Bar */}
+ {isMobile && (
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex gap-2 p-4 z-50 md:hidden">
+            <button
+              onClick={handleAddToCart}
+              disabled={adding}
+              className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg shadow transition"
+            >
+              {adding ? "Adding..." : "Add to Cart"}
+            </button>
+            <button
+              onClick={handleBuyNow}
+              disabled={checking}
+              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg shadow transition"
+            >
+              Buy Now
+            </button>
+          </div>
+        )}
+
+        {/* Modal for Colour & Address Selection */}
+        <AnimatePresence>
+          {showOptions && (
+            <motion.div
+              className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs">
+                <h2 className="text-lg font-bold mb-4">Choose Options</h2>
+                {/* Colour */}
+                <label className="block mb-2 font-medium">Colour</label>
+                <select
+                  value={selectedColour}
+                  onChange={e => setSelectedColour(e.target.value)}
+                  className="w-full mb-4 border rounded p-2"
+                >
+                  <option value="">Select Colour</option>
+                  {colours.map(colour => (
+                    <option key={colour} value={colour}>{colour}</option>
+                  ))}
+                </select>
+                {/* Address */}
+                <label className="block mb-2 font-medium">Delivery Address</label>
+                <select
+                  value={selectedAddress}
+                  onChange={e => setSelectedAddress(e.target.value)}
+                  className="w-full mb-4 border rounded p-2"
+                >
+                  <option value="">Select Address</option>
+                  {addresses.map(addr => (
+                    <option key={addr.id} value={addr.id}>
+                      {addr.address} {addr.city ? `(${addr.city})` : ""}
+                    </option>
+                  ))}
+                </select>
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={handleConfirmOptions}
+                    className="flex-1 bg-orange-500 text-white py-2 rounded"
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => setShowOptions(null)}
+                    className="flex-1 bg-gray-200 text-gray-700 py-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>        
         </div>
       </div>
     </>
