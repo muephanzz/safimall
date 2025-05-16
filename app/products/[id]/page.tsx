@@ -63,8 +63,8 @@ export default function ProductDetails() {
   // New: Modal state for options
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [showOptions, setShowOptions] = useState<null | "cart" | "buy">(null);
-  const [colours, setColours] = useState<string[]>([]);
-  const [selectedColour, setSelectedColour] = useState<string>("");
+  const [Colors, setColors] = useState<string[]>([]);
+  const [selectedColor, setSelectedColor] = useState<string>("");
   const [addresses, setAddresses] = useState<any[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>("");
 
@@ -82,7 +82,7 @@ export default function ProductDetails() {
     checkMobile();
   }, []);
 
-  // Fetch product, reviews, recommendations, and colours
+  // Fetch product, reviews, recommendations, and Colors
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -96,12 +96,12 @@ export default function ProductDetails() {
         if (productData) {
           setProduct(productData);
           setMainImage(productData.image_urls?.[0] || "");
-          // Parse colours from attribute field (JSON)
+          // Parse Colors from attribute field (JSON)
           try {
             const attr = typeof productData.attribute === "string" ? JSON.parse(productData.attribute) : productData.attribute;
-            setColours(attr?.colours || []);
+            setColors(attr?.Color || []);
           } catch {
-            setColours([]);
+            setColors([]);
           }
         }
         setReviews(reviewsData || []);
@@ -164,8 +164,8 @@ export default function ProductDetails() {
 
   // Confirm modal selection
   const handleConfirmOptions = async () => {
-    if (!selectedColour || !selectedAddress) {
-      toast.error("Please select both colour and delivery address.");
+    if (!selectedColor || !selectedAddress) {
+      toast.error("Please select both Color and delivery address.");
       return;
     }
     if (!product || quantity < 1) return toast.error("Please select a valid quantity.");
@@ -185,7 +185,7 @@ export default function ProductDetails() {
           items: {
             ...existingCartItem.items,
             quantity: newQty,
-            colour: selectedColour,
+            Color: selectedColor,
             address: selectedAddress,
           }
         }).eq("cart_id", existingCartItem.cart_id);
@@ -201,7 +201,7 @@ export default function ProductDetails() {
               description: product.description,
               image_url: mainImage,
               quantity,
-              colour: selectedColour,
+              Color: selectedColor,
               address: selectedAddress,
             }
           }
@@ -324,7 +324,7 @@ export default function ProductDetails() {
             </motion.div>
             {/* Thumbnails: hide on mobile */}
             {product.image_urls?.length > 1 && (
-              <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-thin hidden md:flex">
+              <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-thin flex">
                 {product.image_urls.map((img, idx) => (
                   <Image
                     key={idx}
@@ -340,7 +340,7 @@ export default function ProductDetails() {
             )}
           </div>
           {/* Right: Product Info */}
-          <div className="w-full lg:w-3/5 p-6 pt-10 flex flex-col gap-4 sticky top-0 self-start">
+          <div className="w-full lg:w-3/5 p-6 pt-10 flex flex-col gap-4 sticky top-0 self-start overflow-x-hidden">
             <div className="flex items-center gap-2 mb-2">
               <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded font-bold">In Stock</span>
               {/* Add more badges as needed */}
@@ -351,7 +351,7 @@ export default function ProductDetails() {
               <span className="text-3xl font-bold text-red-600">Ksh {product.price.toLocaleString()}</span>
               {/* You can add old price or discount badge here */}
             </div>
-            <div className="flex gap-4 mb-4 hidden md:flex">
+            <div className="flex gap-4 mb-4 flex">
               <button
                 onClick={handleAddToCart}
                 disabled={adding}
@@ -441,8 +441,8 @@ export default function ProductDetails() {
             </div>
           </div>
 
- {/* Mobile Fixed Bottom Bar */}
- {isMobile && (
+        {/* Mobile Fixed Bottom Bar */}
+        {isMobile && (
           <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex gap-2 p-4 z-50 md:hidden">
             <button
               onClick={handleAddToCart}
@@ -461,7 +461,7 @@ export default function ProductDetails() {
           </div>
         )}
 
-        {/* Modal for Colour & Address Selection */}
+        {/* Modal for Color & Address Selection */}
         <AnimatePresence>
           {showOptions && (
             <motion.div
@@ -472,16 +472,16 @@ export default function ProductDetails() {
             >
               <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs">
                 <h2 className="text-lg font-bold mb-4">Choose Options</h2>
-                {/* Colour */}
-                <label className="block mb-2 font-medium">Colour</label>
+                {/* Color */}
+                <label className="block mb-2 font-medium">Color</label>
                 <select
-                  value={selectedColour}
-                  onChange={e => setSelectedColour(e.target.value)}
+                  value={selectedColor}
+                  onChange={e => setSelectedColor(e.target.value)}
                   className="w-full mb-4 border rounded p-2"
                 >
-                  <option value="">Select Colour</option>
-                  {colours.map(colour => (
-                    <option key={colour} value={colour}>{colour}</option>
+                  <option value="">Select Color</option>
+                  {Colors.map(Color => (
+                    <option key={Color} value={Color}>{Color}</option>
                   ))}
                 </select>
                 {/* Address */}
