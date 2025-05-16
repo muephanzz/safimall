@@ -398,7 +398,7 @@ export default function ProductDetails() {
 
         {/* Tabs */}
         <div className="max-w-7xl mx-auto mt-8 px-4">
-          <div className="flex gap-6 border-b border-gray-200 pb-2 sticky top-0 bg-white z-10">
+          <div className="flex gap-6 border-b border-gray-200 pb-2 sticky overflow-hidden top-20 bg-white z-10">
             {["specifications", "reviews", "recommended"].map((tab) => (
               <button
                 key={tab}
