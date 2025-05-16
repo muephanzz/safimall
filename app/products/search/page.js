@@ -79,13 +79,12 @@ export default function SearchPage() {
         </motion.div>
       ) : (
         <>
+          <ProductFilter />
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="grid grid-cols-2 px-4 md:px-6 lg:px-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
           >
-            <ProductFilter />
-
             {products.map((product) => (
               <motion.div
                 key={product.product_id}
