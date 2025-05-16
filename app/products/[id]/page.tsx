@@ -10,6 +10,7 @@ import ProductCard, { Product as ProductCardType } from "@/components/ProductCar
 import ReviewSection from "@/components/ReviewSection";
 import { motion, AnimatePresence } from "framer-motion";
 import Head from "next/head";
+import SearchBar from "@/components/SearchBar";
 
 // Skeleton Loader
 function ProductSkeleton() {
@@ -298,19 +299,13 @@ export default function ProductDetails() {
               <path d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <input
-            type="search"
-            placeholder="Search in SafiMall"
-            className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50 text-gray-700"
-            // You can add onChange/onKeyDown for actual search logic
-          />
+          <SearchBar />
         </div>
       )}
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-0 px-0">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 bg-white rounded-2xl shadow-2xl overflow-hidden mt-4">
           {/* Left: Image Gallery */}
-        {!isMobile && (
           <div className="w-full lg:w-2/5 p-6 pt-10 flex flex-col items-center">
             <motion.div
               className="w-full aspect-square bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl shadow-lg relative"
@@ -345,7 +340,7 @@ export default function ProductDetails() {
               )}
             </motion.div>
             {/* Thumbnails: hide on mobile */}
-            {product.image_urls?.length > 1 && (
+            {!isMobile && product.image_urls?.length > 1 && (
               <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-thin flex">
                 {product.image_urls.map((img, idx) => (
                   <Image
@@ -361,7 +356,6 @@ export default function ProductDetails() {
               </div>
             )}
           </div>
-          )}
           {/* Mobile: Show main image only */}
           {/* Right: Product Info */}
           <div className="w-full lg:w-3/5 p-6 pt-10 flex flex-col gap-4 sticky top-0 self-start overflow-x-hidden">
