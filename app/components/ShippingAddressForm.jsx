@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import toast from "react-hot-toast";
 
-export default function ShippingAddressForm({ userId, onSaved }) {
+export default function ShippingAddressForm({ userId, onSaved, onBack }) {
   const [counties, setCounties] = useState([]);
   const [constituencies, setConstituencies] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -113,86 +113,149 @@ export default function ShippingAddressForm({ userId, onSaved }) {
   };
 
   return (
-    <form onSubmit={handleSave} className="space-y-4 max-w-lg mx-auto bg-white p-6 rounded-xl shadow">
-      <h3 className="text-xl font-bold mb-2">{editingId ? "Edit" : "Add"} Shipping Address</h3>
-      <div>
-        <label className="block text-sm font-semibold mb-1">Recipient Name</label>
-        <input
-          className="w-full border rounded px-3 py-2"
-          value={recipient}
-          onChange={e => setRecipient(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-semibold mb-1">Phone Number</label>
-        <input
-          className="w-full border rounded px-3 py-2"
-          value={phone}
-          onChange={e => setPhone(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-semibold mb-1">Address Line</label>
-        <input
-          className="w-full border rounded px-3 py-2"
-          value={addressLine}
-          onChange={e => setAddressLine(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-semibold mb-1">County</label>
-        <select
-          className="w-full border rounded px-3 py-2"
-          value={selectedCounty}
-          onChange={e => setSelectedCounty(e.target.value)}
-          required
+    <div className="max-w-lg mx-auto bg-white rounded-xl shadow p-6 min-h-screen flex flex-col">
+      {/* Header with Back Icon */}
+      <header className="flex items-center mb-6">
+        <button
+          onClick={onBack}
+          aria-label="Go back"
+          className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">Select County</option>
-          {counties.map(c => (
-            <option key={c.county_id} value={c.county_id}>{c.name}</option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-semibold mb-1">Constituency</label>
-        <select
-          className="w-full border rounded px-3 py-2"
-          value={selectedConstituency}
-          onChange={e => setSelectedConstituency(e.target.value)}
-          disabled={!selectedCounty}
-          required
+          <svg
+            className="w-6 h-6 text-gray-700"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            viewBox="0 0 24 24"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <h2 className="text-xl font-semibold text-gray-900 ml-4">
+          {editingId ? "Edit Shipping Address" : "Add Shipping Address"}
+        </h2>
+      </header>
+
+      <form onSubmit={handleSave} className="flex flex-col space-y-5 flex-grow">
+        <div>
+          <label htmlFor="recipient" className="block text-sm font-medium text-gray-700 mb-1">
+            Recipient Name
+          </label>
+          <input
+            id="recipient"
+            type="text"
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={recipient}
+            onChange={(e) => setRecipient(e.target.value)}
+            required
+            placeholder="John Doe"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+            Phone Number
+          </label>
+          <input
+            id="phone"
+            type="tel"
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+            placeholder="+254 7XXXXXXXX"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="addressLine" className="block text-sm font-medium text-gray-700 mb-1">
+            Address Line
+          </label>
+          <input
+            id="addressLine"
+            type="text"
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={addressLine}
+            onChange={(e) => setAddressLine(e.target.value)}
+            required
+            placeholder="1234 Main St"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="county" className="block text-sm font-medium text-gray-700 mb-1">
+            County
+          </label>
+          <select
+            id="county"
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={selectedCounty}
+            onChange={(e) => setSelectedCounty(e.target.value)}
+            required
+          >
+            <option value="">Select County</option>
+            {counties.map((c) => (
+              <option key={c.county_id} value={c.county_id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="constituency" className="block text-sm font-medium text-gray-700 mb-1">
+            Constituency
+          </label>
+          <select
+            id="constituency"
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            value={selectedConstituency}
+            onChange={(e) => setSelectedConstituency(e.target.value)}
+            disabled={!selectedCounty}
+            required
+          >
+            <option value="">Select Constituency</option>
+            {constituencies.map((c) => (
+              <option key={c.constituency_id} value={c.constituency_id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+            Location
+          </label>
+          <select
+            id="location"
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            value={selectedLocation}
+            onChange={(e) => setSelectedLocation(e.target.value)}
+            disabled={!selectedConstituency}
+            required
+          >
+            <option value="">Select Location</option>
+            {locations.map((l) => (
+              <option key={l.location_id} value={l.location_id}>
+                {l.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className={`mt-auto w-full py-3 rounded-md font-semibold text-white shadow-md transition-colors ${
+            loading ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
-          <option value="">Select Constituency</option>
-          {constituencies.map(c => (
-            <option key={c.constituency_id} value={c.constituency_id}>{c.name}</option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-semibold mb-1">Location</label>
-        <select
-          className="w-full border rounded px-3 py-2"
-          value={selectedLocation}
-          onChange={e => setSelectedLocation(e.target.value)}
-          disabled={!selectedConstituency}
-          required
-        >
-          <option value="">Select Location</option>
-          {locations.map(l => (
-            <option key={l.location_id} value={l.location_id}>{l.name}</option>
-          ))}
-        </select>
-      </div>
-      <button
-        type="submit"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition"
-        disabled={loading}
-      >
-        {loading ? "Saving..." : "Save Address"}
-      </button>
-    </form>
+          {loading ? "Saving..." : "Save Address"}
+        </button>
+      </form>
+    </div>
   );
 }

@@ -415,8 +415,9 @@ export default function ProductDetails() {
                   userId={userId}
                   onSaved={(address: ShippingAddress) => {
                     setAddressSummary(address);
-                    setShowAddressEdit(false);
+                    setShowAddressEdit(false); // or whatever closes the form
                   }}
+                  onBack={() => setShowAddressEdit(false)} // This will be called when user clicks the back icon
                 />
               )}
             </div>
@@ -553,8 +554,9 @@ export default function ProductDetails() {
           userId={userId}
           onSaved={(address: ShippingAddress) => {
             setAddressSummary(address);
-            setShowAddressEdit(false);
+            setShowAddressEdit(false); // or whatever closes the form
           }}
+          onBack={() => setShowAddressEdit(false)} // This will be called when user clicks the back icon
         />
       ) : (
         <>
