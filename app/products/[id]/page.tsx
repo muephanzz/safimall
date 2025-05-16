@@ -324,7 +324,7 @@ export default function ProductDetails() {
             </motion.div>
             {/* Thumbnails: hide on mobile */}
             {product.image_urls?.length > 1 && (
-              <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-thin hidden md:flex">
+              <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-thin flex">
                 {product.image_urls.map((img, idx) => (
                   <Image
                     key={idx}
@@ -351,7 +351,7 @@ export default function ProductDetails() {
               <span className="text-3xl font-bold text-red-600">Ksh {product.price.toLocaleString()}</span>
               {/* You can add old price or discount badge here */}
             </div>
-            <div className="flex gap-4 mb-4 hidden md:flex">
+            <div className="flex gap-4 mb-4 flex">
               <button
                 onClick={handleAddToCart}
                 disabled={adding}
@@ -441,8 +441,8 @@ export default function ProductDetails() {
             </div>
           </div>
 
- {/* Mobile Fixed Bottom Bar */}
- {isMobile && (
+        {/* Mobile Fixed Bottom Bar */}
+        {isMobile && (
           <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex gap-2 p-4 z-50 md:hidden">
             <button
               onClick={handleAddToCart}
