@@ -421,6 +421,28 @@ export default function ProductDetails() {
                 />
               )}
             </div>
+          {/* Color selection */}
+          {Colors.length > 0 && (
+            <div className="mb-4">
+              <h3 className="font-semibold mb-2">Select Color:</h3>
+              <div className="flex gap-2 flex-wrap">
+                {Colors.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    className={`px-4 py-2 rounded border 
+                      ${selectedColor === color ? "border-orange-500 bg-orange-50 font-bold" : "border-gray-300 bg-white"}
+                      hover:border-orange-400 transition`}
+                    onClick={() => setSelectedColor(color)}
+                  >
+                    {color}
+                  </button>
+                ))}
+              </div>
+              {!selectedColor && <p className="text-xs text-red-500 mt-1">Please select a color.</p>}
+            </div>
+          )}
+
           {!isMobile && (
             <div className="flex gap-4 mb-4 flex">
               <button
@@ -535,76 +557,59 @@ export default function ProductDetails() {
 
         {/* Modal for Color & Address Selection */}
         <AnimatePresence>
-{showOptions && (
-  <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
-    <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg mx-auto relative">
-      <button
-        onClick={() => setShowOptions(null)}
-        className="absolute top-2 right-2 p-2 rounded-full hover:bg-gray-100"
-        aria-label="Close"
-      >
-        <svg width={24} height={24} fill="none" stroke="currentColor" strokeWidth={2}>
-          <path d="M6 6l12 12M6 18L18 6" />
-        </svg>
-      </button>
-      <h2 className="text-xl font-bold mb-4">Choose Options</h2>
-      {/* If no address, show address form */}
-      {!addressSummary ? (
-        <ShippingAddressForm
-          userId={userId}
-          onSaved={(address: ShippingAddress) => {
-            setAddressSummary(address);
-            setShowAddressEdit(false); // or whatever closes the form
-          }}
-          onBack={() => setShowAddressEdit(false)} // This will be called when user clicks the back icon
-        />
-      ) : (
-        <>
-          {/* Show address summary in modal too */}
-          <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-4">
-            <span>
-              <strong>{addressSummary.recipient_name}</strong>, {addressSummary.phone_number}, {addressSummary.address_line1}, 
-              {addressSummary.locations?.name}, {addressSummary.constituencies?.name}, {addressSummary.counties?.name}
-            </span>
-            <button
-              onClick={() => {
-                setShowOptions(null);
-                setShowAddressEdit(true);
-              }}
-              className="ml-4 px-3 py-1 text-blue-600 border border-blue-200 rounded hover:bg-blue-100 text-xs"
-            >
-              Edit
-            </button>
-          </div>
-          {/* Only show color selector if address exists */}
-          <div className="mb-4">
-            <label className="block text-sm font-semibold mb-1">Color</label>
-            <div className="flex gap-2">
-              {Colors.map((color) => (
+          {showOptions && (
+            <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
+              <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg mx-auto relative">
                 <button
-                  key={color}
-                  type="button"
-                  onClick={() => setSelectedColor(color)}
-                  className={`w-8 h-8 rounded-full border-2 ${selectedColor === color ? "border-blue-600" : "border-gray-300"}`}
-                  style={{ background: color }}
-                  aria-label={color}
-                />
-              ))}
+                  onClick={() => setShowOptions(null)}
+                  className="absolute top-2 right-2 p-2 rounded-full hover:bg-gray-100"
+                  aria-label="Close"
+                >
+                  <svg width={24} height={24} fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M6 6l12 12M6 18L18 6" />
+                  </svg>
+                </button>
+                <h2 className="text-xl font-bold mb-4">Choose Options</h2>
+                {/* If no address, show address form */}
+                {!addressSummary ? (
+                  <ShippingAddressForm
+                    userId={userId}
+                    onSaved={(address: ShippingAddress) => {
+                      setAddressSummary(address);
+                      setShowAddressEdit(false); // or whatever closes the form
+                    }}
+                    onBack={() => setShowAddressEdit(false)} // This will be called when user clicks the back icon
+                  />
+                ) : (
+                  <>
+                    {/* Show address summary in modal too */}
+                    <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-4">
+                      <span>
+                        <strong>{addressSummary.recipient_name}</strong>, {addressSummary.phone_number}, {addressSummary.address_line1}, 
+                        {addressSummary.locations?.name}, {addressSummary.constituencies?.name}, {addressSummary.counties?.name}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setShowOptions(null);
+                          setShowAddressEdit(true);
+                        }}
+                        className="ml-4 px-3 py-1 text-blue-600 border border-blue-200 rounded hover:bg-blue-100 text-xs"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </>
+                )}
+                <button
+                  onClick={handleConfirmOptions}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg shadow transition"
+                  disabled={adding}
+                >
+                  {adding ? "Processing..." : showOptions === "cart" ? "Add to Cart" : "Buy Now"}
+                </button>
+              </div>
             </div>
-          </div>
-        </>
-      )}
-      <button
-        onClick={handleConfirmOptions}
-        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg shadow transition"
-        disabled={adding}
-      >
-        {adding ? "Processing..." : showOptions === "cart" ? "Add to Cart" : "Buy Now"}
-      </button>
-    </div>
-  </div>
-)}
-
+          )}
         </AnimatePresence>        
         </div>
       </div>
