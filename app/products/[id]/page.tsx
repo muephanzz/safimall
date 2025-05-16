@@ -1,7 +1,7 @@
 "use client";
 
 import ShippingAddressForm from "@/components/ShippingAddressForm";
-import { useEffect, useState, useRef, TouchEvent } from "react";
+import React, { useEffect, useState, useRef, TouchEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
@@ -12,14 +12,6 @@ import ReviewSection from "@/components/ReviewSection";
 import { motion, AnimatePresence } from "framer-motion";
 import Head from "next/head";
 import SearchBar from "@/components/SearchBar";
-
-const [userId, setUserId] = useState<string | null>(null);
-
-useEffect(() => {
-  supabase.auth.getSession().then(({ data: { session } }) => {
-    setUserId(session?.user?.id || null);
-  });
-}, []);
 
 // Skeleton Loader
 function ProductSkeleton() {
@@ -82,6 +74,14 @@ export default function ProductDetails() {
   const specRef = useRef<HTMLDivElement>(null);
   const reviewRef = useRef<HTMLDivElement>(null);
   const recoRef = useRef<HTMLDivElement>(null);
+
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id || null);
+    });
+  }, []);
 
   // Mobile detection
   useEffect(() => {
