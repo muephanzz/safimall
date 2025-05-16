@@ -340,7 +340,7 @@ export default function ProductDetails() {
             )}
           </div>
           {/* Right: Product Info */}
-          <div className="w-full lg:w-3/5 p-6 pt-10 flex flex-col gap-4 sticky top-0 self-start">
+          <div className="w-full lg:w-3/5 p-6 pt-10 flex flex-col gap-4 sticky top-0 self-start overflow-x-hidden">
             <div className="flex items-center gap-2 mb-2">
               <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded font-bold">In Stock</span>
               {/* Add more badges as needed */}
