@@ -13,6 +13,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import Head from "next/head";
 import SearchBar from "@/components/SearchBar";
 
+interface ShippingAddress {
+  address_id: string;
+  recipient_name: string;
+  phone_number: string;
+  address_line1: string;
+  county_id: string | number;
+  constituency_id: string | number;
+  location_id: string | number;
+  counties?: { name: string };
+  constituencies?: { name: string };
+  locations?: { name: string };
+}
+
 // Skeleton Loader
 function ProductSkeleton() {
   return (
@@ -76,6 +89,26 @@ export default function ProductDetails() {
   const recoRef = useRef<HTMLDivElement>(null);
 
   const [userId, setUserId] = useState<string | null>(null);
+  const [addressSummary, setAddressSummary] = useState<any>(null);
+  const [showAddressEdit, setShowAddressEdit] = useState(false);
+
+  useEffect(() => {
+    if (!userId) return;
+    supabase
+      .from("shipping_addresses")
+      .select(
+        `*, 
+        counties(name), 
+        constituencies(name), 
+        locations(name)`
+      )
+      .eq("user_id", userId)
+      .single()
+      .then(({ data }) => {
+        if (data) setAddressSummary(data);
+        else setAddressSummary(null);
+      });
+  }, [userId, showAddressEdit]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -363,6 +396,29 @@ export default function ProductDetails() {
             <div className="flex items-center gap-4 mb-4">
               <span className="text-3xl font-bold text-red-600">Ksh {product.price.toLocaleString()}</span>
               {/* You can add old price or discount badge here */}
+              {addressSummary && !showAddressEdit && (
+                <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-4">
+                  <span>
+                    <strong>{addressSummary.recipient_name}</strong>, {addressSummary.phone_number}, {addressSummary.address_line1}, 
+                    {addressSummary.locations?.name}, {addressSummary.constituencies?.name}, {addressSummary.counties?.name}
+                  </span>
+                  <button
+                    onClick={() => setShowAddressEdit(true)}
+                    className="ml-4 px-3 py-1 text-blue-600 border border-blue-200 rounded hover:bg-blue-100 text-xs"
+                  >
+                    Edit
+                  </button>
+                </div>
+              )}
+              {showAddressEdit && (
+                <ShippingAddressForm
+                  userId={userId}
+                  onSaved={(address: ShippingAddress) => {
+                    setAddressSummary(address);
+                    setShowAddressEdit(false);
+                  }}
+                />
+              )}
             </div>
           {!isMobile && (
             <div className="flex gap-4 mb-4 flex">
@@ -478,61 +534,74 @@ export default function ProductDetails() {
 
         {/* Modal for Color & Address Selection */}
         <AnimatePresence>
-          {showOptions && (
-            <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
-              <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg mx-auto relative">
+{showOptions && (
+  <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
+    <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg mx-auto relative">
+      <button
+        onClick={() => setShowOptions(null)}
+        className="absolute top-2 right-2 p-2 rounded-full hover:bg-gray-100"
+        aria-label="Close"
+      >
+        <svg width={24} height={24} fill="none" stroke="currentColor" strokeWidth={2}>
+          <path d="M6 6l12 12M6 18L18 6" />
+        </svg>
+      </button>
+      <h2 className="text-xl font-bold mb-4">Choose Options</h2>
+      {/* If no address, show address form */}
+      {!addressSummary ? (
+        <ShippingAddressForm
+          userId={userId}
+          onSaved={(address: ShippingAddress) => {
+            setAddressSummary(address);
+            setShowAddressEdit(false);
+          }}
+        />
+      ) : (
+        <>
+          {/* Show address summary in modal too */}
+          <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-4">
+            <span>
+              <strong>{addressSummary.recipient_name}</strong>, {addressSummary.phone_number}, {addressSummary.address_line1}, 
+              {addressSummary.locations?.name}, {addressSummary.constituencies?.name}, {addressSummary.counties?.name}
+            </span>
+            <button
+              onClick={() => {
+                setShowOptions(null);
+                setShowAddressEdit(true);
+              }}
+              className="ml-4 px-3 py-1 text-blue-600 border border-blue-200 rounded hover:bg-blue-100 text-xs"
+            >
+              Edit
+            </button>
+          </div>
+          {/* Only show color selector if address exists */}
+          <div className="mb-4">
+            <label className="block text-sm font-semibold mb-1">Color</label>
+            <div className="flex gap-2">
+              {Colors.map((color) => (
                 <button
-                  onClick={() => setShowOptions(null)}
-                  className="absolute top-2 right-2 p-2 rounded-full hover:bg-gray-100"
-                  aria-label="Close"
-                >
-                  <svg width={24} height={24} fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path d="M6 6l12 12M6 18L18 6" />
-                  </svg>
-                </button>
-
-                <h2 className="text-xl font-bold mb-4">
-                  Choose Options
-                </h2>
-
-                {/* Color selector */}
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold mb-1">Color</label>
-                  <div className="flex gap-2">
-                    {Colors.map((color) => (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => setSelectedColor(color)}
-                        className={`w-8 h-8 rounded-full border-2 ${selectedColor === color ? "border-blue-600" : "border-gray-300"}`}
-                        style={{ background: color }}
-                        aria-label={color}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Shipping address selector */}
-                {userId && (
-                  <div className="mb-4">
-                    <ShippingAddressForm
-                      userId={userId}
-                      onSaved={(address: { address_id: string }) => setSelectedAddress(address.address_id)}
-
-                    />
-                  </div>
-                )}
-
-                <button
-                  onClick={handleConfirmOptions}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg shadow transition"
-                  disabled={adding}
-                >
-                  {adding ? "Processing..." : showOptions === "cart" ? "Add to Cart" : "Buy Now"}
-                </button>
-              </div>
+                  key={color}
+                  type="button"
+                  onClick={() => setSelectedColor(color)}
+                  className={`w-8 h-8 rounded-full border-2 ${selectedColor === color ? "border-blue-600" : "border-gray-300"}`}
+                  style={{ background: color }}
+                  aria-label={color}
+                />
+              ))}
             </div>
-          )}
+          </div>
+        </>
+      )}
+      <button
+        onClick={handleConfirmOptions}
+        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg shadow transition"
+        disabled={adding}
+      >
+        {adding ? "Processing..." : showOptions === "cart" ? "Add to Cart" : "Buy Now"}
+      </button>
+    </div>
+  </div>
+)}
 
         </AnimatePresence>        
         </div>
