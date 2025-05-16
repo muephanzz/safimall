@@ -1,5 +1,6 @@
 "use client";
 
+import ShippingAddressForm from "@/components/ShippingAddressForm";
 import { useEffect, useState, useRef, TouchEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -11,6 +12,14 @@ import ReviewSection from "@/components/ReviewSection";
 import { motion, AnimatePresence } from "framer-motion";
 import Head from "next/head";
 import SearchBar from "@/components/SearchBar";
+
+const [userId, setUserId] = useState<string | null>(null);
+
+useEffect(() => {
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    setUserId(session?.user?.id || null);
+  });
+}, []);
 
 // Skeleton Loader
 function ProductSkeleton() {
@@ -117,20 +126,6 @@ export default function ProductDetails() {
     fetchData();
   }, [id]);
 
-  // Fetch user's shipping addresses
-  useEffect(() => {
-    const fetchAddresses = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
-      const { data, error } = await supabase
-        .from("shipping_addresses")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .order("created_at", { ascending: false });
-      if (!error) setAddresses(data || []);
-    };
-    fetchAddresses();
-  }, []);
 
   // Intersection Observer for scroll-based tab switching
   useEffect(() => {
@@ -484,57 +479,61 @@ export default function ProductDetails() {
         {/* Modal for Color & Address Selection */}
         <AnimatePresence>
           {showOptions && (
-            <motion.div
-              className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs">
-                <h2 className="text-lg font-bold mb-4">Choose Options</h2>
-                {/* Color */}
-                <label className="block mb-2 font-medium">Color</label>
-                <select
-                  value={selectedColor}
-                  onChange={e => setSelectedColor(e.target.value)}
-                  className="w-full mb-4 border rounded p-2"
+            <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
+              <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg mx-auto relative">
+                <button
+                  onClick={() => setShowOptions(null)}
+                  className="absolute top-2 right-2 p-2 rounded-full hover:bg-gray-100"
+                  aria-label="Close"
                 >
-                  <option value="">Select Color</option>
-                  {Colors.map(Color => (
-                    <option key={Color} value={Color}>{Color}</option>
-                  ))}
-                </select>
-                {/* Address */}
-                <label className="block mb-2 font-medium">Delivery Address</label>
-                <select
-                  value={selectedAddress}
-                  onChange={e => setSelectedAddress(e.target.value)}
-                  className="w-full mb-4 border rounded p-2"
-                >
-                  <option value="">Select Address</option>
-                  {addresses.map(addr => (
-                    <option key={addr.id} value={addr.id}>
-                      {addr.address} {addr.city ? `(${addr.city})` : ""}
-                    </option>
-                  ))}
-                </select>
-                <div className="flex gap-2 mt-4">
-                  <button
-                    onClick={handleConfirmOptions}
-                    className="flex-1 bg-orange-500 text-white py-2 rounded"
-                  >
-                    Confirm
-                  </button>
-                  <button
-                    onClick={() => setShowOptions(null)}
-                    className="flex-1 bg-gray-200 text-gray-700 py-2 rounded"
-                  >
-                    Cancel
-                  </button>
+                  <svg width={24} height={24} fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M6 6l12 12M6 18L18 6" />
+                  </svg>
+                </button>
+
+                <h2 className="text-xl font-bold mb-4">
+                  Choose Options
+                </h2>
+
+                {/* Color selector */}
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold mb-1">Color</label>
+                  <div className="flex gap-2">
+                    {Colors.map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => setSelectedColor(color)}
+                        className={`w-8 h-8 rounded-full border-2 ${selectedColor === color ? "border-blue-600" : "border-gray-300"}`}
+                        style={{ background: color }}
+                        aria-label={color}
+                      />
+                    ))}
+                  </div>
                 </div>
+
+                {/* Shipping address selector */}
+                {userId && (
+                  <div className="mb-4">
+                    <ShippingAddressForm
+                      userId={userId}
+                      onSaved={(address: { address_id: string }) => setSelectedAddress(address.address_id)}
+
+                    />
+                  </div>
+                )}
+
+                <button
+                  onClick={handleConfirmOptions}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg shadow transition"
+                  disabled={adding}
+                >
+                  {adding ? "Processing..." : showOptions === "cart" ? "Add to Cart" : "Buy Now"}
+                </button>
               </div>
-            </motion.div>
+            </div>
           )}
+
         </AnimatePresence>        
         </div>
       </div>
