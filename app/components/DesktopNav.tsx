@@ -16,7 +16,7 @@ interface Subcategory {
   subcategory: string;
 }
 
-export default function DesktopMenu() {
+export default function JumiaDesktopMenu() {
   const pathname = usePathname();
   const subcategoryId = pathname?.split("/")[3] || "";
 
@@ -26,14 +26,18 @@ export default function DesktopMenu() {
   useEffect(() => {
     async function fetchCategories() {
       const { data, error } = await supabase.from("categories").select("*");
-      if (error) console.error("Error fetching categories:", error);
-      else if (data) setCategories(data);
+      if (error) {
+        console.error("Error fetching categories:", error);
+      } else if (data) {
+        setCategories(data);
+      }
     }
 
     async function fetchSubcategories() {
       const { data, error } = await supabase.from("subcategories").select("*");
-      if (error) console.error("Error fetching subcategories:", error);
-      else if (data) {
+      if (error) {
+        console.error("Error fetching subcategories:", error);
+      } else if (data) {
         const grouped = data.reduce((acc: Record<number, Subcategory[]>, sub) => {
           if (!acc[sub.category_id]) acc[sub.category_id] = [];
           acc[sub.category_id].push(sub);
@@ -48,7 +52,7 @@ export default function DesktopMenu() {
   }, []);
 
   return (
-    <nav className="absolute mt-24 left-0 right-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 shadow-2xl hidden md:flex w-full px-6 text-[18px] font-semibold space-x-8 rounded-b-3xl border-b-2 border-blue-700 z-50">
+    <nav className="absolute mt-24 left-0 right-0 bg-gradient-to-r from-jumia-orange via-jumia-red to-jumia-purple shadow-2xl hidden md:flex w-full px-6 text-[18px] font-semibold space-x-8 rounded-b-3xl border-b-2 border-jumia-red z-50">
       {categories.map((category) => {
         const hasSubcategories = subcategories[category.id]?.length > 0;
 
@@ -70,7 +74,7 @@ export default function DesktopMenu() {
             </div>
 
             {hasSubcategories && (
-              <div className="absolute left-0 top-full min-w-[220px] bg-white/95 shadow-2xl border border-indigo-100 opacity-0 group-hover:opacity-100 group-hover:visible invisible pointer-events-none group-hover:pointer-events-auto transition-all duration-300 backdrop-blur-xl z-50">
+              <div className="absolute left-0 top-full min-w-[220px] bg-white/95 shadow-2xl border border-jumia-red opacity-0 group-hover:opacity-100 group-hover:visible invisible pointer-events-none group-hover:pointer-events-auto transition-all duration-300 backdrop-blur-xl z-50">
                 <ul className="py-3">
                   {subcategories[category.id].map((sub) => {
                     const isActive = subcategoryId === sub.subcategory_id.toString();
@@ -79,8 +83,8 @@ export default function DesktopMenu() {
                       <li key={sub.subcategory_id}>
                         <Link
                           href={`/products/subcategory/${sub.subcategory_id}`}
-                          className={`flex items-center gap-2 px-4 py-1 text-gray-700 font-medium hover:bg-gradient-to-r hover:from-indigo-100 hover:to-blue-100 hover:text-indigo-700 transition-all duration-200 ${
-                            isActive ? "bg-indigo-100 text-indigo-700 font-bold" : ""
+                          className={`flex items-center gap-2 px-4 py-1 text-gray-700 font-medium hover:bg-gradient-to-r hover:from-jumia-red-light hover:to-jumia-orange-light hover:text-jumia-red transition-all duration-200 ${
+                            isActive ? "bg-jumia-red-light text-jumia-red font-bold" : ""
                           }`}
                         >
                           {sub.subcategory}
