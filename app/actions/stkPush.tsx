@@ -15,7 +15,6 @@ interface Params {
   amount: number;
   user_id: string;
   checkoutItems: Item[];
-  shipping_address: string;
   email: string;
 }
 
@@ -31,7 +30,6 @@ export const sendStkPush = async (body: Params) => {
     amount,
     user_id,
     checkoutItems,
-    shipping_address,
     email,
   } = body;
 
@@ -90,7 +88,6 @@ export const sendStkPush = async (body: Params) => {
         phone_number: formattedPhone,
         amount,
         status: "pending",
-        shipping_address,
         email,
         items: checkoutItems,
         created_at: new Date().toISOString(),
@@ -117,7 +114,7 @@ export const sendStkPush = async (body: Params) => {
       PhoneNumber: formattedPhone,
       CallBackURL: process.env.MPESA_CALLBACK_URL,
       AccountReference: user_id.slice(0, 6),
-      TransactionDesc: `Payment for order with ${checkoutItems.length} items, shipping to ${shipping_address}, email: ${email}`,
+      TransactionDesc: `Payment for order with ${checkoutItems.length} items, email: ${email}`,
     };
 
     const response = await axios.post(

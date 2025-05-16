@@ -51,6 +51,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 }) => {
   const filterRef = useRef<HTMLFormElement | null>(null);
 
+  // Close filter panel when clicking outside (mobile drawer)
   useEffect(() => {
     if (!isOpen) return;
 
@@ -67,21 +68,31 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
   const FilterContent = (
     <form
       onSubmit={onSubmit}
-      className="flex flex-col gap-4 bg-white shadow-xl rounded-xl p-4 w-full max-w-xs"
       ref={filterRef}
+      className="flex flex-col gap-4 bg-white shadow-xl rounded-xl p-4 w-full max-w-xs"
+      aria-label="Product Filters"
     >
+      {/* Header with Close Button */}
       <div className="flex justify-between items-center mb-2">
         <span className="text-lg font-bold text-indigo-700">Filters</span>
-        <button type="button" className="md:hidden" onClick={onClose} aria-label="Close Filters">
+        <button
+          type="button"
+          className="md:hidden"
+          onClick={onClose}
+          aria-label="Close Filters"
+        >
           <X className="w-6 h-6" />
         </button>
       </div>
 
-      {/* Price Range */}
+      {/* Price Range Inputs */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
+        <label htmlFor="minPrice" className="block text-sm font-medium text-gray-700 mb-1">
+          Price Range
+        </label>
         <div className="flex gap-2">
           <input
+            id="minPrice"
             type="number"
             name="minPrice"
             min={0}
@@ -89,8 +100,10 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
             value={minPrice}
             onChange={onSubcategoryChange}
             className="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-400"
+            aria-label="Minimum price"
           />
           <input
+            id="maxPrice"
             type="number"
             name="maxPrice"
             min={0}
@@ -98,17 +111,21 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
             value={maxPrice}
             onChange={onSubcategoryChange}
             className="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-400"
+            aria-label="Maximum price"
           />
         </div>
       </div>
 
-      {/* Subcategory */}
+      {/* Subcategory Dropdown */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Subcategory</label>
+        <label htmlFor="subcategory_id" className="block text-sm font-medium text-gray-700 mb-1">
+          Subcategory
+        </label>
         <select
+          id="subcategory_id"
+          name="subcategory_id"
           value={subcategory_id}
           onChange={onSubcategoryChange}
-          name="subcategory_id"
           className="w-full border border-gray-300 rounded px-2 py-1"
         >
           <option value="">All Subcategories</option>
@@ -120,13 +137,16 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
         </select>
       </div>
 
-      {/* Brand */}
+      {/* Brand Dropdown */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+        <label htmlFor="brand_id" className="block text-sm font-medium text-gray-700 mb-1">
+          Brand
+        </label>
         <select
+          id="brand_id"
+          name="brand_id"
           value={brand_id}
           onChange={onBrandChange}
-          name="brand_id"
           className="w-full border border-gray-300 rounded px-2 py-1"
         >
           <option value="">All Brands</option>
@@ -138,13 +158,16 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
         </select>
       </div>
 
-      {/* Minimum Rating */}
+      {/* Minimum Rating Dropdown */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Rating</label>
+        <label htmlFor="minRating" className="block text-sm font-medium text-gray-700 mb-1">
+          Minimum Rating
+        </label>
         <select
+          id="minRating"
+          name="minRating"
           value={minRating}
           onChange={onRatingChange}
-          name="minRating"
           className="w-full border border-gray-300 rounded px-2 py-1"
         >
           <option value="">All Ratings</option>
@@ -156,13 +179,16 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
         </select>
       </div>
 
-      {/* Sort By */}
+      {/* Sort By Dropdown */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+        <label htmlFor="sort" className="block text-sm font-medium text-gray-700 mb-1">
+          Sort By
+        </label>
         <select
+          id="sort"
+          name="sort"
           value={sort}
           onChange={onSortChange}
-          name="sort"
           className="w-full border border-gray-300 rounded px-2 py-1"
         >
           <option value="default">Default</option>
@@ -171,6 +197,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
         </select>
       </div>
 
+      {/* Submit Button */}
       <button
         type="submit"
         className="mt-2 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-600 text-white px-4 py-2 rounded-lg shadow font-semibold transition"
@@ -197,9 +224,11 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="fixed inset-0 z-40 bg-black/40 md:hidden flex"
             style={{ backdropFilter: "blur(2px)" }}
+            aria-modal="true"
+            role="dialog"
           >
             <div className="w-72 bg-white h-full shadow-2xl overflow-y-auto">{FilterContent}</div>
-            <div className="flex-1" onClick={onClose} />
+            <div className="flex-1" onClick={onClose} aria-hidden="true" />
           </motion.aside>
         )}
       </AnimatePresence>

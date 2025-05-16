@@ -25,14 +25,13 @@ interface Params {
   amount: number;
   user_id: string;
   checkoutItems: Item[];
-  shipping_address: string;
   email: string;
 }
 
 export default function PaymentForm() {
   const [checkoutItems, setCheckoutItems] = useState<Item[]>([]);
   const [amount, setAmount] = useState(0);
-  const [shippingAddress, setShippingAddress] = useState("");
+
   const [email, setEmail] = useState("");
   const [dataFromForm, setDataFromForm] = useState({
     mpesa_phone: "",
@@ -131,12 +130,6 @@ export default function PaymentForm() {
       return;
     }
 
-    if (!shippingAddress) {
-      setLoading(false);
-      (toast as any).info("Please select a shipping address");
-      return;
-    }
-
     if (checkoutItems.length === 0) {
       setLoading(false);
       //alert("No items found for checkout");
@@ -160,8 +153,6 @@ export default function PaymentForm() {
         amount,
         user_id: userData.user.id,
         checkoutItems,
-        shipping_address: shippingAddress,
-        email,
       } as Params);
 
       if (stkError) {
@@ -248,26 +239,6 @@ export default function PaymentForm() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-              <div>
-                <label
-                  htmlFor="shippingAddress"
-                  className="text-sm font-medium mb-1 block"
-                >
-                  Shipping Address
-                </label>
-                <select
-                  id="shippingAddress"
-                  value={shippingAddress}
-                  onChange={(e) => setShippingAddress(e.target.value)}
-                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
-                  required
-                >
-                  <option value="">Select your campus</option>
-                  <option value="Murang'a University">Murang'a University</option>
-                  <option value="Karatina University">Karatina University</option>
-                </select>
-              </div>
-
               <div>
                 <label
                   htmlFor="mpesa_phone"

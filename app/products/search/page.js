@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 import ProductCard from '@/components/ProductCard';
 import Pagination from '@/components/Pagination';
 import { motion } from 'framer-motion';
+import ProductFilter from '@/components/ProductFilter';
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
@@ -83,6 +84,8 @@ export default function SearchPage() {
             animate={{ opacity: 1 }}
             className="grid grid-cols-2 px-4 md:px-6 lg:px-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
           >
+            <ProductFilter />
+
             {products.map((product) => (
               <motion.div
                 key={product.product_id}
