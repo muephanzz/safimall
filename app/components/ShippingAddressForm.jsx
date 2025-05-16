@@ -6,6 +6,7 @@ export default function ShippingAddressForm({ userId, onSaved }) {
   const [counties, setCounties] = useState([]);
   const [constituencies, setConstituencies] = useState([]);
   const [locations, setLocations] = useState([]);
+
   const [selectedCounty, setSelectedCounty] = useState("");
   const [selectedConstituency, setSelectedConstituency] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
@@ -14,6 +15,9 @@ export default function ShippingAddressForm({ userId, onSaved }) {
   const [recipient, setRecipient] = useState("");
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
+
+  // New state to toggle edit/display mode
+  const [isEditing, setIsEditing] = useState(false);
 
   // Fetch counties on mount
   useEffect(() => {
@@ -55,7 +59,12 @@ export default function ShippingAddressForm({ userId, onSaved }) {
     if (!userId) return;
     supabase
       .from("shipping_addresses")
-      .select("*")
+      .select(
+        `shipping_addresses.*, 
+         counties.name as county_name, 
+         constituencies.name as constituency_name, 
+         locations.name as location_name`
+      )
       .eq("user_id", userId)
       .single()
       .then(({ data }) => {
@@ -67,6 +76,12 @@ export default function ShippingAddressForm({ userId, onSaved }) {
           setSelectedCounty(data.county_id || "");
           setSelectedConstituency(data.constituency_id || "");
           setSelectedLocation(data.location_id || "");
+          setCounties((prev) => prev.length ? prev : [{ county_id: data.county_id, name: data.county_name }]);
+          setConstituencies((prev) => prev.length ? prev : [{ constituency_id: data.constituency_id, name: data.constituency_name }]);
+          setLocations((prev) => prev.length ? prev : [{ location_id: data.location_id, name: data.location_name }]);
+          setIsEditing(false); // start in display mode
+        } else {
+          setIsEditing(true); // no address, start editing
         }
       });
   }, [userId]);
@@ -108,10 +123,36 @@ export default function ShippingAddressForm({ userId, onSaved }) {
     } else {
       toast.success("Address saved!");
       setEditingId(result.data.address_id);
+      setIsEditing(false);
       if (onSaved) onSaved(result.data);
     }
   };
 
+  if (!userId) {
+    return <p className="text-center text-gray-500">Please log in to manage shipping addresses.</p>;
+  }
+
+  // Display mode: show address summary + Edit button
+  if (!isEditing && editingId) {
+    return (
+      <div className="max-w-lg mx-auto bg-white p-6 rounded-xl shadow space-y-4">
+        <h3 className="text-xl font-bold">Shipping Address</h3>
+        <p><strong>Recipient:</strong> {recipient}</p>
+        <p><strong>Phone:</strong> {phone}</p>
+        <p>
+          <strong>Address:</strong> {addressLine}, {locations.find(l => l.location_id === selectedLocation)?.name || ""}, {constituencies.find(c => c.constituency_id === selectedConstituency)?.name || ""}, {counties.find(c => c.county_id === selectedCounty)?.name || ""}
+        </p>
+        <button
+          onClick={() => setIsEditing(true)}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+        >
+          Edit
+        </button>
+      </div>
+    );
+  }
+
+  // Edit mode: show form
   return (
     <form onSubmit={handleSave} className="space-y-4 max-w-lg mx-auto bg-white p-6 rounded-xl shadow">
       <h3 className="text-xl font-bold mb-2">{editingId ? "Edit" : "Add"} Shipping Address</h3>
