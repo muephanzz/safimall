@@ -165,11 +165,9 @@ useEffect(() => {
           setMainImage(productData.image_urls?.[0] || "");
           // Parse Colors from attributes field (JSON)
           try {
-            console.log("Raw attributes:", productData.attributes);
             const attr = typeof productData.attributes === "string"
               ? JSON.parse(productData.attributes)
               : productData.attributes;
-            console.log("Parsed attributes:", attr);
             let colorArr = [];
             if (Array.isArray(attr?.Color)) {
               colorArr = attr.Color;
@@ -181,9 +179,6 @@ useEffect(() => {
               colorArr = [attr.Color];
             }
             setColors(colorArr);
-            console.log("Colors extracted:", colorArr);
-
-            console.log("Colors extracted:", attr?.Color || []);
           } catch (err) {
             console.error("Error parsing attributes:", err);
             setColors([]);
@@ -503,9 +498,10 @@ const handleConfirmOptions = async (
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{product.name}</h1>
             <p className="text-gray-700 text-base mb-2">{product.description}</p>
-            <div className="block items-center gap-4 mb-4">
+            <div className="block items-center gap-4">
               <span className="text-3xl font-bold text-red-600 mb-4">Ksh {product.price.toLocaleString()}</span>
               {/* You can add old price or discount badge here */}
+             </div>
               <label className="block font-semibold mb-1">Shipping To:</label>
               {addressSummary && !showAddressEdit && (
                 <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-2">
@@ -531,7 +527,6 @@ const handleConfirmOptions = async (
                   onBack={() => setShowAddressEdit(false)} // This will be called when user clicks the back icon
                 />
               )}
-            </div>
             {Colors.length > 0 && (
               <div className="mb-4">
                 <label className="block font-semibold mb-1">Select Color:</label>
