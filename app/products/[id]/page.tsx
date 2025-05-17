@@ -145,7 +145,19 @@ export default function ProductDetails() {
               ? JSON.parse(productData.attributes)
               : productData.attributes;
             console.log("Parsed attributes:", attr);
-            setColors(attr?.Color || []);
+            let colorArr = [];
+            if (Array.isArray(attr?.Color)) {
+              colorArr = attr.Color;
+            } else if (typeof attr?.Color === "string") {
+              // If Color is a comma-separated string
+            colorArr = attr.Color.split(",").map((s: string) => s.trim()).filter(Boolean);
+            } else if (attr?.Color != null) {
+              // If Color is a single value (not array or string)
+              colorArr = [attr.Color];
+            }
+            setColors(colorArr);
+            console.log("Colors extracted:", colorArr);
+
             console.log("Colors extracted:", attr?.Color || []);
           } catch (err) {
             console.error("Error parsing attributes:", err);
@@ -430,7 +442,7 @@ export default function ProductDetails() {
   <div className="mb-4">
     <label className="block font-semibold mb-1">Select Color:</label>
     <div className="flex gap-2">
-      {Colors.map((color) => (
+      {Array.isArray(Colors) && Colors.length > 0 && Colors.map((color) => (
         <button
           key={color}
           className={`px-4 py-2 rounded border ${selectedColor === color ? "border-blue-500 bg-blue-100" : "border-gray-300"}`}
@@ -576,7 +588,7 @@ export default function ProductDetails() {
                 <div className="mb-4">
                   <label className="block font-semibold mb-1">Select Color:</label>
                   <div className="flex gap-2">
-                    {Colors.map((color) => (
+                  {Array.isArray(Colors) && Colors.length > 0 && Colors.map((color) => (
                       <button
                         key={color}
                         className={`px-4 py-2 rounded border ${selectedColor === color ? "border-blue-500 bg-blue-100" : "border-gray-300"}`}
@@ -621,7 +633,7 @@ export default function ProductDetails() {
                       <div className="mb-4">
                         <h3 className="font-semibold mb-2">Select Color:</h3>
                         <div className="flex gap-2 flex-wrap">
-                          {Colors.map((color) => (
+                          {Array.isArray(Colors) && Colors.length > 0 && Colors.map((color) => (
                             <button
                               key={color}
                               type="button"
