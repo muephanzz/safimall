@@ -176,7 +176,7 @@ export default function ProductDetails() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-            const sectionId = entry.target.getattributes("data-section");
+            const sectionId = entry.target.getAttribute("data-section");
             if (sectionId) setActiveTab(sectionId);
           }
         });
@@ -185,7 +185,7 @@ export default function ProductDetails() {
     );
     sections.forEach(({ ref, id }) => {
       if (ref.current) {
-        ref.current.setattributes("data-section", id);
+        ref.current.setAttribute("data-section", id);
         observer.observe(ref.current);
       }
     });
