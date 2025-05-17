@@ -11,6 +11,10 @@ import ReviewSection from "@/components/ReviewSection";
 import { motion, AnimatePresence } from "framer-motion";
 import Head from "next/head";
 import SearchBar from "@/components/SearchBar";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+// Define SortOrder type for review sorting
+type SortOrder = "newest" | "oldest" | "highest" | "lowest";
 
 interface ShippingAddress {
   address_id: string;
@@ -23,6 +27,24 @@ interface ShippingAddress {
   counties?: { name: string };
   constituencies?: { name: string };
   locations?: { name: string };
+}
+
+interface CartItem {
+  product_id: String;
+  name: string;
+  price: number;
+  description?: string;
+  image_url: string;
+  quantity: number;
+  Color: string;
+  address: ShippingAddress | null;
+}
+
+interface ExistingCartItem {
+  cart_id: number;
+  user_id: string;
+  product_id: String;
+  items: CartItem;
 }
 
 // Skeleton Loader
@@ -91,6 +113,8 @@ export default function ProductDetails() {
   const [addressSummary, setAddressSummary] = useState<any>(null);
   const [showAddressEdit, setShowAddressEdit] = useState(false);
 
+
+  
   useEffect(() => {
     if (!userId) return;
     supabase
@@ -209,62 +233,143 @@ export default function ProductDetails() {
   const handleBuyNow = () => setShowOptions("buy");
 
   // Confirm modal selection
-  const handleConfirmOptions = async () => {
-    if (!selectedColor || !selectedAddress) {
-      toast.error("Please select both Color and delivery address.");
+const handleConfirmOptions = async (
+  supabase: SupabaseClient,
+  product: Product | null,
+  mainImage: string,
+  quantity: number,
+  selectedColor: string,
+  selectedAddress: ShippingAddress | null,
+  showOptions: "cart" | "buy" | null,
+  setShowOptions: React.Dispatch<React.SetStateAction<"cart" | "buy" | null>>,
+  setAdding: React.Dispatch<React.SetStateAction<boolean>>,
+  setChecking: React.Dispatch<React.SetStateAction<boolean>>,
+  router: ReturnType<typeof useRouter>
+) => {
+  if (!selectedColor || !selectedAddress) {
+    toast.error("Please select both Color and delivery address.");
+    return;
+  }
+  if (!product || quantity < 1) {
+    toast.error("Please select a valid quantity.");
+    return;
+  }
+
+  setAdding(true);
+
+  try {
+    // Get current user session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      toast.error("Please log in to add items to the cart.");
+      setAdding(false);
       return;
     }
-    if (!product || quantity < 1) return toast.error("Please select a valid quantity.");
-    setAdding(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return toast.error("Please log in to add items to the cart.");
-      const { data: existingCartItem } = await supabase
+
+    // Check if the product with the same Color already exists in cart
+    const { data: existingCartItem, error: fetchError } = await supabase
+      .from("cart")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .eq("product_id", product.product_id)
+      .single();
+
+
+    if (fetchError && fetchError.code !== "PGRST116") {
+      // PGRST116 = No rows found, which is okay
+      throw fetchError;
+    }
+
+    if (existingCartItem) {
+      // Update quantity and details if item exists
+      const newQty = existingCartItem.items.quantity + quantity;
+      await supabase
         .from("cart")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .eq("product_id", product.product_id)
-        .single();
-      if (existingCartItem) {
-        const newQty = existingCartItem.items.quantity + quantity;
-        await supabase.from("cart").update({
+        .update({
           items: {
             ...existingCartItem.items,
             quantity: newQty,
             Color: selectedColor,
             address: selectedAddress,
-          }
-        }).eq("cart_id", existingCartItem.cart_id);
-      } else {
-        await supabase.from("cart").insert([
-          {
+          },
+        })
+        .eq("cart_id", existingCartItem.cart_id);
+    } else {
+      // Insert new cart item
+      await supabase.from("cart").insert([
+        {
+          product_id: String(product.product_id),
+          user_id: session.user.id,
+          items: {
             product_id: product.product_id,
-            user_id: session.user.id,
-            items: {
-              product_id: product.product_id,
-              name: product.name,
-              price: product.price,
-              description: product.description,
-              image_url: mainImage,
-              quantity,
-              Color: selectedColor,
-              address: selectedAddress,
-            }
-          }
-        ]);
-      }
-      toast.success("Item added to cart!");
-      setShowOptions(null);
-      if (showOptions === "cart") window.location.reload();
-      if (showOptions === "buy") router.push("/orders/checkout");
-    } catch (err: any) {
-      console.error("Error adding to cart:", err.message);
-      toast.error("Failed to add item to cart.");
-    } finally {
-      setAdding(false);
-      setChecking(false);
+            name: product.name,
+            price: product.price,
+            description: product.description,
+            image_url: mainImage,
+            quantity,
+            Color: selectedColor,
+            address: selectedAddress,
+          },
+        },
+      ]);
     }
-  };
+
+    // Save/update cart item in localStorage for quick access or offline support
+    try {
+      const checkoutItem: CartItem = {
+        product_id: String(product.product_id),
+        name: product.name,
+        price: product.price,
+        description: product.description,
+        image_url: mainImage,
+        quantity,
+        Color: selectedColor,
+        address: selectedAddress,
+      };
+
+      let checkoutItems: CartItem[] = [];
+      const stored = localStorage.getItem("checkoutitems");
+      if (stored) {
+        checkoutItems = JSON.parse(stored);
+      }
+
+      const existingIndex = checkoutItems.findIndex(
+        (item) =>
+          item.product_id === checkoutItem.product_id &&
+          item.Color === checkoutItem.Color
+      );
+
+      if (existingIndex > -1) {
+        checkoutItems[existingIndex] = {
+          ...checkoutItems[existingIndex],
+          quantity: checkoutItem.quantity,
+          address: checkoutItem.address,
+        };
+      } else {
+        checkoutItems.push(checkoutItem);
+      }
+
+      localStorage.setItem("checkoutitems", JSON.stringify(checkoutItems));
+    } catch (lsError) {
+      console.warn("Failed to update localStorage:", lsError);
+    }
+
+    toast.success("Item added to cart!");
+    setShowOptions(null);
+
+    if (showOptions === "cart") {
+      window.location.reload();
+    } else if (showOptions === "buy") {
+      router.push("/orders/checkout");
+    }
+  } catch (err: any) {
+    console.error("Error adding to cart:", err.message || err);
+    toast.error("Failed to add item to cart.");
+  } finally {
+    setAdding(false);
+    setChecking(false);
+  }
+};
 
   // Touch handlers for mobile swipe
   const handleTouchStart = (e: TouchEvent) => setTouchStartX(e.touches[0].clientX);
@@ -535,7 +640,7 @@ export default function ProductDetails() {
                 <option value="highest">Highest Rated</option>
                 <option value="lowest">Lowest Rated</option>
               </select>
-              <ReviewSection reviews={reviews} sortOrder={sortOrder} />
+              <ReviewSection reviews={reviews} sortOrder={sortOrder as SortOrder} />
             </div>
             {/* Recommendations */}
             <div ref={recoRef} className="scroll-mt-28">
@@ -653,7 +758,21 @@ export default function ProductDetails() {
                   </>
                 )}
                 <button
-                  onClick={handleConfirmOptions}
+                  onClick={() =>
+                    handleConfirmOptions(
+                      supabase,
+                      product,
+                      mainImage,
+                      quantity,
+                      selectedColor,
+                      addressSummary,
+                      showOptions,
+                      setShowOptions,
+                      setAdding,
+                      setChecking,
+                      router
+                    )
+                  }
                   className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg shadow transition"
                   disabled={adding}
                 >
