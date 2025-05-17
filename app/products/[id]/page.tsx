@@ -140,9 +140,15 @@ export default function ProductDetails() {
           setMainImage(productData.image_urls?.[0] || "");
           // Parse Colors from attribute field (JSON)
           try {
-            const attr = typeof productData.attribute === "string" ? JSON.parse(productData.attribute) : productData.attribute;
+            console.log("Raw attribute:", productData.attribute);
+            const attr = typeof productData.attribute === "string"
+              ? JSON.parse(productData.attribute)
+              : productData.attribute;
+            console.log("Parsed attribute:", attr);
             setColors(attr?.Color || []);
-          } catch {
+            console.log("Colors extracted:", attr?.Color || []);
+          } catch (err) {
+            console.error("Error parsing attribute:", err);
             setColors([]);
           }
         }
@@ -420,6 +426,24 @@ export default function ProductDetails() {
                 />
               )}
             </div>
+            {Colors.length > 0 && (
+  <div className="mb-4">
+    <label className="block font-semibold mb-1">Select Color:</label>
+    <div className="flex gap-2">
+      {Colors.map((color) => (
+        <button
+          key={color}
+          className={`px-4 py-2 rounded border ${selectedColor === color ? "border-blue-500 bg-blue-100" : "border-gray-300"}`}
+          onClick={() => setSelectedColor(color)}
+          type="button"
+        >
+          {color}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
+
           {!isMobile && (
             <div className="flex gap-4 mb-4 flex">
               <button
