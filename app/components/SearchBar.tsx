@@ -1,5 +1,13 @@
 "use client";
-import { useState, useEffect, useRef, FormEvent, KeyboardEvent } from "react";
+
+import {
+  useState,
+  useEffect,
+  useRef,
+  FormEvent,
+  KeyboardEvent,
+  ChangeEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import { Search, ArrowLeft, X } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
@@ -9,8 +17,17 @@ interface Suggestion {
   product_id: string | number;
 }
 
-export default function SearchBar() {
-  const [query, setQuery] = useState<string>("");
+interface SearchBarProps {
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+}
+
+export default function SearchBar({
+  value,
+  onChange,
+  placeholder = "Search products...",
+}: SearchBarProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showMobileOverlay, setShowMobileOverlay] = useState(false);
   const router = useRouter();
@@ -27,14 +44,14 @@ export default function SearchBar() {
 
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (!query.trim()) {
+      if (!value.trim()) {
         setSuggestions([]);
         return;
       }
       const { data, error } = await supabase
         .from("products")
         .select("name, product_id")
-        .ilike("name", `%${query}%`)
+        .ilike("name", `%${value}%`)
         .limit(5);
 
       if (!error && data) setSuggestions(data as Suggestion[]);
@@ -42,13 +59,13 @@ export default function SearchBar() {
 
     const timeoutId = setTimeout(fetchSuggestions, 300);
     return () => clearTimeout(timeoutId);
-  }, [query]);
+  }, [value]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (query.trim()) {
-      router.push(`/products/search?query=${encodeURIComponent(query.trim())}`);
-      setQuery("");
+    if (value.trim()) {
+      router.push(`/products/search?query=${encodeURIComponent(value.trim())}`);
+      onChange({ target: { value: "" } } as ChangeEvent<HTMLInputElement>);
       setSuggestions([]);
       setShowMobileOverlay(false); // Close overlay on submit
     }
@@ -56,7 +73,7 @@ export default function SearchBar() {
 
   const handleSuggestionClick = (name: string) => {
     router.push(`/products/search?query=${encodeURIComponent(name)}`);
-    setQuery("");
+    onChange({ target: { value: "" } } as ChangeEvent<HTMLInputElement>);
     setSuggestions([]);
     setShowMobileOverlay(false); // Close overlay on click
   };
@@ -82,9 +99,9 @@ export default function SearchBar() {
       <input
         type="text"
         aria-label="Search products"
-        placeholder="Search products..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
         className="w-full rounded-full border border-gray-300 bg-white py-2 pl-12 pr-4 text-gray-900 placeholder-gray-400 shadow-sm transition focus:border-orange-500 focus:ring-2 focus:ring-orange-400 focus:outline-none"
         spellCheck={false}
         autoComplete="off"
@@ -115,18 +132,18 @@ export default function SearchBar() {
             autoFocus
             type="text"
             aria-label="Search products"
-            placeholder="Search products..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            placeholder={placeholder}
+            value={value}
+            onChange={onChange}
             className="w-full rounded-full border border-gray-300 bg-white py-2 pl-4 pr-10 text-gray-900 placeholder-gray-400 shadow-sm transition focus:border-orange-500 focus:ring-2 focus:ring-orange-400 focus:outline-none"
             spellCheck={false}
             autoComplete="off"
           />
         </form>
-        {query && (
+        {value && (
           <button
             type="button"
-            onClick={() => setQuery("")}
+            onClick={() => onChange({ target: { value: "" } } as ChangeEvent<HTMLInputElement>)}
             className="ml-2"
             aria-label="Clear"
           >
