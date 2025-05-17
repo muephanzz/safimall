@@ -31,7 +31,7 @@ interface ShippingAddress {
 }
 
 interface CartItem {
-  product_id: String;
+  product_id: string;
   name: string;
   price: number;
   description?: string;
@@ -44,7 +44,7 @@ interface CartItem {
 interface ExistingCartItem {
   cart_id: number;
   user_id: string;
-  product_id: String;
+  product_id: string;
   items: CartItem;
 }
 
@@ -102,7 +102,6 @@ export default function ProductDetails() {
   const [showOptions, setShowOptions] = useState<null | "cart" | "buy">(null);
   const [Colors, setColors] = useState<string[]>([]);
   const [selectedColor, setSelectedColor] = useState<string>("");
-  const [addresses, setAddresses] = useState<any[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>("");
 
   // Refs for scroll-based tab switching
@@ -116,23 +115,22 @@ export default function ProductDetails() {
 
 
   
-  useEffect(() => {
-    if (!userId) return;
-    supabase
-      .from("shipping_addresses")
-      .select(
-        `*, 
-        counties(name), 
-        constituencies(name), 
-        locations(name)`
-      )
-      .eq("user_id", userId)
-      .single()
-      .then(({ data }) => {
-        if (data) setAddressSummary(data);
-        else setAddressSummary(null);
-      });
-  }, [userId, showAddressEdit]);
+useEffect(() => {
+  if (!userId) return;
+  supabase
+    .from("shipping_addresses")
+    .select(
+      `*, 
+      counties(name), 
+      constituencies(name), 
+      locations(name)`
+    )
+    .eq("user_id", userId)
+    .then(({ data }) => {
+      if (data && data.length > 0) setAddressSummary(data[0]); // or handle as array
+      else setAddressSummary(null);
+    });
+}, [userId, showAddressEdit]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -141,10 +139,12 @@ export default function ProductDetails() {
   }, []);
 
   // Mobile detection
-  useEffect(() => {
+ useEffect(() => {
     // Detect mobile device based on user agent
     const checkMobile = () => {
-      setIsMobile(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+      if (typeof navigator !== "undefined") {
+        setIsMobile(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+      }
     };
     checkMobile();
   }, []);
@@ -329,10 +329,10 @@ const handleConfirmOptions = async (
       };
 
       let checkoutItems: CartItem[] = [];
-      const stored = localStorage.getItem("checkoutitems");
+      const stored = typeof window !== "undefined" ? localStorage.getItem("checkoutitems") : null;
       if (stored) {
         checkoutItems = JSON.parse(stored);
-      }
+     }
 
       const existingIndex = checkoutItems.findIndex(
         (item) =>
@@ -359,7 +359,8 @@ const handleConfirmOptions = async (
     setShowOptions(null);
 
     if (showOptions === "cart") {
-      window.location.reload();
+      toast.success("Item added to cart!");
+      // Optionally update cart state/UI here instead of reloading
     } else if (showOptions === "buy") {
       router.push("/orders/checkout");
     }
@@ -381,7 +382,7 @@ const handleConfirmOptions = async (
     if (Math.abs(touchDiff) > 50 && product.image_urls.length > 1) {
       const currentIndex = product.image_urls.indexOf(mainImage);
       const nextIndex = touchDiff > 0
-        ? (currentIndex + 1) % product.image_urls.length
+        ? (currentIndex  ) % product.image_urls.length
         : (currentIndex - 1 + product.image_urls.length) % product.image_urls.length;
       setMainImage(product.image_urls[nextIndex]);
     }
@@ -417,7 +418,7 @@ const handleConfirmOptions = async (
     aggregateRating: reviews.length > 0 && {
       "@type": "AggregateRating",
       ratingValue: (
-        reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        reviews.reduce((sum, r) => sum  .rating, 0) / reviews.length
       ).toFixed(1),
       reviewCount: reviews.length,
     },
@@ -435,7 +436,7 @@ const handleConfirmOptions = async (
         <meta property="og:description" content={product.description} />
         <meta property="og:image" content={mainImage} />
         <link rel="canonical" href={`https://smartkenya.co.ke/products/${product.product_id}`} />
-        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+        <script type="application/ldjon">{JSON.stringify(structuredData)}</script>
       </Head>
 
       <ProductHeader isMobile={isMobile} />
@@ -472,7 +473,7 @@ const handleConfirmOptions = async (
               {/* Show image count on mobile */}
               {isMobile && product.image_urls?.length > 1 && (
                 <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
-                  {product.image_urls.indexOf(mainImage) + 1} / {product.image_urls.length}
+                  {product.image_urls.indexOf(mainImage)  } / {product.image_urls.length}
                 </div>
               )}
             </motion.div>
@@ -485,7 +486,7 @@ const handleConfirmOptions = async (
                     src={img}
                     width={64}
                     height={64}
-                    alt={`Thumbnail ${idx + 1}`}
+                    alt={`Thumbnail ${idx  }`}
                     onClick={() => setMainImage(img)}
                     className={`cursor-pointer border-2 rounded-lg ${mainImage === img ? "border-orange-500" : "border-gray-200"}`}
                   />
