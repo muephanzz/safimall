@@ -26,6 +26,7 @@ function LayoutWrapper({ children }) {
       <Toaster position="top-right" autoClose={800} />
       <ToastContainer position="top-right" autoClose={800} />
       {children}
+            {!hideNav && <BottomNav />}
     </>
   );
 }
