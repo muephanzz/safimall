@@ -349,8 +349,6 @@ const handleConfirmOptions = async (
     } catch (lsError) {
       console.warn("Failed to update localStorage:", lsError);
     }
-
-    toast.success("Item added to cart!");
     setShowOptions(null);
 
     if (showOptions === "cart") {

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SearchBar from "./SearchBar";
 
@@ -7,7 +6,6 @@ interface ProductHeaderProps {
 }
 
 export default function ProductHeader({ isMobile }: ProductHeaderProps) {
-  const [showSearch, setShowSearch] = useState(false);
   const router = useRouter();
 
   return (
@@ -31,7 +29,7 @@ export default function ProductHeader({ isMobile }: ProductHeaderProps) {
 
         {/* Search Icon */}
         <button
-          onClick={() => setShowSearch((prev) => !prev)}
+          onClick={() => router.push("/search")}
           aria-label="Search"
           className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 ml-2"
         >
@@ -40,14 +38,6 @@ export default function ProductHeader({ isMobile }: ProductHeaderProps) {
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
         </button>
-
-        {/* Search Bar (conditionally rendered) */}
-        {showSearch && (
-          <div className="absolute top-full left-0 w-full bg-white shadow-md px-2 py-2">
-            {/* Replace with your actual SearchBar component */}
-            <SearchBar />
-          </div>
-        )}
       </div>
     )
   );
