@@ -138,17 +138,17 @@ export default function ProductDetails() {
         if (productData) {
           setProduct(productData);
           setMainImage(productData.image_urls?.[0] || "");
-          // Parse Colors from attribute field (JSON)
+          // Parse Colors from attributes field (JSON)
           try {
-            console.log("Raw attribute:", productData.attribute);
-            const attr = typeof productData.attribute === "string"
-              ? JSON.parse(productData.attribute)
-              : productData.attribute;
-            console.log("Parsed attribute:", attr);
+            console.log("Raw attributes:", productData.attributes);
+            const attr = typeof productData.attributes === "string"
+              ? JSON.parse(productData.attributes)
+              : productData.attributes;
+            console.log("Parsed attributes:", attr);
             setColors(attr?.Color || []);
             console.log("Colors extracted:", attr?.Color || []);
           } catch (err) {
-            console.error("Error parsing attribute:", err);
+            console.error("Error parsing attributes:", err);
             setColors([]);
           }
         }
@@ -176,7 +176,7 @@ export default function ProductDetails() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-            const sectionId = entry.target.getAttribute("data-section");
+            const sectionId = entry.target.getattributes("data-section");
             if (sectionId) setActiveTab(sectionId);
           }
         });
@@ -185,7 +185,7 @@ export default function ProductDetails() {
     );
     sections.forEach(({ ref, id }) => {
       if (ref.current) {
-        ref.current.setAttribute("data-section", id);
+        ref.current.setattributes("data-section", id);
         observer.observe(ref.current);
       }
     });
