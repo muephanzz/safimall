@@ -39,21 +39,15 @@ export default function Cart() {
   useEffect(() => {
     const fetchUserData = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
-
-      if (error) {
+      if (error || !session?.user) {
         setIsAuthenticated(false);
         setLoading(false);
         return;
       }
 
-      if (session?.user) {
-        setIsAuthenticated(true);
-        setUserId(session.user.id);
-        fetchCart(session.user.id);
-      } else {
-        setIsAuthenticated(false);
-        setLoading(false);
-      }
+      setIsAuthenticated(true);
+      setUserId(session.user.id);
+      fetchCart(session.user.id);
     };
 
     const fetchCart = async (userId: string) => {
@@ -62,7 +56,7 @@ export default function Cart() {
         .select("*")
         .eq("user_id", userId);
 
-      if (cartError) {
+      if (cartError || !cartData) {
         setLoading(false);
         return;
       }
@@ -73,7 +67,7 @@ export default function Cart() {
         .select("product_id, stock")
         .in("product_id", productIds);
 
-      if (productsError) {
+      if (productsError || !productsData) {
         setLoading(false);
         return;
       }
@@ -127,7 +121,9 @@ export default function Cart() {
     } else {
       setCartItems((prev) =>
         prev.map((item) =>
-          item.cart_id === cart_id ? { ...item, items: { ...item.items, quantity: newQuantity } } : item
+          item.cart_id === cart_id
+            ? { ...item, items: { ...item.items, quantity: newQuantity } }
+            : item
         )
       );
       toast.success("Quantity updated!");
@@ -195,26 +191,33 @@ export default function Cart() {
               Review your selected items, adjust quantities, and proceed to a seamless checkout experience.
             </p>
           </header>
+
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Cart Items */}
             <div className="flex-1">
               <div className="space-y-6">
                 <AnimatePresence>
-                  {cartItems.length === 0 && !loading && (
-                    <div className="text-center py-12 space-y-4">
+                  {cartItems.length === 0 && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="text-center py-12 space-y-4"
+                    >
                       <p className="text-2xl text-gray-700 font-medium">
                         Your Cart is Empty
                       </p>
                       <p className="text-gray-500">
-                        Discover exclusive products and build your perfect selection
+                        Discover exclusive products and build your perfect selection.
                       </p>
-                    </div>
+                    </motion.div>
                   )}
 
                   {cartItems.map((item) => {
                     const isSelected = !!selectedItems[item.cart_id];
                     const outOfStock = item.stock < item.items.quantity;
-                    const truncatedDescription = item.items.description?.split(" ").slice(0, 6).join(" ") + "...";
+                    const truncatedDescription =
+                      item.items.description?.split(" ").slice(0, 6).join(" ") + "...";
 
                     return (
                       <motion.div
@@ -265,101 +268,62 @@ export default function Cart() {
                           </p>
 
                           <p className="text-gray-900 font-bold text-lg mt-1">
-                            Total: <span className="text-[#f68b1e]">Ksh {(item.items.price * item.items.quantity).toLocaleString()}</span>
+                            Total:{" "}
+                            <span className="text-[#f68b1e]">
+                              Ksh {(item.items.price * item.items.quantity).toLocaleString()}
+                            </span>
                           </p>
 
                           {outOfStock && (
-                            <p className="mt-2 text-sm text-red-600 font-semibold">
-                              ⚠️ Only {item.stock} left in stock, please reduce quantity.
+                            <p className="text-red-500 font-medium mt-2">
+                              Only {item.stock} in stock
                             </p>
                           )}
 
-                          <p className="mt-3 text-xs text-gray-400 italic select-none">
-                            Estimated delivery: <span className="font-semibold text-[#f68b1e]">Tomorrow</span>
-                          </p>
-                        </div>
+                          <div className="mt-3 flex items-center gap-2 justify-center sm:justify-start">
+                            <button
+                              className="px-2 py-1 rounded-md bg-gray-200 text-gray-800"
+                              onClick={() =>
+                                updateQuantity(item.cart_id, item.items.quantity - 1)
+                              }
+                              disabled={item.items.quantity <= 1}
+                            >
+                              -
+                            </button>
+                            <span className="font-semibold text-gray-800">
+                              {item.items.quantity}
+                            </span>
+                            <button
+                              className="px-2 py-1 rounded-md bg-gray-200 text-gray-800"
+                              onClick={() =>
+                                updateQuantity(item.cart_id, item.items.quantity + 1)
+                              }
+                              disabled={item.items.quantity >= item.stock}
+                            >
+                              +
+                            </button>
 
-                        <div className="flex items-center justify-center gap-3">
-                          <button
-                            onClick={() => updateQuantity(item.cart_id, item.items.quantity - 1)}
-                            disabled={item.items.quantity <= 1}
-                            className="px-3 py-2 bg-orange-100 text-[#f68b1e] rounded-full hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                            aria-label={`Decrease quantity of ${item.items.name}`}
-                          >
-                            −
-                          </button>
-                          <span className="px-5 py-2 bg-gray-100 rounded-lg border text-gray-700 font-medium select-none">
-                            {item.items.quantity}
-                          </span>
-                          <button
-                            onClick={() => updateQuantity(item.cart_id, item.items.quantity + 1)}
-                            disabled={outOfStock}
-                            className="px-3 py-2 bg-orange-100 text-[#f68b1e] rounded-full hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                            aria-label={`Increase quantity of ${item.items.name}`}
-                          >
-                            +
-                          </button>
+                            <button
+                              onClick={() => handleRemoveItem(item.cart_id)}
+                              className="ml-4 p-1.5 text-red-500 hover:bg-red-100 rounded-full"
+                              aria-label="Remove item"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
                         </div>
-
-                        <button
-                          onClick={() => handleRemoveItem(item.cart_id)}
-                          className="p-3 bg-[#f68b1e] hover:bg-orange-600 text-white rounded-full shadow-lg transition"
-                          aria-label={`Remove ${item.items.name} from cart`}
-                          title="Remove item"
-                        >
-                          <Trash2 size={20} />
-                        </button>
                       </motion.div>
                     );
                   })}
                 </AnimatePresence>
               </div>
             </div>
+
             {/* Order Summary */}
-            <div className="w-full lg:w-[350px]">
-              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24">
-                <h3 className="text-xl font-semibold mb-6 text-gray-900">
-                  Order Summary
-                </h3>
-                <div className="flex justify-between mb-2 text-gray-700">
-                  <span>Subtotal</span>
-                  <span>Ksh {subtotal.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between mb-2 text-gray-700">
-                  <span>Shipping</span>
-                  <span className="text-[#f68b1e] font-semibold">FREE</span>
-                </div>
-                <hr className="my-4" />
-                <div className="flex justify-between font-bold text-lg text-gray-900">
-                  <span>Total</span>
-                  <span>Ksh {subtotal.toLocaleString()}</span>
-                </div>
-                <button
-                  onClick={() => {
-                    const selectedProducts = cartItems
-                      .filter((item) => selectedItems[item.cart_id])
-                      .map(({ items }) => items);
-
-                    if (selectedProducts.length === 0) {
-                      toast.warning("Please select at least one item.");
-                      return;
-                    }
-
-                    localStorage.setItem("checkoutItems", JSON.stringify(selectedProducts));
-                    router.push("/orders/checkout");
-                  }}
-                  className={`mt-6 w-full py-3 rounded-xl font-semibold text-white shadow-lg transition ${
-                    subtotal === 0
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-[#f68b1e] hover:bg-orange-600"
-                  }`}
-                  disabled={subtotal === 0}
-                  aria-disabled={subtotal === 0}
-                >
-                  {subtotal === 0 ? "Select items to proceed" : "Proceed to Checkout"}
-                </button>
-              </div>
-            </div>
+            <OrderSummary
+              subtotal={subtotal}
+              shippingFee={0}
+            />
           </div>
         </motion.div>
       </div>
