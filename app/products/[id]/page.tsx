@@ -355,10 +355,27 @@ const handleConfirmOptions = async (
 
     if (showOptions === "cart") {
       toast.success("Item added to cart!");
-      // Optionally update cart state/UI here instead of reloading
-    } else if (showOptions === "buy") {
-      router.push("/orders/checkout");
-    }
+        setShowOptions(null);
+      } else if (showOptions === "buy") {
+        // Save only this item for checkout (not in the cart)
+        try {
+          const checkoutItem = {
+            product_id: String(product.product_id),
+            name: product.name,
+            price: product.price,
+            description: product.description,
+            image_url: mainImage,
+            quantity,
+            Color: selectedColor,
+            address: selectedAddress,
+          };
+          localStorage.setItem("checkoutitem", JSON.stringify(checkoutItem));
+        } catch (lsError) {
+          console.warn("Failed to save checkout item:", lsError);
+        }
+        setShowOptions(null);
+        router.push("/orders/checkout");
+      }
   } catch (err: any) {
     console.error("Error adding to cart:", err.message || err);
     toast.error("Failed to add item to cart.");

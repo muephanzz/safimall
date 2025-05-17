@@ -12,11 +12,30 @@ import Image from "next/image";
 import { Loader2, User } from "lucide-react";
 import toast from "react-hot-toast";
 
+// Shipping address type
+interface ShippingAddress {
+  address_id: string;
+  recipient_name: string;
+  phone_number: string;
+  address_line1: string;
+  county_id: string | number;
+  constituency_id: string | number;
+  location_id: string | number;
+  counties?: { name: string };
+  constituencies?: { name: string };
+  locations?: { name: string };
+}
+
+// Cart item type (includes Color and address)
 interface Item {
+  product_id: string;
   price: number;
   quantity: number;
   image_url: string;
   name: string;
+  Color?: string;
+  address?: ShippingAddress | null;
+  description?: string;
 }
 
 interface Params {
@@ -31,22 +50,28 @@ interface Params {
 export default function PaymentForm() {
   const [checkoutItems, setCheckoutItems] = useState<Item[]>([]);
   const [amount, setAmount] = useState(0);
-
   const [email, setEmail] = useState("");
-  const [dataFromForm, setDataFromForm] = useState({
-    mpesa_phone: "",
-  });
-
+  const [dataFromForm, setDataFromForm] = useState({ mpesa_phone: "" });
   const [loading, setLoading] = useState(false);
   const [stkQueryLoading, setStkQueryLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
   const router = useRouter();
 
-  // Load cart items and total amount from localStorage
+  // Load checkout item(s) and total amount from localStorage
   useEffect(() => {
-    const items: Item[] = JSON.parse(localStorage.getItem("checkoutItems") || "[]");
+    let items: Item[] = [];
+    if (typeof window !== "undefined") {
+      const single = localStorage.getItem("checkoutitem");
+      if (single) {
+        items = [JSON.parse(single)];
+      } else {
+        const stored = localStorage.getItem("checkoutItems");
+        if (stored) {
+          items = JSON.parse(stored);
+        }
+      }
+    }
     setCheckoutItems(items);
     const total = items.reduce(
       (sum: number, item: Item) => sum + item.price * item.quantity,
@@ -61,13 +86,11 @@ export default function PaymentForm() {
     const fetchEmail = async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData?.user) return;
-
       const { data: profile } = await supabase
         .from("profiles")
         .select("email")
         .eq("user_id", userData.user.id)
         .single();
-
       if (profile?.email) setEmail(profile.email);
     };
     fetchEmail();
@@ -81,7 +104,6 @@ export default function PaymentForm() {
     let reqcount = 0;
     const timer = setInterval(async () => {
       reqcount += 1;
-
       if (reqcount === 15) {
         clearInterval(timer);
         setStkQueryLoading(false);
@@ -89,9 +111,7 @@ export default function PaymentForm() {
         setErrorMessage("You took too long to pay");
         return;
       }
-
       const { data, error } = await stkPushQuery(CheckoutRequestID);
-
       if (error) {
         if (error.response?.data?.errorCode !== "500.001.1001") {
           clearInterval(timer);
@@ -100,13 +120,14 @@ export default function PaymentForm() {
           setErrorMessage(error.response.data.errorMessage);
         }
       }
-
       if (data) {
         if (data.ResultCode === "0") {
           clearInterval(timer);
           setStkQueryLoading(false);
           setLoading(false);
           setSuccess(true);
+          // Clear single checkout item if present
+          localStorage.removeItem("checkoutitem");
         } else {
           clearInterval(timer);
           setStkQueryLoading(false);
@@ -125,14 +146,12 @@ export default function PaymentForm() {
 
     if (!kenyanPhoneNumberRegex.test(dataFromForm.mpesa_phone)) {
       setLoading(false);
-      //alert("Invalid M-Pesa number");
       toast.error("Invalid mpesa number");
       return;
     }
 
     if (checkoutItems.length === 0) {
       setLoading(false);
-      //alert("No items found for checkout");
       toast.error("No items found for checkout");
       return;
     }
@@ -142,7 +161,6 @@ export default function PaymentForm() {
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError || !userData?.user) {
         setLoading(false);
-        //alert("Please log in to purchase this item!");
         toast.error("Please log in to purchase items");
         return;
       }
@@ -157,24 +175,45 @@ export default function PaymentForm() {
 
       if (stkError) {
         setLoading(false);
-        //alert(stkError);
         toast.error("Unknown error occured!");
         return;
       }
 
-      //alert("STK push sent successfully");
       const checkoutRequestId = stkData.CheckoutRequestID;
-      //console.log("CheckoutRequestID:", checkoutRequestId);
-
       setStkQueryLoading(true);
       stkPushQueryWithIntervals(checkoutRequestId);
     } catch (err) {
       setLoading(false);
       toast.error("Something went wrong!");
-      //alert("Error sending STK push");
-      //console.error(err);
     }
   };
+
+  // Helper to display shipping address (if available)
+  function renderAddress(address?: ShippingAddress | null) {
+    if (!address) return <span className="text-gray-400">No shipping address</span>;
+    return (
+      <div className="text-xs text-gray-600 mt-1">
+        <div>
+          <span className="font-semibold">Recipient:</span> {address.recipient_name}
+        </div>
+        <div>
+          <span className="font-semibold">Phone:</span> {address.phone_number}
+        </div>
+        <div>
+          <span className="font-semibold">Address:</span> {address.address_line1}
+        </div>
+        <div>
+          <span className="font-semibold">County:</span> {address.counties?.name || address.county_id}
+        </div>
+        <div>
+          <span className="font-semibold">Constituency:</span> {address.constituencies?.name || address.constituency_id}
+        </div>
+        <div>
+          <span className="font-semibold">Location:</span> {address.locations?.name || address.location_id}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -214,9 +253,19 @@ export default function PaymentForm() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900">{item.name}</h3>
                     <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                    {item.Color && (
+                      <p className="text-xs text-gray-500">
+                        <span className="font-semibold">Color:</span> {item.Color}
+                      </p>
+                    )}
                     <p className="text-base font-bold text-blue-700">
                       Ksh {item.price.toFixed(2)}
                     </p>
+                    {/* Shipping Address */}
+                    <div className="mt-2">
+                      <span className="font-semibold text-xs text-gray-700">Shipping:</span>
+                      {renderAddress(item.address)}
+                    </div>
                   </div>
                 </div>
               ))}
