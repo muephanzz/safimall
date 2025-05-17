@@ -17,6 +17,10 @@ export default function SearchPage() {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [query]);
+
+  useEffect(() => {
     if (query) {
       fetchProducts(query, currentPage);
     }
