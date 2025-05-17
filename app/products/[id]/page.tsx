@@ -515,7 +515,7 @@ const handleConfirmOptions = async (
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{product.name}</h1>
             <p className="text-gray-700 text-base mb-2">{product.description}</p>
-            <div className="flex items-center gap-4 mb-4">
+            <div className="block items-center gap-4 mb-4">
               <span className="text-3xl font-bold text-red-600">Ksh {product.price.toLocaleString()}</span>
               {/* You can add old price or discount badge here */}
               {addressSummary && !showAddressEdit && (
@@ -544,22 +544,22 @@ const handleConfirmOptions = async (
               )}
             </div>
             {Colors.length > 0 && (
-  <div className="mb-4">
-    <label className="block font-semibold mb-1">Select Color:</label>
-    <div className="flex gap-2">
-      {Array.isArray(Colors) && Colors.length > 0 && Colors.map((color) => (
-        <button
-          key={color}
-          className={`px-4 py-2 rounded border ${selectedColor === color ? "border-blue-500 bg-blue-100" : "border-gray-300"}`}
-          onClick={() => setSelectedColor(color)}
-          type="button"
-        >
-          {color}
-        </button>
-      ))}
-    </div>
-  </div>
-)}
+              <div className="mb-4">
+                <label className="block font-semibold mb-1">Select Color:</label>
+                <div className="flex gap-2">
+                  {Array.isArray(Colors) && Colors.length > 0 && Colors.map((color) => (
+                    <button
+                      key={color}
+                      className={`px-4 py-2 rounded border ${selectedColor === color ? "border-blue-500 bg-blue-100" : "border-gray-300"}`}
+                      onClick={() => setSelectedColor(color)}
+                      type="button"
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
           {!isMobile && (
             <div className="flex gap-4 mb-4 flex">
@@ -690,21 +690,6 @@ const handleConfirmOptions = async (
                 <h2 className="text-lg font-bold mb-4">
                   Confirm your selection
                 </h2>
-                <div className="mb-4">
-                  <label className="block font-semibold mb-1">Select Color:</label>
-                  <div className="flex gap-2">
-                  {Array.isArray(Colors) && Colors.length > 0 && Colors.map((color) => (
-                      <button
-                        key={color}
-                        className={`px-4 py-2 rounded border ${selectedColor === color ? "border-blue-500 bg-blue-100" : "border-gray-300"}`}
-                        onClick={() => setSelectedColor(color)}
-                        type="button"
-                      >
-                        {color}
-                      </button>
-                    ))}
-                  </div>
-                </div>
                 {/* If no address, show address form */}
                 {!addressSummary ? (
                   <ShippingAddressForm
@@ -718,6 +703,7 @@ const handleConfirmOptions = async (
                 ) : (
                   <>
                     {/* Show address summary in modal too */}
+                    <h3 className="font-semibold mb-2">Shipping Address:</h3>
                     <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-4">
                       <span>
                         <strong>{addressSummary.recipient_name}</strong>, {addressSummary.phone_number}, {addressSummary.address_line1}, 
