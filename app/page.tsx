@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
 import { motion } from "framer-motion";
 import ChatPage from "@/components/ChatModel";
+import BottomNav from "./components/BottomNav";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -205,6 +206,7 @@ export default function Home() {
         <ChatPage/>
       )}
       <Footer />
+      <BottomNav />
     </div>
   );
 }

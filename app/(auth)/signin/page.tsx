@@ -149,12 +149,15 @@ export default function SignInPage() {
           </a>
         </div>
 
+    {/*
         <div className="flex items-center my-6">
           <div className="flex-grow border-t border-gray-200" />
           <span className="mx-3 text-gray-400 text-xs">or sign in with google</span>
           <div className="flex-grow border-t border-gray-200" />
         </div>
+    */}
 
+    {/*
         <Button
           onClick={handleGoogle}
           disabled={loading}
@@ -166,6 +169,7 @@ export default function SignInPage() {
           <FcGoogle size={22} />
           <span>Continue with Google</span>
         </Button>
+    */}
       </div>
     </div>
   );

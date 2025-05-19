@@ -1,5 +1,4 @@
 import { useRouter } from "next/navigation";
-import SearchBar from "./SearchBar";
 
 interface ProductHeaderProps {
   isMobile: boolean;

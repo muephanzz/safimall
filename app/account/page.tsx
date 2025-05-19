@@ -19,6 +19,7 @@ import {
   Box,
   ClipboardCheck
 } from "lucide-react";
+import BottomNav from "@/components/BottomNav";
 
 interface ProfileData {
   first_name?: string;
@@ -228,6 +229,7 @@ export default function AccountPage() {
           </div>
         </div>
       </div>
+      <BottomNav />
     </div>
   );
 }

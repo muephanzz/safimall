@@ -1,3 +1,5 @@
+"use client";
+import BottomNav from "@/components/BottomNav";
 import ChatPage from "@/components/ChatModel";
 import ProductHeader from "@/components/ProductHeader";
 import { useEffect, useState } from "react";
@@ -23,6 +25,7 @@ export default function ContactRoute() {
       <div>
         <ChatPage />
       </div>
+      <BottomNav />
     </>
   );
 }

@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 import { ToastContainer } from "react-toastify";
 import Navbar from "./Navbar";
-import BottomNav from "./BottomNav";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 
 const queryClient = new QueryClient();
@@ -26,7 +25,6 @@ function LayoutWrapper({ children }) {
       <Toaster position="top-right" autoClose={800} />
       <ToastContainer position="top-right" autoClose={800} />
       {children}
-            {!hideNav && <BottomNav />}
     </>
   );
 }

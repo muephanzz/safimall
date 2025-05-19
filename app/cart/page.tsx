@@ -8,6 +8,7 @@ import OrderSummary from "../components/OrderSummary";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { motion, AnimatePresence } from "framer-motion";
+import BottomNav from "@/components/BottomNav";
 
 interface CartItem {
   cart_id: string;
@@ -360,6 +361,7 @@ export default function Cart() {
           </div>
         </motion.div>
       </div>
+      <BottomNav />
     </section>
   );
 }
