@@ -1,3 +1,5 @@
+"use client";
+
 import ProductHeader from "@/components/ProductHeader";
 import MobileMenu from "@/components/TabletNav";
 import { useEffect, useState } from "react";
