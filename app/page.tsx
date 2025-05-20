@@ -203,9 +203,13 @@ export default function Home() {
           />
         </div>
       </main>
+
+      {/*
       {!isMobile && (
         <ChatPage/>
       )}
+      */}
+      
       <Footer />
       <BottomNav />
       <ChatWidget />
