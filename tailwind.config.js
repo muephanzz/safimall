@@ -11,6 +11,9 @@ module.exports = {
       borderColor: {
         border: 'hsl(var(--border))',
       },
+      colors: {
+        background: 'hsl(var(--background))',
+      },
     },
   },
   plugins: [],
