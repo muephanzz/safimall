@@ -43,11 +43,19 @@ return (
           >
             Manage Products
           </Link>
+
           <Link
             href="/admin/orders"
             className="block px-3 py-2 rounded-md hover:bg-green-600 hover:text-white transition"
           >
             Manage Orders
+          </Link>
+
+          <Link
+            href="/admin/AdminChatDashboard"
+            className="block px-3 py-2 rounded-md hover:bg-green-600 hover:text-white transition"
+          >
+            Manage Chats
           </Link>
         </nav>
         {/* Optional: Footer or user info */}

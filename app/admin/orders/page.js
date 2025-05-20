@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import AdminLayout from "@/components/AdminLayout";
 import withAdminAuth from "@/components/withAdminAuth";
 import Image from "next/image";
-import toast from "react-hot-toast"; // Notifications
+import toast from "react-hot-toast";
 import { Loader2, Trash2, RefreshCw } from "lucide-react"; // Icons
 
 const statusSteps = [

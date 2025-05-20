@@ -10,7 +10,7 @@ const contacts = [
     id: 1,
     name: "WhatsApp",
     icon: <FaWhatsapp className="text-green-500" size={20} />,
-    url: "https://wa.me/1234567890",
+    url: "https://wa.me/254798229783",
     description: "Chat with us",
   },
   {
@@ -35,14 +35,14 @@ const contacts = [
     id: 3,
     name: "Call",
     icon: <Phone className="text-blue-600" size={20} />,
-    url: "tel:+1234567890",
+    url: "tel:+254798229783",
     description: "24/7 support",
   },
   {
     id: 4,
     name: "Email",
     icon: <Mail className="text-red-500" size={20} />,
-    url: "mailto:support@example.com",
+    url: "mailto:support@smartkenya.co.ke",
     description: "Quick response",
   },
 ];
@@ -103,7 +103,6 @@ export default function ChatPage() {
     </div>
     ) : (
     <main className="max-w-xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center text-orange-700">Contact Support</h1>
       <ul className="space-y-4">
         {contacts.map(({ id, name, icon, url, description }) => (
           <li key={id}>

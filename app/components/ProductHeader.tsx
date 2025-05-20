@@ -2,9 +2,10 @@ import { useRouter } from "next/navigation";
 
 interface ProductHeaderProps {
   isMobile: boolean;
+  title: string;
 }
 
-export default function ProductHeader({ isMobile }: ProductHeaderProps) {
+export default function ProductHeader({ isMobile, title }: ProductHeaderProps) {
   const router = useRouter();
 
   return (
@@ -23,7 +24,7 @@ export default function ProductHeader({ isMobile }: ProductHeaderProps) {
 
         {/* Title */}
         <div className="flex-1 text-center font-semibold text-lg">
-          Product Details
+          {title}
         </div>
 
         {/* Search Icon */}

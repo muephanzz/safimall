@@ -20,7 +20,7 @@ export default function ContactRoute() {
   return (
     <>
       <div>
-        <ProductHeader isMobile={isMobile} />
+        <ProductHeader isMobile={isMobile} title="Support" />
       </div>
       <div>
         <ChatPage />

@@ -392,7 +392,7 @@ const handleConfirmOptions = async (
     if (Math.abs(touchDiff) > 50 && product.image_urls.length > 1) {
       const currentIndex = product.image_urls.indexOf(mainImage);
       const nextIndex = touchDiff > 0
-        ? (currentIndex  ) % product.image_urls.length
+        ? (currentIndex + 1) % product.image_urls.length
         : (currentIndex - 1 + product.image_urls.length) % product.image_urls.length;
       setMainImage(product.image_urls[nextIndex]);
     }
@@ -449,8 +449,8 @@ const handleConfirmOptions = async (
         <script type="application/ldjon">{JSON.stringify(structuredData)}</script>
       </Head>
 
-      <ProductHeader isMobile={isMobile} />
-
+      <ProductHeader isMobile={isMobile} title="Product Details" />
+      
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-0 px-0">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 bg-white rounded-2xl shadow-2xl overflow-hidden mt-4">
           {/* Left: Image Gallery */}

@@ -9,6 +9,7 @@ import SearchBar from "@/components/SearchBar";
 import { motion } from "framer-motion";
 import ChatPage from "@/components/ChatModel";
 import BottomNav from "./components/BottomNav";
+import ChatWidget from "./components/ChatWidget";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -207,6 +208,7 @@ export default function Home() {
       )}
       <Footer />
       <BottomNav />
+      <ChatWidget />
     </div>
   );
 }
